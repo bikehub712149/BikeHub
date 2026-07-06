@@ -134,4 +134,10 @@
   .font-black {
     font-family: var(--font-heading);
   }
+
+  button {
+    font-family: var(--font-heading);
+    cursor: pointer !important;
+    transition: all 0.5s ease-in-out;
+  }
 }

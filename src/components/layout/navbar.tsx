@@ -1,40 +1,33 @@
 "use client";
 
-import { usePathname } from "next/navigation";
-import { Input } from "@/components/ui/input";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Search, Plus, BadgeCheck } from "lucide-react";
 
-const titles: Record<string, string> = {
-  "/": "Dashboard",
-  "/inventory": "Inventory",
-  "/sales": "Sales",
-  "/customers": "Customers",
-  "/settings": "Settings",
-};
+import { Input } from "@/components/ui/input";
+
+import AddBikeDialog from "@/components/dialogs/add-bike-dialog";
+import SoldBikeDialog from "@/components/dialogs/sold-bike-dialog";
 
 export default function Navbar() {
-  const pathname = usePathname();
-
-  const title = titles[pathname] ?? "BikeHub";
-
   return (
-    <header className="flex h-16 items-center justify-between border-b bg-background px-6">
-      {/* Left */}
-      <div>
-        <h1 className="text-xl font-semibold">{title}</h1>
-      </div>
-
-      {/* Right */}
-      <div className="flex items-center gap-4">
-        <Input
-          placeholder="Search..."
-          className="hidden w-64 md:flex"
+    <header className="sticky top-0 z-40 flex items-center gap-4 border-b bg-white px-8 h-24">
+      {/* Search */}
+      <div className="relative flex-1">
+        <Search
+          size={18}
+          className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
         />
 
-        <Avatar>
-          <AvatarFallback>NA</AvatarFallback>
-        </Avatar>
+        <Input
+          placeholder="Search bike number, customer, seller..."
+          className="h-12 rounded-xl pl-11 text-sm"
+        />
       </div>
+
+      {/* Buttons */}
+
+      <AddBikeDialog />
+
+      <SoldBikeDialog />
     </header>
   );
 }

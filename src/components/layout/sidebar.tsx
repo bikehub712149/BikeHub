@@ -44,7 +44,7 @@ export default function Sidebar() {
   return (
     <aside className="flex h-screen w-64 flex-col border-r bg-background">
       {/* Logo */}
-      <div className="border-b p-6">
+      <div className="border-b h-24 flex items-center justify-center">
         <h1 className="text-2xl font-bold">BikeHub</h1>
       </div>
 
