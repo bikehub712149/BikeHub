@@ -42,9 +42,9 @@ export default function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="flex h-screen w-64 flex-col border-r bg-background">
+    <aside className="sticky top-0 z-40 h-screen w-64 flex-col border-r bg-background">
       {/* Logo */}
-      <div className="border-b h-24 flex items-center justify-center">
+      <div className="border-b h-26 flex items-center justify-center">
         <h1 className="text-2xl font-bold">BikeHub</h1>
       </div>
 

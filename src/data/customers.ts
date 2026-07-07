@@ -1,4 +1,6 @@
-export const customers = [
+import { CustomerTransaction } from "@/types/coustomer";
+
+export const customers: CustomerTransaction[] = [
   {
     id: "1",
     bikeId: "WB15XX1234",
@@ -15,9 +17,8 @@ export const customers = [
       address: "Howrah",
     },
 
-    purchasePrice: "110000",
-    sellingPrice: "145000",
-
+    purchasePrice: 110000,
+    sellingPrice: 145000,
     receiptId: "WB15XX1234",
   },
 
@@ -33,9 +34,9 @@ export const customers = [
 
     buyer: null,
 
-    purchasePrice: "82000",
-    sellingPrice: "",
+    purchasePrice: 82000,
+    sellingPrice: null,
 
-    receiptId: "",
+    receiptId: null,
   },
 ];

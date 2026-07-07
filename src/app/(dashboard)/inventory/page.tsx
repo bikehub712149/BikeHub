@@ -8,7 +8,7 @@ export default async function InventoryPage() {
   const bikes = await getAllBikes();
 
   return (
-    <div className="flex-1 overflow-y-auto p-8 pb-32">
+    <div className="flex-1 overflow-y-auto p-4 pb-32">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
           Inventory Management

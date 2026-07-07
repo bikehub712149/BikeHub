@@ -9,7 +9,7 @@ import SoldBikeDialog from "@/components/dialogs/sold-bike-dialog";
 
 export default function Navbar() {
   return (
-    <header className="sticky top-0 z-40 flex items-center gap-4 border-b bg-white px-8 h-24">
+    <header className="sticky top-0 z-40 flex items-center gap-16 border-b bg-white px-8 h-26">
       {/* Search */}
       <div className="relative flex-1">
         <Search
@@ -25,9 +25,11 @@ export default function Navbar() {
 
       {/* Buttons */}
 
-      <AddBikeDialog />
+      <div className="flex gap-5">
+        <AddBikeDialog />
 
       <SoldBikeDialog />
+      </div>
     </header>
   );
 }

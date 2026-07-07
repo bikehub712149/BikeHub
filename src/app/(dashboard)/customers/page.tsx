@@ -12,7 +12,7 @@ export default async function CustomersPage() {
   const customers = await getCustomers();
 
   return (
-    <div className="flex-1 p-8 pb-24">
+    <div className="flex-1 p-4 pb-24">
       <div className="mb-8">
         <h1 className="text-2xl font-bold">Customer CRM</h1>
 
