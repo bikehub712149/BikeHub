@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import BikeSelector from "@/components/bike-selector";
-import { getAllBikes } from "@/lib/bikes";
+import { getAllBikes } from "@/lib/demo/bikes";
 
 export default function SoldBikeDialog() {
   const [receipt, setReceipt] = useState<File | null>(null);

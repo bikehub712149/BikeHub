@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Upload, X } from "lucide-react";
-
+import { Loader2, Plus, X } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
@@ -14,21 +15,30 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import BikeGallery from "../bike-details/bike-gallery";
+
 
 export default function AddBikeDialog() {
   const [images, setImages] = useState<File[]>([]);
   const [selectedImage, setSelectedImage] = useState(0);
   const [sellerDocs, setSellerDocs] = useState<File[]>([]);
+  const router = useRouter();
+
+const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [form, setForm] = useState({
     number: "",
     model: "",
     year: "",
     kms: "",
-    purchasePrice: "",
+    expectedSellingPrice: "",
+    engineNumber: "",
+    
 
     sellerName: "",
     sellerPhone: "",
+    purchasePrice: "",
+    chassisNumber: "",
     sellerAddress: "",
   });
 
@@ -56,42 +66,91 @@ export default function AddBikeDialog() {
     setImages(images.filter((_, i) => i !== index));
   }
 
-  function handleSubmit() {
-    const bikePayload = {
-      bike: {
-        id: crypto.randomUUID(),
+async function handleSubmit() {
+  try {
+    setIsSubmitting(true);
 
-        number: form.number,
-        model: form.model,
-        year: Number(form.year),
-        kms: form.kms,
+    const payload = {
+  bike: {
+    id: crypto.randomUUID(),
 
-        price: Number(form.purchasePrice),
+    number: form.number,
+    model: form.model,
+    year: Number(form.year),
+    kms: form.kms,
 
-        status: "Available",
+    expectedSellingPrice: Number(form.expectedSellingPrice),
 
-        images: images.map((file) => file.name),
+    status: "Available",
+
+    image:
+      "https://images.unsplash.com/photo-1558981806-ec527fa84c39?w=1200&auto=format&fit=crop&q=80",
+
+    engineNumber: form.engineNumber,
+    chassisNumber: form.chassisNumber,
+
+    // images: [] // Cloudinary later
+  },
+
+  customer: {
+    id: crypto.randomUUID(),
+
+    bikeId: form.number, // see note below
+
+    seller: {
+      name: form.sellerName,
+      phone: form.sellerPhone,
+      address: form.sellerAddress,
+
+      // documents: [] // Cloudinary later
+    },
+
+    purchasePrice: Number(form.purchasePrice),
+  },
+};
+
+    const res = await fetch("/api/bike", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
       },
+      body: JSON.stringify(payload),
+    });
 
-      transaction: {
-        seller: {
-          name: form.sellerName,
-          phone: form.sellerPhone,
-          address: form.sellerAddress,
-        },
+    if (!res.ok) {
+      const error = await res.json();
 
-        buyer: null,
+      throw new Error(error.message || "Failed to save bike");
+    }
 
-        purchasePrice: Number(form.purchasePrice),
+    toast.success("Bike added successfully.");
 
-        sellingPrice: 0,
+    setForm({
+      number: "",
+      model: "",
+      year: "",
+      kms: "",
+      expectedSellingPrice: "",
+      engineNumber: "",
+      
+      sellerName: "",
+      sellerPhone: "",
+      purchasePrice: "",
+      chassisNumber: "",
+      sellerAddress: "",
+    });
 
-        receiptId: null,
-      },
-    };
+    setImages([]);
+    setSellerDocs([]);
+    setSelectedImage(0);
 
-    console.log(bikePayload);
+    router.refresh();
+  } catch (err: any) {
+    toast.error(err.message || "Something went wrong.");
+  } finally {
+    setIsSubmitting(false);
   }
+}
 
   return (
     <Dialog>
@@ -116,69 +175,15 @@ export default function AddBikeDialog() {
         <div className="grid grid-cols-12 h-[75vh] py-5">
           {/* LEFT */}
 
-          <div className="col-span-5 border-r bg-slate-200 p-8 rounded-tl-lg rounded-bl-lg">
-            <h3 className="mb-5 text-lg font-semibold">Bike Photos</h3>
-
-            <div className="h-80 overflow-hidden rounded-2xl border bg-white">
-              {images.length ? (
-                <img
-                  src={URL.createObjectURL(images[selectedImage])}
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                <div className="flex h-full items-center justify-center text-slate-400">
-                  No image selected
-                </div>
-              )}
-            </div>
-
-            <div className="mt-5 grid grid-cols-5 gap-3">
-              {images.map((img, index) => (
-                <div
-                  key={index}
-                  onClick={() => setSelectedImage(index)}
-                  className={`relative cursor-pointer overflow-hidden rounded-xl border-2 transition
-
-            ${selectedImage === index ? "border-blue-600" : "border-slate-200"}
-          `}
-                >
-                  <img
-                    src={URL.createObjectURL(img)}
-                    className="h-20 w-full object-cover"
-                  />
-
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      removeImage(index);
-
-                      if (selectedImage >= images.length - 1)
-                        setSelectedImage(0);
-                    }}
-                    className="absolute right-1 top-1 rounded-full bg-black/60 p-1 text-white"
-                  >
-                    <X size={12} />
-                  </button>
-                </div>
-              ))}
-
-              {images.length < 4 && (
-                <label className="flex h-20 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-300 hover:border-blue-500">
-                  <Plus className="mb-1 h-5 w-5" />
-
-                  <span className="text-xs">Add</span>
-
-                  <input
-                    hidden
-                    type="file"
-                    multiple
-                    accept="image/*"
-                    onChange={handleImages}
-                  />
-                </label>
-              )}
-            </div>
+          <div className="col-span-5 border-r">
+            <BikeGallery
+              images={images}
+              selectedImage={selectedImage}
+              setSelectedImage={setSelectedImage}
+              editable
+              onAddImages={handleImages}
+              onRemoveImage={removeImage}
+            />
           </div>
 
           {/* RIGHT */}
@@ -189,18 +194,21 @@ export default function AddBikeDialog() {
             <div className="grid grid-cols-2 gap-5">
               <Input
                 name="number"
+                value={form.number}
                 placeholder="Registration Number"
                 onChange={handleChange}
               />
 
               <Input
                 name="model"
+                value={form.model}
                 placeholder="Bike Model"
                 onChange={handleChange}
               />
 
               <Input
                 name="year"
+                value={form.year}
                 placeholder="Manufacturing Year"
                 type="number"
                 onChange={handleChange}
@@ -208,16 +216,27 @@ export default function AddBikeDialog() {
 
               <Input
                 name="kms"
+                value={form.kms}
                 placeholder="Kilometers"
                 onChange={handleChange}
               />
 
               <Input
-                name="purchasePrice"
-                placeholder="Purchase Price"
+                name="expectedSellingPrice"
+                value={form.expectedSellingPrice}
+                placeholder="Expected Selling Price"
                 type="number"
                 onChange={handleChange}
               />
+
+              <Input
+                name="engineNumber"
+                value={form.engineNumber}
+                placeholder="Engine Number"
+                onChange={handleChange}
+              />
+
+              
             </div>
 
             <h3 className="mt-10 mb-5 text-lg font-semibold">
@@ -227,20 +246,39 @@ export default function AddBikeDialog() {
             <div className="grid grid-cols-2 gap-5">
               <Input
                 name="sellerName"
+                value={form.sellerName}
                 placeholder="Seller Name"
                 onChange={handleChange}
               />
 
               <Input
                 name="sellerPhone"
+                value={form.sellerPhone}
                 placeholder="Phone Number"
                 onChange={handleChange}
               />
+
+              <Input
+                name="purchasePrice"
+                value={form.purchasePrice}
+                placeholder="Purchase Price"
+                type="number"
+                onChange={handleChange}
+              />
+
+              <Input
+                name="chassisNumber"
+                value={form.chassisNumber}
+                placeholder="Chassis Number"
+                onChange={handleChange}
+              />
+              
 
               <div className="col-span-2">
                 <Textarea
                   rows={4}
                   name="sellerAddress"
+                  value={form.sellerAddress}
                   placeholder="Seller Address"
                   onChange={handleChange}
                 />
@@ -248,10 +286,11 @@ export default function AddBikeDialog() {
             </div>
 
             <div className="mt-8">
-              <p className="mb-2 text-sm font-medium">Seller Documents</p>
+              <p className="mb-3 text-sm font-medium">Seller Documents</p>
 
               <p className="mb-3 text-xs text-slate-500">
-                Aadhaar / PAN / Voter ID / Driving License
+                Upload Aadhaar / PAN / Voter ID / Driving License (Multiple
+                files allowed)
               </p>
 
               <Input
@@ -262,6 +301,31 @@ export default function AddBikeDialog() {
                   setSellerDocs(Array.from(e.target.files ?? []))
                 }
               />
+
+              {sellerDocs.length > 0 && (
+                <div className="mt-4 space-y-2 rounded-xl border bg-slate-50 p-4">
+                  {sellerDocs.map((file, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center justify-between rounded-lg bg-white px-3 py-2 border"
+                    >
+                      <span className="truncate text-sm">{file.name}</span>
+
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        onClick={() =>
+                          setSellerDocs((docs) =>
+                            docs.filter((_, i) => i !== index)
+                          )
+                        }
+                      >
+                        <X size={16} />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="mt-8 flex justify-end gap-4">
@@ -269,9 +333,20 @@ export default function AddBikeDialog() {
                 Cancel
               </Button>
 
-              <Button className="px-8" onClick={handleSubmit}>
-                Save Bike
-              </Button>
+              <Button
+  className="min-w-[150px]"
+  disabled={isSubmitting}
+  onClick={handleSubmit}
+>
+  {isSubmitting ? (
+    <>
+      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+      Saving...
+    </>
+  ) : (
+    "Save Bike"
+  )}
+</Button>
             </div>
           </div>
         </div>

@@ -6,7 +6,13 @@ export interface Bike {
   model: string;
   year: number;
   kms: string;
-  price: string;
+  expectedSellingPrice: number;
   status: BikeStatus;
-  image: string;
+  image: string; // cover image (thumbnail)
+  images?: string[]; // all uploaded images
+  color?: string;
+
+  engineNumber?: string;
+
+  chassisNumber?: string;
 }

@@ -7,7 +7,7 @@ import {
   Clock,
   ChevronRight,
 } from "lucide-react";
-import { getRecentBikes, getAllBikes } from "@/lib/bikes";
+import { getRecentBikes, getAllBikes } from "@/lib/demo/bikes";
 import BikeCard from "@/components/bike-card";
 import Link from "next/link";
 

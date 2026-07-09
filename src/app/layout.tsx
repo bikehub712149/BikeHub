@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Roboto, Poppins } from "next/font/google";
 import "./globals.css";
+import { Toaster } from "@/components/ui/sonner";
 
 const roboto = Roboto({
   variable: "--font-roboto",
@@ -28,7 +29,10 @@ export default function RootLayout({
       lang="en"
       className={`${roboto.variable} ${poppins.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">{children}
+        <Toaster richColors position="top-right" />
+      </body>
+      
     </html>
   );
 }

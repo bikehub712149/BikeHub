@@ -1,8 +1,11 @@
 import Link from "next/link";
 import Image from "next/image";
 import { ChevronRight } from "lucide-react";
+// app/api/bikes/route.ts
 
-import { getAllBikes } from "@/lib/bikes";
+// app/api/bikes/route.ts
+
+import { getAllBikes, createBike } from "@/lib/server/bike";
 
 export default async function InventoryPage() {
   const bikes = await getAllBikes();
@@ -79,7 +82,7 @@ export default async function InventoryPage() {
                   <td className="px-6 py-4">{bike.kms}</td>
 
                   <td className="px-6 py-4 font-semibold">
-                    ₹{bike.price}
+                    ₹{bike.expectedSellingPrice.toLocaleString()}
                   </td>
 
                   <td className="px-6 py-4">

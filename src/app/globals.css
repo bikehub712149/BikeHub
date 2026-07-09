@@ -127,6 +127,9 @@
   h6 {
     font-family: var(--font-heading);
   }
+  html{
+    scroll-behavior: smooth;
+  }
 
   .font-semibold,
   .font-bold,

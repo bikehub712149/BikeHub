@@ -1,15 +1,23 @@
-export type ContactInfo = {
+export interface Person {
   name: string;
   phone: string;
   address: string;
-};
 
-export type CustomerTransaction = {
+  documents?: string[];
+}
+
+export interface CustomerTransaction {
   id: string;
+
   bikeId: string;
-  seller: ContactInfo;
-  buyer: ContactInfo | null;
-  purchasePrice: number;        // Changed to number
-  sellingPrice: number | null;  // Changed to number or null
+
+  seller: Person;
+
+  buyer: Person | null;
+
+  purchasePrice: number;
+
+  sellingPrice: number | null;
+
   receiptId: string | null;
-};
+}

@@ -12,7 +12,7 @@ export default function BikeCard({
   model,
   year,
   kms,
-  price,
+  expectedSellingPrice,
   status,
   image,
 }: Bike) {
@@ -47,7 +47,7 @@ export default function BikeCard({
           </div>
 
           <div className="flex items-center justify-between">
-            <span className="text-xl font-bold">₹{price}</span>
+            <span className="text-xl font-bold">₹{expectedSellingPrice.toLocaleString()}</span>
 
             <Badge variant={status === "Available" ? "default" : "secondary"}>
               {status}

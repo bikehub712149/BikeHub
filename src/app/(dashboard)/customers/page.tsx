@@ -2,8 +2,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { FileText } from "lucide-react";
 
-import { getCustomers } from "@/lib/customers";
-import { getBikeById } from "@/lib/bikes";
+import { getCustomers } from "@/lib/demo/customers";
+import { getBikeById } from "@/lib/demo/bikes";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";

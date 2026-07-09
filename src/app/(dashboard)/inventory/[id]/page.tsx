@@ -1,44 +1,17 @@
-import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft, Bike, Calendar, Gauge, IndianRupee } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
+
+import BikeGalleryClient from "./gallery-client";
+
+import TechnicalCard from "@/components/bike-details/technical-card";
+import FinancialCard from "@/components/bike-details/financial-card";
+import PartyCard from "@/components/bike-details/party-card";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 
-const bikes = {
-  WB15XX1234: {
-    id: "WB15XX1234",
-    number: "WB-15-XX-1234",
-    brand: "Royal Enfield",
-    model: "Classic 350",
-    year: 2021,
-    kms: "12,450 km",
-    price: "1,45,000",
-    status: "Available",
-    image: "/bikes/bike1.jpg",
-    owner: "Rahul Das",
-    color: "Black",
-    engine: "ENG7823423",
-    chassis: "CHS9283723",
-  },
-
-  WB18AA4587: {
-    id: "WB18AA4587",
-    number: "WB-18-AA-4587",
-    brand: "TVS",
-    model: "Raider",
-    year: 2023,
-    kms: "4,300 km",
-    price: "95,000",
-    status: "Available",
-    image: "/bikes/bike2.jpg",
-    owner: "Sourav Pal",
-    color: "Red",
-    engine: "ENG923823",
-    chassis: "CHS293823",
-  },
-};
+import { getBikeById } from "@/lib/server/bike";
+import { getCustomerByBikeId } from "@/lib/server/coustomer";
 
 export default async function BikeDetailsPage({
   params,
@@ -47,174 +20,167 @@ export default async function BikeDetailsPage({
 }) {
   const { id } = await params;
 
-  const bike = bikes[id as keyof typeof bikes];
+  const bike = await getBikeById(id);
+
+  const transaction = bike ? await getCustomerByBikeId(bike.number) : null;
+
+  const bikeData = bike ? JSON.parse(JSON.stringify(bike)) : null;
+
+  const transactionData = transaction
+    ? JSON.parse(JSON.stringify(transaction))
+    : null;
 
   if (!bike) {
     return (
-      <div className="text-center text-red-500">
-        Bike not found.
+      <div className="flex h-[70vh] items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-3xl font-bold">Bike Not Found</h1>
+
+          <p className="mt-2 text-slate-500">
+            This bike doesn't exist anymore.
+          </p>
+
+          <Link href="/inventory">
+            <Button className="mt-6">Back to Inventory</Button>
+          </Link>
+        </div>
       </div>
     );
   }
 
+  const images = bikeData?.images?.length
+    ? bikeData.images
+    : bikeData?.image
+    ? [bikeData.image]
+    : [];
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 p-8">
+      {/* Header */}
 
-      <Link
-        href="/inventory"
-        className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-black"
-      >
-        <ArrowLeft size={18} />
-        Back to Inventory
-      </Link>
+      <div className="flex items-center justify-between">
+        <div>
+          <Link
+            href="/inventory"
+            className="mb-4 inline-flex items-center gap-2 text-sm text-slate-500 transition hover:text-black"
+          >
+            <ArrowLeft size={16} />
+            Back to Inventory
+          </Link>
 
-      <div>
-        <h1 className="text-3xl font-bold">
-          {bike.brand} {bike.model}
-        </h1>
+          <div className="flex items-center gap-4">
+            <h1 className="text-4xl font-bold">{bikeData.model}</h1>
 
-        <p className="text-muted-foreground">
-          {bike.number}
-        </p>
+            <Badge
+              className={
+                bikeData.status === "Sold"
+                  ? "bg-red-100 text-red-700 hover:bg-red-100"
+                  : "bg-green-100 text-green-700 hover:bg-green-100"
+              }
+            >
+              {bikeData.status}
+            </Badge>
+          </div>
+
+          <p className="mt-2 text-slate-500">
+            Registration No. {bikeData.number}
+          </p>
+        </div>
       </div>
 
-      <div className="grid gap-8 lg:grid-cols-2">
+      {/* Gallery + Technical */}
 
-        <Card className="rounded-2xl">
+      <div className="grid gap-8 xl:grid-cols-12">
+        {/* Gallery */}
 
-          <CardContent className="p-6">
+        <div className="xl:col-span-5">
+          {/* Client wrapper because gallery uses useState */}
 
-            <Image
-              src={bike.image}
-              alt={bike.model}
-              width={700}
-              height={500}
-              className="h-[420px] w-full rounded-xl object-cover"
+          <BikeGalleryClient images={images} />
+        </div>
+
+        {/* Technical */}
+
+        <div className="space-y-8 xl:col-span-7">
+          <TechnicalCard bikeData={bikeData} />
+
+          {transaction && (
+            <FinancialCard
+              purchasePrice={transaction.purchasePrice}
+              sellingPrice={transaction.sellingPrice}
             />
-
-          </CardContent>
-
-        </Card>
-
-        <Card className="rounded-2xl">
-
-          <CardContent className="space-y-5 p-6">
-
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">
-                Registration
-              </span>
-
-              <span className="font-semibold">
-                {bike.number}
-              </span>
-            </div>
-
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">
-                Brand
-              </span>
-
-              <span>{bike.brand}</span>
-            </div>
-
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">
-                Model
-              </span>
-
-              <span>{bike.model}</span>
-            </div>
-
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">
-                Year
-              </span>
-
-              <span>{bike.year}</span>
-            </div>
-
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">
-                Kilometers
-              </span>
-
-              <span>{bike.kms}</span>
-            </div>
-
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">
-                Price
-              </span>
-
-              <span>₹{bike.price}</span>
-            </div>
-
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">
-                Owner
-              </span>
-
-              <span>{bike.owner}</span>
-            </div>
-
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">
-                Color
-              </span>
-
-              <span>{bike.color}</span>
-            </div>
-
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">
-                Engine No.
-              </span>
-
-              <span>{bike.engine}</span>
-            </div>
-
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">
-                Chassis No.
-              </span>
-
-              <span>{bike.chassis}</span>
-            </div>
-
-            <div className="flex justify-between items-center">
-
-              <span className="text-muted-foreground">
-                Status
-              </span>
-
-              <Badge>
-                {bike.status}
-              </Badge>
-
-            </div>
-
-            <div className="flex gap-4 pt-4">
-
-              <Button className="flex-1">
-                Edit Bike
-              </Button>
-
-              <Button
-                variant="outline"
-                className="flex-1"
-              >
-                Sell Bike
-              </Button>
-
-            </div>
-
-          </CardContent>
-
-        </Card>
-
+          )}
+        </div>
       </div>
 
+      {/* Seller & Buyer */}
+
+      {transaction && (
+        <div className="grid gap-8 xl:grid-cols-2">
+          <PartyCard
+            title="Seller Information"
+            person={transaction.seller}
+            documents={transaction.seller?.documents ?? []}
+          />
+
+          <PartyCard
+            title="Buyer Information"
+            person={transaction.buyer}
+            documents={transaction.buyer?.documents ?? []}
+            receipt={transaction.receiptId}
+          />
+        </div>
+      )}
+
+      {/* Quick Summary */}
+
+      <div className="grid gap-6 md:grid-cols-4">
+        <div className="rounded-3xl border bg-white p-6 shadow-sm">
+          <p className="text-sm text-slate-500">Purchase Price</p>
+
+          <h2 className="mt-3 text-3xl font-bold">
+            ₹{transaction ? transaction.purchasePrice.toLocaleString() : "--"}
+          </h2>
+        </div>
+
+        <div className="rounded-3xl border bg-white p-6 shadow-sm">
+          <p className="text-sm text-slate-500">Selling Price</p>
+
+          <h2 className="mt-3 text-3xl font-bold">
+            {transaction?.sellingPrice
+              ? `₹${transaction.sellingPrice.toLocaleString()}`
+              : "--"}
+          </h2>
+        </div>
+
+        <div className="rounded-3xl border bg-white p-6 shadow-sm">
+          <p className="text-sm text-slate-500">Profit</p>
+
+          <h2 className="mt-3 text-3xl font-bold text-emerald-600">
+            {transaction?.sellingPrice
+              ? `₹${(
+                  transaction.sellingPrice - transaction.purchasePrice
+                ).toLocaleString()}`
+              : "--"}
+          </h2>
+        </div>
+
+        <div className="rounded-3xl border bg-white p-6 shadow-sm">
+          <p className="text-sm text-slate-500">Current Status</p>
+
+          <div className="mt-3">
+            <Badge
+              className={
+                bikeData.status === "Sold"
+                  ? "bg-red-100 text-red-700 hover:bg-red-100"
+                  : "bg-green-100 text-green-700 hover:bg-green-100"
+              }
+            >
+              {bikeData.status}
+            </Badge>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

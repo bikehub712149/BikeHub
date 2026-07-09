@@ -21,7 +21,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { bikes } from '@/data/bikes';
-import { getAllBikes } from '@/lib/bikes';
+import { getAllBikes } from '@/lib/demo/bikes';
 import type { Bike } from '@/types/bike';
 
 // Utility Functions
@@ -132,15 +132,15 @@ export default function SalesPage() {
 
   const soldBikes = allBikes.filter((bike) => bike.status === 'Sold');
 
-  // Calculate total revenue (assuming price is in INR)
+  // Calculate total revenue (assuming expectedSellingPrice.toLocaleString() is in INR)
   const totalRevenue = soldBikes.reduce(
-    (sum, bike) => sum + parseInt(bike.price || '0'),
+    (sum, bike) => sum + parseInt(bike.expectedSellingPrice.toLocaleString() || '0'),
     0
   );
 
   // Calculate profit (assuming 30% margin for demo, you can adjust this)
   const totalProfit = soldBikes.reduce((sum, bike) => {
-    const salePrice = parseInt(bike.price || '0');
+    const salePrice = parseInt(bike.expectedSellingPrice.toLocaleString() || '0');
     const purchasePrice = salePrice * 0.7; // 30% margin assumption
     return sum + (salePrice - purchasePrice);
   }, 0);
@@ -257,7 +257,7 @@ export default function SalesPage() {
                   </tr>
                 ) : (
                   soldBikes.map((bike) => {
-                    const salePrice = parseInt(bike.price || '0');
+                    const salePrice = parseInt(bike.expectedSellingPrice.toLocaleString() || '0');
                     const estimatedPurchasePrice = salePrice * 0.7;
                     const estimatedProfit = salePrice - estimatedPurchasePrice;
 
