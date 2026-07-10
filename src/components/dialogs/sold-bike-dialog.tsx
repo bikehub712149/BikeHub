@@ -28,39 +28,47 @@ export default function SoldBikeDialog() {
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  useEffect(() => {
-    async function fetchBikes() {
-      try {
-        const res = await fetch("/api/bike");
-
-        if (!res.ok) {
-          throw new Error("Failed to fetch bikes");
-        }
-
-        const data: Bike[] = await res.json();
-
-        // Only Available bikes
-        setBikes(data.filter((bike) => bike.status === "Available"));
-      } catch (err) {
-        console.error(err);
-        toast.error("Failed to load bikes");
-      }
-    }
-
-    fetchBikes();
-  }, []);
-
-  const [form, setForm] = useState({
+  const initialForm = {
     bikeNumber: "",
-
     buyerName: "",
     buyerPhone: "",
     buyerAddress: "",
-
     sellingPrice: "",
-
     saleDate: new Date().toISOString().split("T")[0],
-  });
+  };
+
+  const [form, setForm] = useState(initialForm);
+
+  const resetForm = () => {
+    setForm(initialForm);
+
+    setSelectedBike(null);
+
+    setReceipt(null);
+
+    setBuyerDocs([]);
+  };
+
+  async function fetchBikes() {
+    try {
+      const res = await fetch("/api/bike");
+
+      if (!res.ok) {
+        throw new Error("Failed to fetch bikes");
+      }
+
+      const data: Bike[] = await res.json();
+
+      setBikes(data.filter((bike) => bike.status === "Available"));
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to load bikes");
+    }
+  }
+
+  useEffect(() => {
+    fetchBikes();
+  }, []);
 
   function handleChange(
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -114,10 +122,17 @@ export default function SoldBikeDialog() {
         saleDate: new Date().toISOString().split("T")[0],
       });
 
-      setSelectedBike(null);
-      setReceipt(null);
-      setBuyerDocs([]);
+      toast.success("Bike sold successfully.");
 
+      resetForm();
+
+      // remove sold bike immediately
+      setBikes((prev) => prev.filter((bike) => bike.number !== payload.bikeId));
+
+      // close popup
+      setOpen(false);
+
+      // refresh dashboard cards
       router.refresh();
     } catch (err: any) {
       toast.error(err.message || "Something went wrong.");
@@ -237,18 +252,21 @@ export default function SoldBikeDialog() {
             <div className="grid grid-cols-2 gap-5">
               <Input
                 name="buyerName"
+                value={form.buyerName}
                 placeholder="Buyer Name"
                 onChange={handleChange}
               />
 
               <Input
                 name="buyerPhone"
+                value={form.buyerPhone}
                 placeholder="Phone Number"
                 onChange={handleChange}
               />
 
               <Input
                 name="sellingPrice"
+                value={form.sellingPrice}
                 type="number"
                 placeholder="Selling Price"
                 onChange={handleChange}
@@ -263,9 +281,9 @@ export default function SoldBikeDialog() {
 
               <div className="col-span-2">
                 <Textarea
-                  rows={5}
-                  placeholder="Buyer Address"
                   name="buyerAddress"
+                  value={form.buyerAddress}
+                  placeholder="Buyer Address"
                   onChange={handleChange}
                 />
               </div>
@@ -325,8 +343,6 @@ export default function SoldBikeDialog() {
             </div>
 
             <div className="mt-10 flex justify-end gap-4">
-              <Button variant="outline">Cancel</Button>
-
               <Button
                 className="min-w-[150px]"
                 disabled={isSubmitting}
