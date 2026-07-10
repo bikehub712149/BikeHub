@@ -2,7 +2,10 @@ import { NextResponse } from "next/server";
 import {
   getCustomers,
   createCustomer,
-} from "@/lib/server/coustomer";
+  getCustomerByBikeId,
+} from "@/lib/server/customer";
+import { updateCustomer } from "@/lib/server/customer";
+import { markBikeAsSold } from "@/lib/server/bike";
 
 export async function GET() {
   try {
@@ -31,6 +34,40 @@ export async function POST(req: Request) {
 
     return NextResponse.json(
       { message: "Failed to create customer" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PATCH(req: Request) {
+  try {
+    const { bikeId, buyer, sellingPrice, receipt } = await req.json();
+
+    const customer = await getCustomerByBikeId(bikeId);
+
+    if (!customer) {
+      return NextResponse.json(
+        { message: "Customer not found" },
+        { status: 404 }
+      );
+    }
+
+    const updatedCustomer = await updateCustomer(customer.id, {
+      $set: {
+        buyer,
+        sellingPrice,
+        receipt,
+      },
+    });
+
+    await markBikeAsSold(bikeId);
+
+    return NextResponse.json(updatedCustomer);
+  } catch (err) {
+    console.error(err);
+
+    return NextResponse.json(
+      { message: "Failed to complete sale" },
       { status: 500 }
     );
   }

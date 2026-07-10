@@ -11,7 +11,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
 import { getBikeById } from "@/lib/server/bike";
-import { getCustomerByBikeId } from "@/lib/server/coustomer";
+import { getCustomerByBikeId } from "@/lib/server/customer";
+import { Trash2 } from "lucide-react";
+import DeleteBikeDialog from "@/components/dialogs/delete-bike-dialog";
 
 export default async function BikeDetailsPage({
   params,
@@ -26,9 +28,6 @@ export default async function BikeDetailsPage({
 
   const bikeData = bike ? JSON.parse(JSON.stringify(bike)) : null;
 
-  const transactionData = transaction
-    ? JSON.parse(JSON.stringify(transaction))
-    : null;
 
   if (!bike) {
     return (
@@ -58,42 +57,49 @@ export default async function BikeDetailsPage({
     <div className="space-y-8 p-8">
       {/* Header */}
 
-      <div className="flex items-center justify-between">
-        <div>
-          <Link
-            href="/inventory"
-            className="mb-4 inline-flex items-center gap-2 text-sm text-slate-500 transition hover:text-black"
-          >
-            <ArrowLeft size={16} />
-            Back to Inventory
-          </Link>
+      <div className="flex items-start justify-between">
+  <div>
+    <Link
+      href="/inventory"
+      className="mb-4 inline-flex items-center gap-2 text-sm text-slate-500 hover:text-black"
+    >
+      <ArrowLeft size={16} />
+      Back to Inventory
+    </Link>
 
-          <div className="flex items-center gap-4">
-            <h1 className="text-4xl font-bold">{bikeData.model}</h1>
+    <div className="flex items-center gap-3">
+      <h1 className="text-4xl font-bold">{bikeData.model}</h1>
 
-            <Badge
-              className={
-                bikeData.status === "Sold"
-                  ? "bg-red-100 text-red-700 hover:bg-red-100"
-                  : "bg-green-100 text-green-700 hover:bg-green-100"
-              }
-            >
-              {bikeData.status}
-            </Badge>
-          </div>
+      <Badge
+        className={
+          bikeData.status === "Sold"
+            ? "bg-red-100 text-red-700"
+            : bikeData.status === "Pending"
+            ? "bg-yellow-100 text-yellow-700"
+            : "bg-green-100 text-green-700"
+        }
+      >
+        {bikeData.status}
+      </Badge>
+    </div>
 
-          <p className="mt-2 text-slate-500">
-            Registration No. {bikeData.number}
-          </p>
-        </div>
-      </div>
+    <p className="mt-2 text-slate-500">
+      Registration No. {bikeData.number}
+    </p>
+  </div>
+
+  <DeleteBikeDialog
+    bikeId={bikeData.id}
+    bikeNumber={bikeData.number}
+  />
+</div>
 
       {/* Gallery + Technical */}
 
-      <div className="grid gap-8 xl:grid-cols-12">
+      <div className="grid grid-cols-1 xl:grid-cols-[460px_1fr] gap-8 items-start">
         {/* Gallery */}
 
-        <div className="xl:col-span-5">
+        <div className="sticky top-24">
           {/* Client wrapper because gallery uses useState */}
 
           <BikeGalleryClient images={images} />
@@ -101,7 +107,7 @@ export default async function BikeDetailsPage({
 
         {/* Technical */}
 
-        <div className="space-y-8 xl:col-span-7">
+        <div className="flex flex-col gap-6">
           <TechnicalCard bikeData={bikeData} />
 
           {transaction && (
@@ -116,7 +122,7 @@ export default async function BikeDetailsPage({
       {/* Seller & Buyer */}
 
       {transaction && (
-        <div className="grid gap-8 xl:grid-cols-2">
+        <div className="grid gap-6 lg:grid-cols-2">
           <PartyCard
             title="Seller Information"
             person={transaction.seller}
@@ -134,7 +140,7 @@ export default async function BikeDetailsPage({
 
       {/* Quick Summary */}
 
-      <div className="grid gap-6 md:grid-cols-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
         <div className="rounded-3xl border bg-white p-6 shadow-sm">
           <p className="text-sm text-slate-500">Purchase Price</p>
 

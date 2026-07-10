@@ -26,8 +26,8 @@ export async function updateCustomer(id: string, data: any) {
   );
 }
 
-export async function deleteCustomer(id: string) {
+export async function deleteCustomerByBikeId(bikeId: string) {
   await connectDB();
 
-  return CustomerTransaction.findOneAndDelete({ id });
+  return CustomerTransaction.findOneAndDelete({ bikeId });
 }

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { createBike, getAllBikes } from "@/lib/server/bike";
-import { createCustomer } from "@/lib/server/coustomer";
+import { createCustomer } from "@/lib/server/customer";
 
 export async function GET() {
   try {

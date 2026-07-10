@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { BadgeCheck, Upload, X } from "lucide-react";
-
+import { Loader2, BadgeCheck, X } from "lucide-react";
+import Image from "next/image";
 import {
   Dialog,
   DialogContent,
@@ -15,13 +15,40 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import BikeSelector from "@/components/bike-selector";
-import { getAllBikes } from "@/lib/demo/bikes";
+import { Bike } from "@/types/bike";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export default function SoldBikeDialog() {
   const [receipt, setReceipt] = useState<File | null>(null);
   const [buyerDocs, setBuyerDocs] = useState<File[]>([]);
-  const [bikes, setBikes] = useState<any>([]);
-  const [selectedBike, setSelectedBike] = useState<any>(null);
+  const [bikes, setBikes] = useState<Bike[]>([]);
+  const [selectedBike, setSelectedBike] = useState<Bike | null>(null);
+  const router = useRouter();
+  const [open, setOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    async function fetchBikes() {
+      try {
+        const res = await fetch("/api/bike");
+
+        if (!res.ok) {
+          throw new Error("Failed to fetch bikes");
+        }
+
+        const data: Bike[] = await res.json();
+
+        // Only Available bikes
+        setBikes(data.filter((bike) => bike.status === "Available"));
+      } catch (err) {
+        console.error(err);
+        toast.error("Failed to load bikes");
+      }
+    }
+
+    fetchBikes();
+  }, []);
 
   const [form, setForm] = useState({
     bikeNumber: "",
@@ -44,28 +71,60 @@ export default function SoldBikeDialog() {
     });
   }
 
-  function handleSubmit() {
-    const payload = {
-      bikeNumber: form.bikeNumber,
+  async function handleSubmit() {
+    try {
+      setIsSubmitting(true);
 
-      buyer: {
-        name: form.buyerName,
-        phone: form.buyerPhone,
-        address: form.buyerAddress,
-      },
+      const payload = {
+        bikeId: form.bikeNumber,
 
-      sellingPrice: Number(form.sellingPrice),
+        buyer: {
+          name: form.buyerName,
+          phone: form.buyerPhone,
+          address: form.buyerAddress,
+          // documents later
+        },
 
-      saleDate: form.saleDate,
+        sellingPrice: Number(form.sellingPrice),
 
-      receipt: receipt?.name ?? null,
-    };
+        receipt: receipt?.name ?? null,
+      };
+      console.log(payload);
+      const res = await fetch("/api/customers", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
 
-    console.log(payload);
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message || "Failed to complete sale");
+      }
+
+      toast.success("Bike sold successfully.");
+
+      setForm({
+        bikeNumber: "",
+        buyerName: "",
+        buyerPhone: "",
+        buyerAddress: "",
+        sellingPrice: "",
+        saleDate: new Date().toISOString().split("T")[0],
+      });
+
+      setSelectedBike(null);
+      setReceipt(null);
+      setBuyerDocs([]);
+
+      router.refresh();
+    } catch (err: any) {
+      toast.error(err.message || "Something went wrong.");
+    } finally {
+      setIsSubmitting(false);
+    }
   }
-  useEffect(() => {
-    getAllBikes().then(setBikes);
-  }, []);
 
   return (
     <Dialog>
@@ -106,29 +165,65 @@ export default function SoldBikeDialog() {
 
             <BikeSelector
               bikes={bikes}
-              value={selectedBike}
-              onChange={setSelectedBike}
+              value={selectedBike ?? undefined}
+              onChange={(bike) => {
+                console.log(bike);
+
+                setSelectedBike(bike);
+
+                setForm((prev) => ({
+                  ...prev,
+                  bikeNumber: bike.number,
+                }));
+              }}
             />
 
             {selectedBike && (
               <>
                 <img
                   src={selectedBike.image}
-                  className="mt-8 h-60 w-full rounded-2xl object-cover border"
+                  alt={selectedBike.model}
+                  width={600}
+                  height={400}
+                  className="mt-8 h-60 w-full rounded-2xl border object-cover"
                 />
 
                 <div className="mt-8 grid grid-cols-2 gap-5">
-                  <Input value={selectedBike.number} readOnly  className="bg-slate-100" />
+                  <Input
+                    value={selectedBike.number}
+                    readOnly
+                    className="bg-slate-100"
+                  />
 
-                  <Input value={selectedBike.model} readOnly  className="bg-slate-100"/>
+                  <Input
+                    value={selectedBike.model}
+                    readOnly
+                    className="bg-slate-100"
+                  />
 
-                  <Input value={selectedBike.year} readOnly  className="bg-slate-100"/>
+                  <Input
+                    value={selectedBike.year}
+                    readOnly
+                    className="bg-slate-100"
+                  />
 
-                  <Input value={selectedBike.kms} readOnly  className="bg-slate-100"/>
+                  <Input
+                    value={selectedBike.kms}
+                    readOnly
+                    className="bg-slate-100"
+                  />
 
-                  <Input value={`₹ ${selectedBike.price}`} readOnly  className="bg-slate-100"/>
+                  <Input
+                    value={`₹ ${selectedBike.expectedSellingPrice.toLocaleString()}`}
+                    readOnly
+                    className="bg-slate-100"
+                  />
 
-                  <Input value={selectedBike.status} readOnly  className="bg-slate-100"/>
+                  <Input
+                    value={selectedBike.status}
+                    readOnly
+                    className="bg-slate-100"
+                  />
                 </div>
               </>
             )}
@@ -230,12 +325,21 @@ export default function SoldBikeDialog() {
             </div>
 
             <div className="mt-10 flex justify-end gap-4">
-              <Button variant="outline">
-                Cancel
-              </Button>
+              <Button variant="outline">Cancel</Button>
 
-              <Button onClick={handleSubmit}>
-                Complete Sale
+              <Button
+                className="min-w-[150px]"
+                disabled={isSubmitting}
+                onClick={handleSubmit}
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  "Complete Sale"
+                )}
               </Button>
             </div>
           </div>

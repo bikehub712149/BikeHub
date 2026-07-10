@@ -15,14 +15,19 @@ if (!cached) {
   };
 }
 
+
 export async function connectDB() {
-  if (cached.conn) return cached.conn;
+  try {
+    if (mongoose.connection.readyState >= 1) {
+      console.log("Already Connected");
+      return;
+    }
 
-  if (!cached.promise) {
-    cached.promise = mongoose.connect(MONGODB_URI);
+    await mongoose.connect(process.env.MONGODB_URI!);
+
+    console.log("Mongo Connected ✅");
+  } catch (err) {
+    console.error("Mongo Error:", err);
+    throw err;
   }
-
-  cached.conn = await cached.promise;
-
-  return cached.conn;
 }

@@ -33,6 +33,18 @@ export async function updateBike(
   }).lean<BikeType | null>();
 }
 
+export async function markBikeAsSold(bikeId: string) {
+  await connectDB();
+
+  return Bike.findOneAndUpdate(
+    { number: bikeId },
+    {
+      status: "Sold",
+    },
+    { new: true }
+  );
+}
+
 export async function deleteBike(id: string) {
   await connectDB();
 
