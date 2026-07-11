@@ -114,8 +114,8 @@ export default function PartyCard({
                           className="text-blue-600"
                         />
 
-                        <span className="truncate">
-                          {doc}
+                        <span className="truncate capitalize font-semibold">
+                          Download the document
                         </span>
 
                       </div>

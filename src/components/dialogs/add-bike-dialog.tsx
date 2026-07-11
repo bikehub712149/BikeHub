@@ -16,15 +16,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import BikeGallery from "../bike-details/bike-gallery";
-
+import imageCompression from "browser-image-compression"; // <-- New
+import jsPDF from "jspdf"; // <-- New
 
 export default function AddBikeDialog() {
   const [images, setImages] = useState<File[]>([]);
   const [selectedImage, setSelectedImage] = useState(0);
   const [sellerDocs, setSellerDocs] = useState<File[]>([]);
+  const [fileKey, setFileKey] = useState(Date.now());
   const router = useRouter();
 
-const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [form, setForm] = useState({
     number: "",
@@ -33,7 +35,6 @@ const [isSubmitting, setIsSubmitting] = useState(false);
     kms: "",
     expectedSellingPrice: "",
     engineNumber: "",
-    
 
     sellerName: "",
     sellerPhone: "",
@@ -62,95 +63,172 @@ const [isSubmitting, setIsSubmitting] = useState(false);
     setImages([...images, ...files]);
   }
 
-  function removeImage(index: number) {
+function removeImage(index: number) {
     setImages(images.filter((_, i) => i !== index));
+    setSelectedImage(0); // <-- Resets selection so it doesn't break
   }
 
-async function handleSubmit() {
-  try {
-    setIsSubmitting(true);
+  async function handleSubmit() {
+    try {
+      setIsSubmitting(true);
 
-    const payload = {
-  bike: {
-    id: crypto.randomUUID(),
+      // 1. Create your structured payload (without images for now)
+      const payload = {
+        bike: {
+          id: crypto.randomUUID(),
+          number: form.number,
+          model: form.model,
+          year: Number(form.year),
+          kms: form.kms,
+          expectedSellingPrice: Number(form.expectedSellingPrice),
+          status: "Available",
+          engineNumber: form.engineNumber,
+          chassisNumber: form.chassisNumber,
+          image: "", // The backend will replace this with the main image URL
+          images: [], // The backend will replace this with all Cloudinary URLs
+        },
+        customer: {
+          id: crypto.randomUUID(),
+          bikeId: form.number,
+          seller: {
+            name: form.sellerName,
+            phone: form.sellerPhone,
+            address: form.sellerAddress,
+            documents: [], // The backend will replace this with the PDF URL
+          },
+          purchasePrice: Number(form.purchasePrice),
+        },
 
-    number: form.number,
-    model: form.model,
-    year: Number(form.year),
-    kms: form.kms,
+        mainImageIndex: selectedImage,
+      };
 
-    expectedSellingPrice: Number(form.expectedSellingPrice),
+      // 2. Initialize FormData
+      const formData = new FormData();
 
-    status: "Available",
+      // Append the JSON payload as a string
+      formData.append("data", JSON.stringify(payload));
 
-    image:
-      "https://images.unsplash.com/photo-1558981806-ec527fa84c39?w=1200&auto=format&fit=crop&q=80",
+      // 1. COMPRESS BIKE IMAGES (Strictly < 200KB & Parallel)
+      // ---------------------------------------------------------
+      const compressedBikeFiles = await Promise.all(
+        images.map(async (file) => {
+          const compressedBlob = await imageCompression(file, {
+            maxSizeMB: 0.19, // Target ~190KB to strictly guarantee under 200KB
+            maxWidthOrHeight: 1600, // Great resolution for bike details
+            useWebWorker: true,
+            initialQuality: 0.8,
+          });
+          return new File([compressedBlob], file.name, { type: file.type });
+        })
+      );
 
-    engineNumber: form.engineNumber,
-    chassisNumber: form.chassisNumber,
+      compressedBikeFiles.forEach((file) => formData.append("images", file));
 
-    // images: [] // Cloudinary later
-  },
+      // ---------------------------------------------------------
+      // 2. COMPRESS DOCS & BUNDLE TO PDF (Target ~100KB per doc)
+      // ---------------------------------------------------------
+      const docImages = sellerDocs.filter((f) => f.type.startsWith("image/"));
+      const docPdfs = sellerDocs.filter((f) => f.type === "application/pdf");
 
-  customer: {
-    id: crypto.randomUUID(),
+      if (docImages.length > 0) {
+        const pdf = new jsPDF({
+          orientation: "p",
+          unit: "mm",
+          format: "a4",
+          compress: true,
+        });
 
-    bikeId: form.number, // see note below
+        const processedDocs = await Promise.all(
+          docImages.map(async (file) => {
+            const compressedBlob = await imageCompression(file, {
+              maxSizeMB: 0.09, // Target ~90KB to strictly guarantee under 100KB
+              maxWidthOrHeight: 1200, // Perfect for reading ID cards and receipts clearly
+              useWebWorker: true,
+              fileType: "image/jpeg",
+            });
 
-    seller: {
-      name: form.sellerName,
-      phone: form.sellerPhone,
-      address: form.sellerAddress,
+            return new Promise<string>((resolve) => {
+              const reader = new FileReader();
+              reader.readAsDataURL(compressedBlob);
+              reader.onloadend = () => resolve(reader.result as string);
+            });
+          })
+        );
 
-      // documents: [] // Cloudinary later
-    },
+        processedDocs.forEach((base64Str, i) => {
+          if (i > 0) pdf.addPage();
 
-    purchasePrice: Number(form.purchasePrice),
-  },
-};
+          const imgProps = pdf.getImageProperties(base64Str);
+          const pdfWidth = pdf.internal.pageSize.getWidth();
+          const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
 
-    const res = await fetch("/api/bike", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
-    });
+          pdf.addImage(
+            base64Str,
+            "JPEG",
+            0,
+            0,
+            pdfWidth,
+            pdfHeight,
+            undefined,
+            "FAST"
+          );
+        });
 
-    if (!res.ok) {
-      const error = await res.json();
+        const pdfBlob = pdf.output("blob");
+        const combinedPdfFile = new File(
+          [pdfBlob],
+          `${form.number}-seller-docs.pdf`,
+          { type: "application/pdf" }
+        );
 
-      throw new Error(error.message || "Failed to save bike");
+        formData.append("sellerDocs", combinedPdfFile);
+      }
+
+      // Append any files that were already PDFs
+      docPdfs.forEach((pdf) => formData.append("sellerDocs", pdf));
+
+      // ---------------------------------------------------------
+      // 3. SEND TO API
+      // ---------------------------------------------------------
+      const res = await fetch("/api/bike", {
+        method: "POST",
+        body: formData, // the browser sets multipart boundaries automatically
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message || "Failed to save bike");
+      }
+
+      toast.success("Bike added successfully.");
+
+      // Reset Form
+      setForm({
+        number: "",
+        model: "",
+        year: "",
+        kms: "",
+        expectedSellingPrice: "",
+        engineNumber: "",
+        sellerName: "",
+        sellerPhone: "",
+        purchasePrice: "",
+        chassisNumber: "",
+        sellerAddress: "",
+      });
+
+      setImages([]);
+      setSellerDocs([]);
+      setSelectedImage(0);
+      setFileKey(Date.now());
+
+      router.refresh();
+    } catch (err: any) {
+      toast.error(err.message || "Something went wrong.");
+    } finally {
+      setIsSubmitting(false);
     }
-
-    toast.success("Bike added successfully.");
-
-    setForm({
-      number: "",
-      model: "",
-      year: "",
-      kms: "",
-      expectedSellingPrice: "",
-      engineNumber: "",
-      
-      sellerName: "",
-      sellerPhone: "",
-      purchasePrice: "",
-      chassisNumber: "",
-      sellerAddress: "",
-    });
-
-    setImages([]);
-    setSellerDocs([]);
-    setSelectedImage(0);
-
-    router.refresh();
-  } catch (err: any) {
-    toast.error(err.message || "Something went wrong.");
-  } finally {
-    setIsSubmitting(false);
   }
-}
 
   return (
     <Dialog>
@@ -235,8 +313,6 @@ async function handleSubmit() {
                 placeholder="Engine Number"
                 onChange={handleChange}
               />
-
-              
             </div>
 
             <h3 className="mt-10 mb-5 text-lg font-semibold">
@@ -272,7 +348,6 @@ async function handleSubmit() {
                 placeholder="Chassis Number"
                 onChange={handleChange}
               />
-              
 
               <div className="col-span-2">
                 <Textarea
@@ -295,6 +370,7 @@ async function handleSubmit() {
 
               <Input
                 type="file"
+                key={fileKey}
                 multiple
                 accept="image/*,.pdf"
                 onChange={(e) =>
@@ -334,19 +410,19 @@ async function handleSubmit() {
               </Button>
 
               <Button
-  className="min-w-[150px]"
-  disabled={isSubmitting}
-  onClick={handleSubmit}
->
-  {isSubmitting ? (
-    <>
-      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-      Saving...
-    </>
-  ) : (
-    "Save Bike"
-  )}
-</Button>
+                className="min-w-[150px]"
+                disabled={isSubmitting}
+                onClick={handleSubmit}
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  "Save Bike"
+                )}
+              </Button>
             </div>
           </div>
         </div>
