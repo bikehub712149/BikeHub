@@ -1,14 +1,23 @@
 import Link from "next/link";
 import Image from "next/image";
 import { ChevronRight } from "lucide-react";
-// app/api/bikes/route.ts
+import { getAllBikes } from "@/lib/server/bike";
 
-// app/api/bikes/route.ts
+export default async function InventoryPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ status?: string }>;
+}) {
+  const { status } = await searchParams;
 
-import { getAllBikes, createBike } from "@/lib/server/bike";
+  const allBikes = await getAllBikes();
 
-export default async function InventoryPage() {
-  const bikes = await getAllBikes();
+  const bikes =
+    status === "available"
+      ? allBikes.filter((bike) => bike.status === "Available")
+      : status === "sold"
+      ? allBikes.filter((bike) => bike.status === "Sold")
+      : allBikes;
 
   return (
     <div className="flex-1 overflow-y-auto p-4 pb-32">
@@ -24,17 +33,38 @@ export default async function InventoryPage() {
 
       {/* Filter Buttons (UI Only) */}
       <div className="mb-6 flex gap-2 rounded-xl border border-slate-200 bg-slate-100 p-1 w-max">
-        <button className="rounded-lg border bg-white px-5 py-2 text-sm font-semibold shadow-sm">
+        <Link
+          href="/inventory"
+          className={`rounded-lg px-5 py-2 text-sm font-semibold transition ${
+            !status
+              ? "border bg-white shadow-sm"
+              : "text-slate-600 hover:bg-white"
+          }`}
+        >
           All Bikes
-        </button>
+        </Link>
 
-        <button className="rounded-lg px-5 py-2 text-sm text-slate-600 hover:bg-white">
+        <Link
+          href="/inventory?status=available"
+          className={`rounded-lg px-5 py-2 text-sm font-semibold transition ${
+            status === "available"
+              ? "border bg-white shadow-sm"
+              : "text-slate-600 hover:bg-white"
+          }`}
+        >
           Available
-        </button>
+        </Link>
 
-        <button className="rounded-lg px-5 py-2 text-sm text-slate-600 hover:bg-white">
+        <Link
+          href="/inventory?status=sold"
+          className={`rounded-lg px-5 py-2 text-sm font-semibold transition ${
+            status === "sold"
+              ? "border bg-white shadow-sm"
+              : "text-slate-600 hover:bg-white"
+          }`}
+        >
           Sold
-        </button>
+        </Link>
       </div>
 
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">

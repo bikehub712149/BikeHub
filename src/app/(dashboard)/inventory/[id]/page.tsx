@@ -6,13 +6,10 @@ import BikeGalleryClient from "./gallery-client";
 import TechnicalCard from "@/components/bike-details/technical-card";
 import FinancialCard from "@/components/bike-details/financial-card";
 import PartyCard from "@/components/bike-details/party-card";
-
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-
 import { getBikeById } from "@/lib/server/bike";
 import { getCustomerByBikeId } from "@/lib/server/customer";
-import { Trash2 } from "lucide-react";
 import DeleteBikeDialog from "@/components/dialogs/delete-bike-dialog";
 
 export default async function BikeDetailsPage({

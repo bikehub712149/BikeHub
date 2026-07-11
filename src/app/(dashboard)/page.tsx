@@ -7,13 +7,24 @@ import {
   Clock,
   ChevronRight,
 } from "lucide-react";
-import { getRecentBikes, getAllBikes } from "@/lib/demo/bikes";
+import { getAllBikes } from "@/lib/server/bike";
 import BikeCard from "@/components/bike-card";
 import Link from "next/link";
 
 export default async function DashboardOverview() {
-  const recentBikes = await getRecentBikes();
-  const allBikes = await getAllBikes();
+const allBikes = await getAllBikes();
+
+const recentBikes = allBikes.slice(0, 6);
+
+const totalStock = allBikes.length;
+
+const soldBikes = allBikes.filter(
+  (bike) => bike.status === "Sold"
+).length;
+
+const pendingBikes = allBikes.filter(
+  (bike) => bike.status === "Pending"
+).length;
 
   return (
     <>
@@ -36,7 +47,7 @@ export default async function DashboardOverview() {
               <p className="text-sm font-medium text-slate-500 mb-1">
                 Total Stock in Shop
               </p>
-              <h3 className="text-3xl font-bold text-slate-900">{allBikes.length}</h3>
+              <h3 className="text-3xl font-bold text-slate-900">{totalStock}</h3>
             </div>
           </div>
           <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden group">
@@ -47,7 +58,7 @@ export default async function DashboardOverview() {
               <p className="text-sm font-medium text-slate-500 mb-1">
                 Bikes Sold
               </p>
-              <h3 className="text-3xl font-bold text-slate-900">{allBikes.filter((bike) => bike.status === "Sold").length}</h3>
+              <h3 className="text-3xl font-bold text-slate-900">{soldBikes}</h3>
             </div>
           </div>
           <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden group">
@@ -58,7 +69,7 @@ export default async function DashboardOverview() {
               <p className="text-sm font-medium text-slate-500 mb-1">
                 Pending Paperwork
               </p>
-              <h3 className="text-3xl font-bold text-slate-900">{allBikes.filter((bike) => bike.status === "Pending").length}</h3>
+              <h3 className="text-3xl font-bold text-slate-900">{pendingBikes}</h3>
             </div>
           </div>
         </div>

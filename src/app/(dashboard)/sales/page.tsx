@@ -55,7 +55,7 @@ const StatCard = ({
         {title}
       </CardTitle>
       <div className="rounded-lg bg-primary/10 p-2 text-primary">
-        <Icon className="h-4 w-4" />
+        <Icon className="h-6 w-6" />
       </div>
     </CardHeader>
     <CardContent>
@@ -111,39 +111,42 @@ const StatusBadge = ({ status }: { status: Bike['status'] }) => {
 };
 
 export default function SalesPage() {
-  const [allBikes, setAllBikes] = useState<Bike[]>([]);
-  const [loading, setLoading] = useState(true);
+const [soldBikes, setSoldBikes] = useState<any[]>([]);
+const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const loadBikes = async () => {
-      try {
-        const data = await getAllBikes();
-        setAllBikes(data);
-      } catch (error) {
-        console.error('Failed to load bikes:', error);
-        // Fallback to imported bikes if API fails
-        setAllBikes(bikes);
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadBikes();
-  }, []);
+useEffect(() => {
+  async function fetchSales() {
+    try {
+      const res = await fetch("/api/sales");
 
-  const soldBikes = allBikes.filter((bike) => bike.status === 'Sold');
+      if (!res.ok) throw new Error();
+
+      const data = await res.json();
+
+      setSoldBikes(data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  fetchSales();
+}, []);
+
 
   // Calculate total revenue (assuming expectedSellingPrice.toLocaleString() is in INR)
-  const totalRevenue = soldBikes.reduce(
-    (sum, bike) => sum + parseInt(bike.expectedSellingPrice.toLocaleString() || '0'),
-    0
-  );
+const totalRevenue = soldBikes.reduce(
+  (sum, bike) => sum + bike.sellingPrice,
+  0
+);
 
   // Calculate profit (assuming 30% margin for demo, you can adjust this)
-  const totalProfit = soldBikes.reduce((sum, bike) => {
-    const salePrice = parseInt(bike.expectedSellingPrice.toLocaleString() || '0');
-    const purchasePrice = salePrice * 0.7; // 30% margin assumption
-    return sum + (salePrice - purchasePrice);
-  }, 0);
+const totalProfit = soldBikes.reduce(
+  (sum, bike) =>
+    sum + (bike.sellingPrice - bike.buyingPrice),
+  0
+);
 
   const averageProfit = soldBikes.length > 0 ? totalProfit / soldBikes.length : 0;
 
@@ -153,29 +156,21 @@ export default function SalesPage() {
       title: 'Total Revenue',
       value: formatCurrency(totalRevenue),
       icon: Wallet,
-      trend: 12.5,
-      trendLabel: 'vs last month',
     },
     {
       title: 'Net Profit',
       value: formatCurrency(totalProfit),
       icon: TrendingUp,
-      trend: 8.2,
-      trendLabel: 'vs last month',
     },
     {
       title: 'Bikes Sold',
       value: soldBikes.length.toString(),
       icon: ShoppingBag,
-      trend: 5,
-      trendLabel: 'vs last month',
     },
     {
       title: 'Avg Profit per Bike',
       value: formatCurrency(Math.round(averageProfit)),
       icon: Receipt,
-      trend: 3.7,
-      trendLabel: 'vs last month',
     },
   ];
 
@@ -206,8 +201,6 @@ export default function SalesPage() {
             title={stat.title}
             value={stat.value}
             icon={stat.icon}
-            trend={stat.trend}
-            trendLabel={stat.trendLabel}
           />
         ))}
       </div>
@@ -257,7 +250,7 @@ export default function SalesPage() {
                   </tr>
                 ) : (
                   soldBikes.map((bike) => {
-                    const salePrice = parseInt(bike.expectedSellingPrice.toLocaleString() || '0');
+                    const salePrice = parseInt(bike.sellingPrice.toLocaleString() || '0');
                     const estimatedPurchasePrice = salePrice * 0.7;
                     const estimatedProfit = salePrice - estimatedPurchasePrice;
 

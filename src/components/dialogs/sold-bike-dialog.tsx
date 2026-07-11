@@ -29,7 +29,6 @@ export default function SoldBikeDialog() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const initialForm = {
-    bikeNumber: "",
     buyerName: "",
     buyerPhone: "",
     buyerAddress: "",
@@ -84,8 +83,6 @@ export default function SoldBikeDialog() {
       setIsSubmitting(true);
 
       const payload = {
-        bikeId: form.bikeNumber,
-
         buyer: {
           name: form.buyerName,
           phone: form.buyerPhone,
@@ -97,8 +94,12 @@ export default function SoldBikeDialog() {
 
         receipt: receipt?.name ?? null,
       };
-      console.log(payload);
-      const res = await fetch("/api/customers", {
+      if (!selectedBike) {
+        toast.error("Please select a bike.");
+        return;
+      }
+
+      const res = await fetch(`/api/customers/${selectedBike.number}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -114,7 +115,6 @@ export default function SoldBikeDialog() {
       toast.success("Bike sold successfully.");
 
       setForm({
-        bikeNumber: "",
         buyerName: "",
         buyerPhone: "",
         buyerAddress: "",
@@ -127,7 +127,9 @@ export default function SoldBikeDialog() {
       resetForm();
 
       // remove sold bike immediately
-      setBikes((prev) => prev.filter((bike) => bike.number !== payload.bikeId));
+      setBikes((prev) =>
+        prev.filter((bike) => bike.number !== selectedBike?.number)
+      );
 
       // close popup
       setOpen(false);
@@ -182,14 +184,7 @@ export default function SoldBikeDialog() {
               bikes={bikes}
               value={selectedBike ?? undefined}
               onChange={(bike) => {
-                console.log(bike);
-
                 setSelectedBike(bike);
-
-                setForm((prev) => ({
-                  ...prev,
-                  bikeNumber: bike.number,
-                }));
               }}
             />
 

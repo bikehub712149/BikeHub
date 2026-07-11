@@ -5,14 +5,28 @@ import {
   getCustomerByBikeId,
 } from "@/lib/server/customer";
 import { updateCustomer } from "@/lib/server/customer";
-import { markBikeAsSold } from "@/lib/server/bike";
+import { getAllBikes, markBikeAsSold } from "@/lib/server/bike";
 
 export async function GET() {
   try {
     const customers = await getCustomers();
+    const bikes = await getAllBikes();
 
-    return NextResponse.json(customers);
-  } catch {
+    const data = customers.map((customer: any) => {
+      const bike = bikes.find(
+        (b: any) => b.number === customer.bikeId
+      );
+
+      return {
+        ...customer,
+        bike,
+      };
+    });
+
+    return NextResponse.json(data);
+  } catch (err) {
+    console.error(err);
+
     return NextResponse.json(
       { message: "Failed to fetch customers" },
       { status: 500 }
@@ -34,40 +48,6 @@ export async function POST(req: Request) {
 
     return NextResponse.json(
       { message: "Failed to create customer" },
-      { status: 500 }
-    );
-  }
-}
-
-export async function PATCH(req: Request) {
-  try {
-    const { bikeId, buyer, sellingPrice, receipt } = await req.json();
-
-    const customer = await getCustomerByBikeId(bikeId);
-
-    if (!customer) {
-      return NextResponse.json(
-        { message: "Customer not found" },
-        { status: 404 }
-      );
-    }
-
-    const updatedCustomer = await updateCustomer(customer.id, {
-      $set: {
-        buyer,
-        sellingPrice,
-        receipt,
-      },
-    });
-
-    await markBikeAsSold(bikeId);
-
-    return NextResponse.json(updatedCustomer);
-  } catch (err) {
-    console.error(err);
-
-    return NextResponse.json(
-      { message: "Failed to complete sale" },
       { status: 500 }
     );
   }

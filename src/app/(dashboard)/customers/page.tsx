@@ -1,15 +1,37 @@
+"use client";
 import Image from "next/image";
 import Link from "next/link";
 import { FileText } from "lucide-react";
-
-import { getCustomers } from "@/lib/demo/customers";
-import { getBikeById } from "@/lib/demo/bikes";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useEffect, useState } from "react";
 
-export default async function CustomersPage() {
-  const customers = await getCustomers();
+
+
+export default function CustomersPage() {
+  const [customers, setCustomers] = useState<any[]>([]);
+const [loading, setLoading] = useState(true);
+
+useEffect(() => {
+  async function fetchCustomers() {
+    try {
+      const res = await fetch("/api/customers");
+
+      if (!res.ok) throw new Error();
+
+      const data = await res.json();
+
+      setCustomers(data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  fetchCustomers();
+}, []);
 
   return (
     <div className="flex-1 p-4 pb-24">
@@ -22,9 +44,8 @@ export default async function CustomersPage() {
       </div>
 
       <div className="space-y-6">
-        {await Promise.all(
-          customers.map(async (record) => {
-            const bike = await getBikeById(record.bikeId);
+        {customers.map((record) => {
+            const bike = record.bike;
 
             if (!bike) return null;
 
@@ -156,7 +177,7 @@ export default async function CustomersPage() {
               </Card>
             );
           })
-        )}
+        }
       </div>
     </div>
   );
