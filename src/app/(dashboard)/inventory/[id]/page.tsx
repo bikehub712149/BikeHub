@@ -71,8 +71,6 @@ export default async function BikeDetailsPage({
         className={
           bikeData.status === "Sold"
             ? "bg-red-100 text-red-700"
-            : bikeData.status === "Pending"
-            ? "bg-yellow-100 text-yellow-700"
             : "bg-green-100 text-green-700"
         }
       >
@@ -142,7 +140,7 @@ export default async function BikeDetailsPage({
           <p className="text-sm text-slate-500">Purchase Price</p>
 
           <h2 className="mt-3 text-3xl font-bold">
-            ₹{transaction ? transaction.purchasePrice.toLocaleString() : "--"}
+            ₹{transaction ? transaction.purchasePrice : "--"}
           </h2>
         </div>
 
@@ -151,7 +149,7 @@ export default async function BikeDetailsPage({
 
           <h2 className="mt-3 text-3xl font-bold">
             {transaction?.sellingPrice
-              ? `₹${transaction.sellingPrice.toLocaleString()}`
+              ? `₹${transaction.sellingPrice}`
               : "--"}
           </h2>
         </div>
@@ -163,7 +161,7 @@ export default async function BikeDetailsPage({
             {transaction?.sellingPrice
               ? `₹${(
                   transaction.sellingPrice - transaction.purchasePrice
-                ).toLocaleString()}`
+                )}`
               : "--"}
           </h2>
         </div>

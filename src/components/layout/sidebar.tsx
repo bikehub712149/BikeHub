@@ -7,6 +7,7 @@ import {
   Bike,
   Users,
   ShoppingCart,
+  ClipboardCheck,
   Settings,
 } from "lucide-react";
 
@@ -25,6 +26,11 @@ const links = [
     title: "Sales",
     href: "/sales",
     icon: ShoppingCart,
+  },
+  {
+    title: "Paperwork",
+    href: "/paperwork",
+    icon: ClipboardCheck,
   },
   {
     title: "Customers",

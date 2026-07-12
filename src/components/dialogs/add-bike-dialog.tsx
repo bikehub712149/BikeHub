@@ -16,8 +16,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import BikeGallery from "../bike-details/bike-gallery";
-import imageCompression from "browser-image-compression"; // <-- New
-import jsPDF from "jspdf"; // <-- New
+import imageCompression from "browser-image-compression"; 
+import jsPDF from "jspdf"; 
 
 export default function AddBikeDialog() {
   const [images, setImages] = useState<File[]>([]);
@@ -63,16 +63,16 @@ export default function AddBikeDialog() {
     setImages([...images, ...files]);
   }
 
-function removeImage(index: number) {
+  function removeImage(index: number) {
     setImages(images.filter((_, i) => i !== index));
-    setSelectedImage(0); // <-- Resets selection so it doesn't break
+    setSelectedImage(0); 
   }
 
   async function handleSubmit() {
     try {
       setIsSubmitting(true);
 
-      // 1. Create your structured payload (without images for now)
+      // 1. Create your structured payload
       const payload = {
         bike: {
           id: crypto.randomUUID(),
@@ -84,8 +84,8 @@ function removeImage(index: number) {
           status: "Available",
           engineNumber: form.engineNumber,
           chassisNumber: form.chassisNumber,
-          image: "", // The backend will replace this with the main image URL
-          images: [], // The backend will replace this with all Cloudinary URLs
+          image: "", // Backend handles this
+          images: [], // Backend handles this
         },
         customer: {
           id: crypto.randomUUID(),
@@ -94,29 +94,27 @@ function removeImage(index: number) {
             name: form.sellerName,
             phone: form.sellerPhone,
             address: form.sellerAddress,
-            documents: [], // The backend will replace this with the PDF URL
+            documents: [], // Backend handles this
           },
           purchasePrice: Number(form.purchasePrice),
         },
-
         mainImageIndex: selectedImage,
       };
 
       // 2. Initialize FormData
       const formData = new FormData();
-
-      // Append the JSON payload as a string
       formData.append("data", JSON.stringify(payload));
 
-      // 1. COMPRESS BIKE IMAGES (Strictly < 200KB & Parallel)
+      // ---------------------------------------------------------
+      // 3. COMPRESS BIKE IMAGES (Target ~1MB & HD)
       // ---------------------------------------------------------
       const compressedBikeFiles = await Promise.all(
         images.map(async (file) => {
           const compressedBlob = await imageCompression(file, {
-            maxSizeMB: 0.19, // Target ~190KB to strictly guarantee under 200KB
-            maxWidthOrHeight: 1600, // Great resolution for bike details
+            maxSizeMB: 1, 
+            maxWidthOrHeight: 1920, 
             useWebWorker: true,
-            initialQuality: 0.8,
+            initialQuality: 0.85,
           });
           return new File([compressedBlob], file.name, { type: file.type });
         })
@@ -125,7 +123,7 @@ function removeImage(index: number) {
       compressedBikeFiles.forEach((file) => formData.append("images", file));
 
       // ---------------------------------------------------------
-      // 2. COMPRESS DOCS & BUNDLE TO PDF (Target ~100KB per doc)
+      // 4. COMPRESS DOCS & BUNDLE TO PDF (Target ~1MB per doc & HD)
       // ---------------------------------------------------------
       const docImages = sellerDocs.filter((f) => f.type.startsWith("image/"));
       const docPdfs = sellerDocs.filter((f) => f.type === "application/pdf");
@@ -141,10 +139,11 @@ function removeImage(index: number) {
         const processedDocs = await Promise.all(
           docImages.map(async (file) => {
             const compressedBlob = await imageCompression(file, {
-              maxSizeMB: 0.09, // Target ~90KB to strictly guarantee under 100KB
-              maxWidthOrHeight: 1200, // Perfect for reading ID cards and receipts clearly
+              maxSizeMB: 1, 
+              maxWidthOrHeight: 1920, 
               useWebWorker: true,
               fileType: "image/jpeg",
+              initialQuality: 0.85,
             });
 
             return new Promise<string>((resolve) => {
@@ -188,11 +187,11 @@ function removeImage(index: number) {
       docPdfs.forEach((pdf) => formData.append("sellerDocs", pdf));
 
       // ---------------------------------------------------------
-      // 3. SEND TO API
+      // 5. SEND TO API
       // ---------------------------------------------------------
       const res = await fetch("/api/bike", {
         method: "POST",
-        body: formData, // the browser sets multipart boundaries automatically
+        body: formData, 
       });
 
       if (!res.ok) {
@@ -252,7 +251,6 @@ function removeImage(index: number) {
 
         <div className="grid grid-cols-12 h-[75vh] py-5">
           {/* LEFT */}
-
           <div className="col-span-5 border-r">
             <BikeGallery
               images={images}
@@ -265,7 +263,6 @@ function removeImage(index: number) {
           </div>
 
           {/* RIGHT */}
-
           <div className="col-span-7 overflow-y-auto p-8">
             <h3 className="mb-5 text-lg font-semibold">Bike Details</h3>
 
@@ -276,14 +273,12 @@ function removeImage(index: number) {
                 placeholder="Registration Number"
                 onChange={handleChange}
               />
-
               <Input
                 name="model"
                 value={form.model}
                 placeholder="Bike Model"
                 onChange={handleChange}
               />
-
               <Input
                 name="year"
                 value={form.year}
@@ -291,14 +286,12 @@ function removeImage(index: number) {
                 type="number"
                 onChange={handleChange}
               />
-
               <Input
                 name="kms"
                 value={form.kms}
                 placeholder="Kilometers"
                 onChange={handleChange}
               />
-
               <Input
                 name="expectedSellingPrice"
                 value={form.expectedSellingPrice}
@@ -306,7 +299,6 @@ function removeImage(index: number) {
                 type="number"
                 onChange={handleChange}
               />
-
               <Input
                 name="engineNumber"
                 value={form.engineNumber}
@@ -326,14 +318,12 @@ function removeImage(index: number) {
                 placeholder="Seller Name"
                 onChange={handleChange}
               />
-
               <Input
                 name="sellerPhone"
                 value={form.sellerPhone}
                 placeholder="Phone Number"
                 onChange={handleChange}
               />
-
               <Input
                 name="purchasePrice"
                 value={form.purchasePrice}
@@ -341,7 +331,6 @@ function removeImage(index: number) {
                 type="number"
                 onChange={handleChange}
               />
-
               <Input
                 name="chassisNumber"
                 value={form.chassisNumber}
@@ -362,10 +351,8 @@ function removeImage(index: number) {
 
             <div className="mt-8">
               <p className="mb-3 text-sm font-medium">Seller Documents</p>
-
               <p className="mb-3 text-xs text-slate-500">
-                Upload Aadhaar / PAN / Voter ID / Driving License (Multiple
-                files allowed)
+                Upload Aadhaar / PAN / Voter ID / Driving License (Multiple files allowed)
               </p>
 
               <Input

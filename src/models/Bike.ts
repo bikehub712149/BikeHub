@@ -1,5 +1,5 @@
 import { Schema, model, models } from "mongoose";
-
+console.log("Loading Bike model");
 const BikeSchema = new Schema(
   {
     id: {
@@ -36,8 +36,14 @@ const BikeSchema = new Schema(
 
     status: {
       type: String,
-      enum: ["Available", "Pending", "Sold"],
+      enum: ["Available", "Sold"],
       default: "Available",
+    },
+
+    paperwork: {
+      type: String,
+      enum: ["Completed", "Pending"],
+      default: "Pending",
     },
 
     image: {

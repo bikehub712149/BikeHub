@@ -17,9 +17,10 @@ export async function GET() {
 
         return {
           ...bike,
-          buyer: customer?.buyer ?? null,
-          sellingPrice: customer?.sellingPrice ?? bike.expectedSellingPrice,
-          receipt: customer?.receipt ?? null,
+          buyer: customer?.buyer,
+          sellingPrice: customer?.sellingPrice,
+          purchasePrice: customer?.purchasePrice,
+          receipt: customer?.receipt,
         };
       });
 

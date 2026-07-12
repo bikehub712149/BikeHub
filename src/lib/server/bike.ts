@@ -45,6 +45,22 @@ export async function markBikeAsSold(bikeId: string) {
   );
 }
 
+export async function updateBikePaperwork(
+  bikeNumber: string,
+  paperwork: "Pending" | "Completed"
+) {
+  await connectDB();
+
+  return Bike.updateOne(
+    { number: bikeNumber },
+    {
+      $set: {
+        paperwork,
+      },
+    }
+  );
+}
+
 export async function deleteBike(id: string) {
   await connectDB();
 

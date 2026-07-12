@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { Loader2, BadgeCheck, X } from "lucide-react";
-import Image from "next/image";
 import {
   Dialog,
   DialogContent,
@@ -18,6 +17,8 @@ import BikeSelector from "@/components/bike-selector";
 import { Bike } from "@/types/bike";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import imageCompression from "browser-image-compression";
+import jsPDF from "jspdf";
 
 export default function SoldBikeDialog() {
   const [receipt, setReceipt] = useState<File | null>(null);
@@ -25,8 +26,13 @@ export default function SoldBikeDialog() {
   const [bikes, setBikes] = useState<Bike[]>([]);
   const [selectedBike, setSelectedBike] = useState<Bike | null>(null);
   const router = useRouter();
+  
+  // Control the open state of the dialog
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Use a key to force file inputs to reset on success
+  const [fileKey, setFileKey] = useState(Date.now());
 
   const initialForm = {
     buyerName: "",
@@ -40,24 +46,20 @@ export default function SoldBikeDialog() {
 
   const resetForm = () => {
     setForm(initialForm);
-
     setSelectedBike(null);
-
     setReceipt(null);
-
     setBuyerDocs([]);
+    setFileKey(Date.now()); // Resets the file inputs
   };
 
+  // Triggered every time the modal is opened
   async function fetchBikes() {
     try {
       const res = await fetch("/api/bike");
-
       if (!res.ok) {
         throw new Error("Failed to fetch bikes");
       }
-
       const data: Bike[] = await res.json();
-
       setBikes(data.filter((bike) => bike.status === "Available"));
     } catch (err) {
       console.error(err);
@@ -65,9 +67,15 @@ export default function SoldBikeDialog() {
     }
   }
 
-  useEffect(() => {
-    fetchBikes();
-  }, []);
+  // Handle dialog open/close properly to fix the dropdown issue
+  const handleOpenChange = (isOpen: boolean) => {
+    setOpen(isOpen);
+    if (isOpen) {
+      fetchBikes(); // Fetch fresh data when opening
+    } else {
+      resetForm(); // Clean up when closing
+    }
+  };
 
   function handleChange(
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -80,31 +88,102 @@ export default function SoldBikeDialog() {
 
   async function handleSubmit() {
     try {
-      setIsSubmitting(true);
-
-      const payload = {
-        buyer: {
-          name: form.buyerName,
-          phone: form.buyerPhone,
-          address: form.buyerAddress,
-          // documents later
-        },
-
-        sellingPrice: Number(form.sellingPrice),
-
-        receipt: receipt?.name ?? null,
-      };
       if (!selectedBike) {
         toast.error("Please select a bike.");
         return;
       }
 
+      setIsSubmitting(true);
+
+      // 1. Create your structured payload
+      const payload = {
+        buyer: {
+          name: form.buyerName,
+          phone: form.buyerPhone,
+          address: form.buyerAddress,
+          documents: [], // Backend will inject Cloudinary URL
+        },
+        sellingPrice: Number(form.sellingPrice),
+        receipt: "", // Backend will inject Cloudinary URL
+      };
+
+      // 2. Initialize FormData
+      const formData = new FormData();
+      formData.append("data", JSON.stringify(payload));
+
+      // ---------------------------------------------------------
+      // 3. COMPRESS RECEIPT (Target ~1MB)
+      // ---------------------------------------------------------
+      if (receipt) {
+        const compressedReceiptBlob = await imageCompression(receipt, {
+          maxSizeMB: 1, 
+          maxWidthOrHeight: 1920, // Full HD width
+          useWebWorker: true,
+          initialQuality: 0.85,
+        });
+        const compressedReceipt = new File([compressedReceiptBlob], receipt.name, { type: receipt.type });
+        formData.append("receipt", compressedReceipt);
+      }
+
+      // ---------------------------------------------------------
+      // 4. COMPRESS BUYER DOCS & BUNDLE TO PDF
+      // ---------------------------------------------------------
+      const docImages = buyerDocs.filter((f) => f.type.startsWith("image/"));
+      const docPdfs = buyerDocs.filter((f) => f.type === "application/pdf");
+
+      if (docImages.length > 0) {
+        const pdf = new jsPDF({
+          orientation: "p",
+          unit: "mm",
+          format: "a4",
+          compress: true,
+        });
+
+        const processedDocs = await Promise.all(
+          docImages.map(async (file) => {
+            const compressedBlob = await imageCompression(file, {
+              maxSizeMB: 1, // Target ~1MB per document page
+              maxWidthOrHeight: 1920,
+              useWebWorker: true,
+              fileType: "image/jpeg",
+              initialQuality: 0.85,
+            });
+
+            return new Promise<string>((resolve) => {
+              const reader = new FileReader();
+              reader.readAsDataURL(compressedBlob);
+              reader.onloadend = () => resolve(reader.result as string);
+            });
+          })
+        );
+
+        processedDocs.forEach((base64Str, i) => {
+          if (i > 0) pdf.addPage();
+          const imgProps = pdf.getImageProperties(base64Str);
+          const pdfWidth = pdf.internal.pageSize.getWidth();
+          const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+          pdf.addImage(base64Str, "JPEG", 0, 0, pdfWidth, pdfHeight, undefined, "FAST");
+        });
+
+        const pdfBlob = pdf.output("blob");
+        const combinedPdfFile = new File(
+          [pdfBlob],
+          `${selectedBike.number}-buyer-docs.pdf`,
+          { type: "application/pdf" }
+        );
+
+        formData.append("buyerDocs", combinedPdfFile);
+      }
+
+      // Append any files that were already PDFs
+      docPdfs.forEach((pdf) => formData.append("buyerDocs", pdf));
+
+      // ---------------------------------------------------------
+      // 5. SEND TO API
+      // ---------------------------------------------------------
       const res = await fetch(`/api/customers/${selectedBike.number}`, {
         method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
+        body: formData, 
       });
 
       if (!res.ok) {
@@ -113,29 +192,10 @@ export default function SoldBikeDialog() {
       }
 
       toast.success("Bike sold successfully.");
-
-      setForm({
-        buyerName: "",
-        buyerPhone: "",
-        buyerAddress: "",
-        sellingPrice: "",
-        saleDate: new Date().toISOString().split("T")[0],
-      });
-
-      toast.success("Bike sold successfully.");
-
-      resetForm();
-
-      // remove sold bike immediately
-      setBikes((prev) =>
-        prev.filter((bike) => bike.number !== selectedBike?.number)
-      );
-
-      // close popup
-      setOpen(false);
-
-      // refresh dashboard cards
-      router.refresh();
+      
+      setOpen(false); 
+      router.refresh(); 
+      
     } catch (err: any) {
       toast.error(err.message || "Something went wrong.");
     } finally {
@@ -144,7 +204,7 @@ export default function SoldBikeDialog() {
   }
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger
         render={
           <Button variant="secondary" className="h-12 rounded-xl px-6">
@@ -155,20 +215,12 @@ export default function SoldBikeDialog() {
       />
 
       <DialogContent
-        className="
-    !max-w-[80vw]
-    max-h-[90vh]
-    overflow-hidden
-    rounded-3xl
-    p-5
-    gap-0
-  "
+        className="!max-w-[80vw] max-h-[90vh] overflow-hidden rounded-3xl p-5 gap-0"
       >
         <DialogHeader className="border-b px-5 py-4">
           <DialogTitle className="text-3xl font-bold leading-5">
             Complete Bike Sale
           </DialogTitle>
-
           <p className="text-slate-500 text-xs ">
             Select a bike and enter buyer information.
           </p>
@@ -176,7 +228,6 @@ export default function SoldBikeDialog() {
 
         <div className="grid h-[75vh] grid-cols-12 py-5">
           {/* LEFT */}
-
           <div className="col-span-5 border-r px-8">
             <h3 className="mb-4 text-xs font-semibold">Bike Information</h3>
 
@@ -199,48 +250,18 @@ export default function SoldBikeDialog() {
                 />
 
                 <div className="mt-8 grid grid-cols-2 gap-5">
-                  <Input
-                    value={selectedBike.number}
-                    readOnly
-                    className="bg-slate-100"
-                  />
-
-                  <Input
-                    value={selectedBike.model}
-                    readOnly
-                    className="bg-slate-100"
-                  />
-
-                  <Input
-                    value={selectedBike.year}
-                    readOnly
-                    className="bg-slate-100"
-                  />
-
-                  <Input
-                    value={selectedBike.kms}
-                    readOnly
-                    className="bg-slate-100"
-                  />
-
-                  <Input
-                    value={`₹ ${selectedBike.expectedSellingPrice.toLocaleString()}`}
-                    readOnly
-                    className="bg-slate-100"
-                  />
-
-                  <Input
-                    value={selectedBike.status}
-                    readOnly
-                    className="bg-slate-100"
-                  />
+                  <Input value={selectedBike.number} readOnly className="bg-slate-100" />
+                  <Input value={selectedBike.model} readOnly className="bg-slate-100" />
+                  <Input value={selectedBike.year.toString()} readOnly className="bg-slate-100" />
+                  <Input value={selectedBike.kms} readOnly className="bg-slate-100" />
+                  <Input value={`₹ ${selectedBike.expectedSellingPrice.toLocaleString()}`} readOnly className="bg-slate-100" />
+                  <Input value={selectedBike.status} readOnly className="bg-slate-100" />
                 </div>
               </>
             )}
           </div>
 
           {/* RIGHT */}
-
           <div className="col-span-7 overflow-y-auto px-10 py-2 pr-6">
             <h3 className="mb-4 text-lg font-semibold">Buyer Information</h3>
 
@@ -251,14 +272,12 @@ export default function SoldBikeDialog() {
                 placeholder="Buyer Name"
                 onChange={handleChange}
               />
-
               <Input
                 name="buyerPhone"
                 value={form.buyerPhone}
                 placeholder="Phone Number"
                 onChange={handleChange}
               />
-
               <Input
                 name="sellingPrice"
                 value={form.sellingPrice}
@@ -266,14 +285,12 @@ export default function SoldBikeDialog() {
                 placeholder="Selling Price"
                 onChange={handleChange}
               />
-
               <Input
                 type="date"
                 name="saleDate"
                 value={form.saleDate}
                 onChange={handleChange}
               />
-
               <div className="col-span-2">
                 <Textarea
                   name="buyerAddress"
@@ -286,8 +303,8 @@ export default function SoldBikeDialog() {
 
             <div className="mt-8">
               <p className="mb-3 text-sm font-medium">Upload Receipt</p>
-
               <Input
+                key={`receipt-${fileKey}`}
                 type="file"
                 accept="image/*"
                 onChange={(e) => setReceipt(e.target.files?.[0] ?? null)}
@@ -295,13 +312,11 @@ export default function SoldBikeDialog() {
 
               <div className="mt-6">
                 <p className="mb-3 text-sm font-medium">Buyer Documents</p>
-
                 <p className="mb-3 text-xs text-slate-500">
-                  Upload Aadhaar / PAN / Voter ID / Driving License (Multiple
-                  files allowed)
+                  Upload Aadhaar / PAN / Voter ID / Driving License (Multiple files allowed)
                 </p>
-
                 <Input
+                  key={`docs-${fileKey}`}
                   type="file"
                   multiple
                   accept="image/*,.pdf"
@@ -318,7 +333,6 @@ export default function SoldBikeDialog() {
                         className="flex items-center justify-between rounded-lg bg-white px-3 py-2 border"
                       >
                         <span className="truncate text-sm">{file.name}</span>
-
                         <Button
                           size="icon"
                           variant="ghost"

@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import {
   User,
   Phone,
@@ -13,17 +13,13 @@ import { Button } from "@/components/ui/button";
 
 type PartyCardProps = {
   title: string;
-
   person: {
     name: string;
     phone: string;
     address: string;
   } | null;
-
   documents?: string[];
-
   receipt?: string | null;
-
   onEdit?: () => void;
 };
 
@@ -34,33 +30,63 @@ export default function PartyCard({
   receipt,
   onEdit,
 }: PartyCardProps) {
+  
+  // Helper function to fetch and download the file with a strict name
+  const handleDownload = async (url: string, desiredFileName: string) => {
+    if (!url) return;
+
+    try {
+      // 1. Ensure the filename ends with .pdf
+      const finalFileName = desiredFileName.endsWith(".pdf")
+        ? desiredFileName
+        : `${desiredFileName}.pdf`;
+
+      // 2. Fetch the actual file data from Cloudinary
+      const response = await fetch(url);
+      
+      if (!response.ok) {
+        throw new Error("Failed to fetch file");
+      }
+
+      // 3. Convert the response to a raw data Blob
+      const blob = await response.blob();
+      
+      // 4. Create a temporary local URL for the Blob
+      const localUrl = window.URL.createObjectURL(blob);
+
+      // 5. Trigger the download using the local URL
+      const link = document.createElement("a");
+      link.href = localUrl;
+      link.download = finalFileName; // The browser will strictly respect this name now
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      // 6. Clean up the memory
+      window.URL.revokeObjectURL(localUrl);
+      
+    } catch (error) {
+      console.error("Download failed:", error);
+      // Fallback: If the fetch fails for any reason, just open it in a new tab
+      window.open(url, "_blank");
+    }
+  };
+
   return (
     <Card className="rounded-3xl shadow-sm">
       <CardContent className="p-8">
-
         <div className="mb-8 flex items-center justify-between">
-
           <div>
-
-            <h2 className="text-xl font-bold">
-              {title}
-            </h2>
-
+            <h2 className="text-xl font-bold">{title}</h2>
             <p className="text-sm text-slate-500">
               Associated person information
             </p>
-
           </div>
 
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onEdit}
-          >
+          <Button variant="outline" size="sm" onClick={onEdit}>
             <Pencil className="mr-2 h-4 w-4" />
             Edit
           </Button>
-
         </div>
 
         {!person ? (
@@ -70,103 +96,72 @@ export default function PartyCard({
         ) : (
           <>
             <div className="space-y-5">
-
               <Info
                 icon={<User size={18} />}
                 label="Name"
                 value={person.name}
               />
-
               <Info
                 icon={<Phone size={18} />}
                 label="Phone"
                 value={person.phone}
               />
-
               <Info
                 icon={<MapPin size={18} />}
                 label="Address"
                 value={person.address}
               />
-
             </div>
 
             {(documents.length > 0 || receipt) && (
-
               <div className="mt-8">
-
-                <h3 className="mb-4 font-semibold">
-                  Uploaded Documents
-                </h3>
+                <h3 className="mb-4 font-semibold">Uploaded Documents</h3>
 
                 <div className="space-y-3">
-
-                  {documents.map((doc, index) => (
-
+                  {documents.map((docUrl, index) => (
                     <div
                       key={index}
                       className="flex items-center justify-between rounded-xl border p-3"
                     >
                       <div className="flex items-center gap-3">
-
-                        <FileText
-                          size={18}
-                          className="text-blue-600"
-                        />
-
+                        <FileText size={18} className="text-blue-600" />
                         <span className="truncate capitalize font-semibold">
-                          Download the document
+                          Seller Document {index + 1}
                         </span>
-
                       </div>
 
                       <Button
                         variant="ghost"
                         size="icon"
+                        onClick={() => handleDownload(docUrl, `document-${index + 1}.pdf`)}
                       >
                         <Download size={16} />
                       </Button>
-
                     </div>
-
                   ))}
 
                   {receipt && (
-
                     <div className="flex items-center justify-between rounded-xl border bg-green-50 p-3">
-
                       <div className="flex items-center gap-3">
-
-                        <FileText
-                          size={18}
-                          className="text-green-700"
-                        />
-
-                        <span>
-                          Sale Receipt
-                        </span>
-
+                        <FileText size={18} className="text-green-700" />
+                        <span className="font-semibold">Sale Receipt</span>
                       </div>
 
                       <Button
                         variant="ghost"
                         size="icon"
+                        className="text-green-700 hover:bg-green-100"
+                        onClick={() => handleDownload(receipt, "sale-receipt.pdf")}
                       >
                         <Download size={16} />
                       </Button>
-
                     </div>
-
                   )}
-
                 </div>
-
               </div>
-
             )}
           </>
         )}
-
       </CardContent>
     </Card>
   );
@@ -183,23 +178,11 @@ function Info({
 }) {
   return (
     <div className="flex items-start gap-4">
-
-      <div className="rounded-xl bg-slate-100 p-3 text-slate-600">
-        {icon}
-      </div>
-
+      <div className="rounded-xl bg-slate-100 p-3 text-slate-600">{icon}</div>
       <div>
-
-        <p className="text-sm text-slate-500">
-          {label}
-        </p>
-
-        <p className="font-semibold">
-          {value}
-        </p>
-
+        <p className="text-sm text-slate-500">{label}</p>
+        <p className="font-semibold">{value}</p>
       </div>
-
     </div>
   );
 }

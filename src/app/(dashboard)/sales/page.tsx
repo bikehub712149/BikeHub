@@ -1,16 +1,16 @@
 // app/sales/page.tsx
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   ArrowUpRight,
   TrendingUp,
@@ -18,17 +18,14 @@ import {
   Wallet,
   Receipt,
   Loader2,
-} from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { bikes } from '@/data/bikes';
-import { getAllBikes } from '@/lib/demo/bikes';
-import type { Bike } from '@/types/bike';
+} from "lucide-react";
+import { cn } from "@/lib/utils";
 
 // Utility Functions
 const formatCurrency = (value: number): string => {
-  return new Intl.NumberFormat('en-IN', {
-    style: 'currency',
-    currency: 'INR',
+  return new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
     maximumFractionDigits: 0,
   }).format(value);
 };
@@ -49,7 +46,7 @@ const StatCard = ({
   trendLabel?: string;
   className?: string;
 }) => (
-  <Card className={cn('relative overflow-hidden', className)}>
+  <Card className={cn("relative overflow-hidden", className)}>
     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
       <CardTitle className="text-sm font-medium text-muted-foreground">
         {title}
@@ -64,111 +61,118 @@ const StatCard = ({
         <p className="text-xs text-muted-foreground">
           <span
             className={cn(
-              'inline-flex items-center gap-1',
-              trend >= 0 ? 'text-emerald-600' : 'text-red-600'
+              "inline-flex items-center gap-1",
+              trend >= 0 ? "text-emerald-600" : "text-red-600"
             )}
           >
             <ArrowUpRight
-              className={cn(
-                'h-3 w-3',
-                trend < 0 && 'rotate-180'
-              )}
+              className={cn("h-3 w-3", trend < 0 && "rotate-180")}
             />
             {Math.abs(trend)}%
-          </span>
-          {' '}
-          {trendLabel || 'from last month'}
+          </span>{" "}
+          {trendLabel || "from last month"}
         </p>
       )}
     </CardContent>
   </Card>
 );
 
-const StatusBadge = ({ status }: { status: Bike['status'] }) => {
-  const variants = {
-    Available: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-    Pending: 'bg-amber-50 text-amber-700 border-amber-200',
-    Sold: 'bg-slate-100 text-slate-600 border-slate-200',
-  };
-
-  const labels = {
-    Available: 'Available',
-    Pending: 'Pending RC',
-    Sold: 'Sold',
-  };
-
-  return (
-    <Badge
-      variant="outline"
-      className={cn('gap-1.5 px-2.5 py-1 font-semibold', variants[status])}
-    >
-      {status === 'Sold' && <span className="h-1.5 w-1.5 rounded-full bg-slate-400" />}
-      {status === 'Available' && <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />}
-      {status === 'Pending' && <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />}
-      {labels[status]}
-    </Badge>
-  );
-};
-
 export default function SalesPage() {
-const [soldBikes, setSoldBikes] = useState<any[]>([]);
-const [loading, setLoading] = useState(true);
+  const [soldBikes, setSoldBikes] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  
+  // Tracks which specific receipt is currently downloading
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
-useEffect(() => {
-  async function fetchSales() {
-    try {
-      const res = await fetch("/api/sales");
+  useEffect(() => {
+    async function fetchSales() {
+      try {
+        const res = await fetch("/api/sales");
 
-      if (!res.ok) throw new Error();
+        if (!res.ok) throw new Error();
 
-      const data = await res.json();
+        const data = await res.json();
 
-      setSoldBikes(data);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
+        setSoldBikes(data);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
     }
-  }
 
-  fetchSales();
-}, []);
+    fetchSales();
+  }, []);
 
+  // The bulletproof download function
+  const handleDownload = async (url: string, desiredFileName: string, recordId: string) => {
+    if (!url) return;
+    
+    // Start the spinner for this specific button
+    setDownloadingId(recordId);
 
-  // Calculate total revenue (assuming expectedSellingPrice.toLocaleString() is in INR)
-const totalRevenue = soldBikes.reduce(
-  (sum, bike) => sum + bike.sellingPrice,
-  0
-);
+    try {
+      const response = await fetch(url);
+      
+      if (!response.ok) {
+        throw new Error("Failed to fetch file");
+      }
 
-  // Calculate profit (assuming 30% margin for demo, you can adjust this)
-const totalProfit = soldBikes.reduce(
-  (sum, bike) =>
-    sum + (bike.sellingPrice - bike.buyingPrice),
-  0
-);
+      const blob = await response.blob();
+      const localUrl = window.URL.createObjectURL(blob);
 
-  const averageProfit = soldBikes.length > 0 ? totalProfit / soldBikes.length : 0;
+      const link = document.createElement("a");
+      link.href = localUrl;
+      link.download = desiredFileName; 
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      window.URL.revokeObjectURL(localUrl);
+    } catch (error) {
+      console.error("Download failed:", error);
+      // Fallback: If the fetch fails, open it in a new tab
+      window.open(url, "_blank");
+    } finally {
+      // Stop the spinner
+      setDownloadingId(null);
+    }
+  };
+
+  // Calculate total revenue
+  const totalRevenue = soldBikes.reduce(
+    (sum, bike) => sum + (bike.sellingPrice || 0),
+    0
+  );
+
+  // Calculate profit
+  const totalProfit = soldBikes.reduce(
+    (sum, bike) => sum + ((bike.sellingPrice || 0) - (bike.purchasePrice || 0)),
+    0
+  );
+
+  const averageProfit =
+    soldBikes.length > 0 ? totalProfit / soldBikes.length : 0;
 
   // Placeholder trend data
   const stats = [
     {
-      title: 'Total Revenue',
+      title: "Total Revenue",
       value: formatCurrency(totalRevenue),
       icon: Wallet,
     },
     {
-      title: 'Net Profit',
+      title: "Net Profit",
       value: formatCurrency(totalProfit),
       icon: TrendingUp,
     },
     {
-      title: 'Bikes Sold',
+      title: "Bikes Sold",
       value: soldBikes.length.toString(),
       icon: ShoppingBag,
     },
     {
-      title: 'Avg Profit per Bike',
+      title: "Avg Profit per Bike",
       value: formatCurrency(Math.round(averageProfit)),
       icon: Receipt,
     },
@@ -178,6 +182,25 @@ const totalProfit = soldBikes.reduce(
     return (
       <div className="flex h-[calc(100vh-4rem)] items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  if (!soldBikes || soldBikes.length === 0) {
+    return (
+      <div className="flex flex-col gap-8 p-4">
+        <div className="flex items-end justify-between">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">Sales & Revenue</h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              Track your store&apos;s financial performance and sold vehicles.
+            </p>
+          </div>
+        </div>
+        <div className="flex h-56 flex-col items-center justify-center gap-3 text-muted-foreground">
+          <ShoppingBag className="h-10 w-10 opacity-30" />
+          <p>No bikes have been sold yet.</p>
+        </div>
       </div>
     );
   }
@@ -239,81 +262,75 @@ const totalProfit = soldBikes.reduce(
                 </tr>
               </thead>
               <tbody className="divide-y">
-                {soldBikes.length === 0 ? (
-                  <tr>
-                    <td
-                      colSpan={6}
-                      className="h-32 text-center text-muted-foreground"
-                    >
-                      No sold vehicles yet.
-                    </td>
-                  </tr>
-                ) : (
-                  soldBikes.map((bike) => {
-                    const salePrice = parseInt(bike.sellingPrice.toLocaleString() || '0');
-                    const estimatedPurchasePrice = salePrice * 0.7;
-                    const estimatedProfit = salePrice - estimatedPurchasePrice;
+                {soldBikes.map((bike) => {
+                  const salePrice = bike.sellingPrice || 0;
+                  const profit = (bike.sellingPrice || 0) - (bike.purchasePrice || 0);
 
-                    return (
-                      <tr
-                        key={bike.id}
-                        className="cursor-pointer transition-colors hover:bg-muted/50"
-                        onClick={() => {
-                          console.log('View bike:', bike.id);
-                        }}
-                      >
-                        <td className="px-4 py-4">
-                          <div className="flex items-center gap-3">
-                            <div className="h-12 w-16 flex-shrink-0 overflow-hidden rounded-lg border border-border bg-muted">
-                              <img
-                                src={bike.image}
-                                alt={bike.model}
-                                className="h-full w-full object-cover"
-                              />
+                  return (
+                    <tr
+                      key={bike.id}
+                      className="cursor-pointer transition-colors hover:bg-muted/50"
+                      onClick={() => {
+                        console.log("View bike:", bike.id);
+                      }}
+                    >
+                      <td className="px-4 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="h-12 w-16 flex-shrink-0 overflow-hidden rounded-lg border border-border bg-muted">
+                            <img
+                              src={bike.image}
+                              alt={bike.model}
+                              className="h-full w-full object-cover"
+                            />
+                          </div>
+                          <div>
+                            <div className="font-semibold text-foreground">
+                              {bike.number}
                             </div>
-                            <div>
-                              <div className="font-semibold text-foreground">
-                                {bike.number}
-                              </div>
-                            </div>
                           </div>
-                        </td>
-                        <td className="px-4 py-4">
-                          <div className="text-sm">{bike.model}</div>
-                        </td>
-                        <td className="px-4 py-4">
-                          <div className="text-sm">{bike.year}</div>
-                          <div className="text-xs text-muted-foreground">
-                            {bike.kms}
-                          </div>
-                        </td>
-                        <td className="px-4 py-4">
-                          <div className="font-bold text-primary">
-                            {formatCurrency(salePrice)}
-                          </div>
-                        </td>
-                        <td className="px-4 py-4">
-                          <span className="font-bold text-emerald-600">
-                            +{formatCurrency(Math.round(estimatedProfit))}
-                          </span>
-                        </td>
-                        <td className="px-4 py-4 text-right">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="text-xs font-medium"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              console.log('Receipt for:', bike.id);
-                            }}
-                          >
-                            Receipt
-                          </Button>
-                        </td>
-                      </tr>
-                    );
-                  })
-                )}
+                        </div>
+                      </td>
+                      <td className="px-4 py-4">
+                        <div className="text-sm">{bike.model}</div>
+                      </td>
+                      <td className="px-4 py-4">
+                        <div className="text-sm">{bike.year}</div>
+                        <div className="text-xs text-muted-foreground">
+                          {bike.kms}
+                        </div>
+                      </td>
+                      <td className="px-4 py-4">
+                        <div className="font-bold text-primary">
+                          {formatCurrency(salePrice)}
+                        </div>
+                      </td>
+                      <td className="px-4 py-4">
+                        <span className="font-bold text-emerald-600">
+                          +{formatCurrency(Math.round(profit))}
+                        </span>
+                      </td>
+                      <td className="px-4 py-4 text-right">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          disabled={downloadingId === bike.id || !bike.receipt} // Disable if no receipt is present
+                          className="text-xs font-medium"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (bike.receipt) {
+                              handleDownload(bike.receipt, `${bike.number}-receipt.jpg`, bike.id);
+                            }
+                          }}
+                        >
+                          {downloadingId === bike.id ? (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          ) : null}
+                          {bike.receipt ? "Receipt" : "No Receipt"}
+                        </Button>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
