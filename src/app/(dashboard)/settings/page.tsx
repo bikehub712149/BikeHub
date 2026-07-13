@@ -12,7 +12,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Store, User, Database, Palette, Loader2 } from "lucide-react";
-import { UserProfile } from "@clerk/nextjs";
+import { UserProfile, SignOutButton } from "@clerk/nextjs";
+import { LogOut, ShieldCheck } from "lucide-react";
 
 export default function SettingsPage() {
   // Updated state to hold the real Credit architecture
@@ -106,33 +107,106 @@ export default function SettingsPage() {
 
         {/* ACCOUNT SETTINGS */}
         <TabsContent value="account">
-          <Card className="rounded-2xl shadow-sm border-none bg-transparent">
-            <CardHeader className="px-0">
-              <CardTitle>Account Profile</CardTitle>
-              <CardDescription>
-                Update your login credentials and personal details.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="px-0 flex justify-center w-full">
-              <UserProfile routing="hash" />
-            </CardContent>
-          </Card>
-        </TabsContent>
+  <div className="space-y-6">
+
+    <Card className="rounded-2xl shadow-sm">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <ShieldCheck className="h-5 w-5 text-green-600" />
+          Administrator Account
+        </CardTitle>
+
+        <CardDescription>
+          Manage your administrator profile, password and security settings.
+        </CardDescription>
+      </CardHeader>
+
+      <CardContent className="flex flex-wrap gap-3">
+
+        <SignOutButton redirectUrl="/sign-in">
+          <Button
+            variant="destructive"
+            className="rounded-xl"
+          >
+            <LogOut className="mr-2 h-4 w-4" />
+            Logout
+          </Button>
+        </SignOutButton>
+
+      </CardContent>
+    </Card>
+
+    <Card className="rounded-2xl shadow-sm border">
+      <CardContent className="p-6">
+        <UserProfile
+          routing="hash"
+          appearance={{
+            elements: {
+              rootBox: "w-full",
+              card: "shadow-none border-none",
+            },
+          }}
+        />
+      </CardContent>
+    </Card>
+
+  </div>
+</TabsContent>
 
         {/* PREFERENCES */}
         <TabsContent value="preferences">
-          <Card className="rounded-2xl shadow-sm">
-            <CardHeader>
-              <CardTitle>Appearance & Locale</CardTitle>
-              <CardDescription>
-                Customize how the dashboard looks and feels to you.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-               <p className="text-sm text-slate-500">Theme and Currency toggles coming soon...</p>
-            </CardContent>
-          </Card>
-        </TabsContent>
+  <Card className="rounded-2xl shadow-sm">
+    <CardHeader>
+      <CardTitle>Dashboard Preferences</CardTitle>
+      <CardDescription>
+        Customize your BikeHub dashboard.
+      </CardDescription>
+    </CardHeader>
+
+    <CardContent className="space-y-6">
+
+      <div className="flex items-center justify-between border rounded-xl p-4">
+        <div>
+          <p className="font-medium">Currency</p>
+          <p className="text-sm text-slate-500">
+            Indian Rupee (₹)
+          </p>
+        </div>
+
+        <Button variant="outline">
+          INR
+        </Button>
+      </div>
+
+      <div className="flex items-center justify-between border rounded-xl p-4">
+        <div>
+          <p className="font-medium">Date Format</p>
+          <p className="text-sm text-slate-500">
+            DD/MM/YYYY
+          </p>
+        </div>
+
+        <Button variant="outline">
+          Change
+        </Button>
+      </div>
+
+      <div className="flex items-center justify-between border rounded-xl p-4">
+        <div>
+          <p className="font-medium">Theme</p>
+          <p className="text-sm text-slate-500">
+            Light Mode
+          </p>
+        </div>
+
+        <Button variant="outline">
+          Light
+        </Button>
+      </div>
+
+    </CardContent>
+  </Card>
+</TabsContent>
 
         {/* STORAGE - ACCURATE CLOUDINARY API DATA */}
         <TabsContent value="storage">

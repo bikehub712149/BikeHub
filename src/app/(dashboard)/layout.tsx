@@ -1,6 +1,10 @@
 import { ReactNode } from "react";
+import { auth } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
+
 import Sidebar from "@/components/layout/sidebar";
 import Navbar from "@/components/layout/navbar";
+
 import { Inter, Poppins } from "next/font/google";
 
 const inter = Inter({
@@ -14,7 +18,17 @@ const poppins = Poppins({
   weight: ["400", "500", "600", "700", "800"],
 });
 
-export default function DashboardLayout({ children }: { children: ReactNode }) {
+export default async function DashboardLayout({
+  children,
+}: {
+  children: ReactNode;
+}) {
+  const { userId } = await auth();
+
+  if (!userId) {
+    redirect("/sign-in");
+  }
+
   return (
     <div className={`${inter.variable} ${poppins.variable} flex min-h-screen`}>
       <Sidebar />
