@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server";
-import { deleteBike, getBikeById } from "@/lib/server/bike";
+import { NextRequest, NextResponse } from "next/server";
+import { deleteBike, getBikeById, updateBike } from "@/lib/server/bike";
 import { deleteCustomerByBikeId } from "@/lib/server/customer";
 
 export async function DELETE(
@@ -13,10 +13,7 @@ export async function DELETE(
     const bike = await getBikeById(id);
 
     if (!bike) {
-      return NextResponse.json(
-        { message: "Bike not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ message: "Bike not found" }, { status: 404 });
     }
 
     // Delete customer history using registration number
@@ -35,5 +32,35 @@ export async function DELETE(
       { message: "Failed to delete bike" },
       { status: 500 }
     );
+  }
+}
+
+export async function PATCH(
+  req: NextRequest,
+  {
+    params,
+  }: {
+    params: Promise<{ id: string }>;
+  }
+) {
+  try {
+    const { id } = await params;
+
+    const body = await req.json();
+
+    const bike = await updateBike(id, {
+      number: body.number,
+      model: body.model,
+      year: Number(body.year),
+      kms: body.kms,
+      engineNumber: body.engineNumber,
+      chassisNumber: body.chassisNumber,
+      ownerSerial: body.ownerSerial,
+      expectedSellingPrice: Number(body.expectedSellingPrice),
+    });
+
+    return NextResponse.json(bike);
+  } catch (error: any) {
+    return NextResponse.json({ message: error.message }, { status: 500 });
   }
 }

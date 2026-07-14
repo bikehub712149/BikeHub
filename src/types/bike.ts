@@ -12,6 +12,7 @@ export interface Bike {
   images?: string[]; // all uploaded images
   color?: string;
 
+  ownerSerial: string;
   engineNumber?: string;
 
   chassisNumber?: string;

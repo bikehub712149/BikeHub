@@ -10,7 +10,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
   ArrowUpRight,
   TrendingUp,
@@ -270,9 +269,6 @@ export default function SalesPage() {
                     <tr
                       key={bike.id}
                       className="cursor-pointer transition-colors hover:bg-muted/50"
-                      onClick={() => {
-                        console.log("View bike:", bike.id);
-                      }}
                     >
                       <td className="px-4 py-4">
                         <div className="flex items-center gap-3">

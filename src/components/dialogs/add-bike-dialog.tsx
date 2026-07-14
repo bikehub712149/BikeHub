@@ -11,13 +11,19 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import BikeGallery from "../bike-details/bike-gallery";
-import imageCompression from "browser-image-compression"; 
-import jsPDF from "jspdf"; 
+import imageCompression from "browser-image-compression";
+import jsPDF from "jspdf";
 
 export default function AddBikeDialog() {
   const [images, setImages] = useState<File[]>([]);
@@ -41,6 +47,7 @@ export default function AddBikeDialog() {
     purchasePrice: "",
     chassisNumber: "",
     sellerAddress: "",
+    ownerSerial: "1",
   });
 
   function handleChange(
@@ -65,7 +72,7 @@ export default function AddBikeDialog() {
 
   function removeImage(index: number) {
     setImages(images.filter((_, i) => i !== index));
-    setSelectedImage(0); 
+    setSelectedImage(0);
   }
 
   async function handleSubmit() {
@@ -86,6 +93,7 @@ export default function AddBikeDialog() {
           chassisNumber: form.chassisNumber,
           image: "", // Backend handles this
           images: [], // Backend handles this
+          ownerSerial: form.ownerSerial,
         },
         customer: {
           id: crypto.randomUUID(),
@@ -104,15 +112,14 @@ export default function AddBikeDialog() {
       // 2. Initialize FormData
       const formData = new FormData();
       formData.append("data", JSON.stringify(payload));
-
       // ---------------------------------------------------------
       // 3. COMPRESS BIKE IMAGES (Target ~1MB & HD)
       // ---------------------------------------------------------
       const compressedBikeFiles = await Promise.all(
         images.map(async (file) => {
           const compressedBlob = await imageCompression(file, {
-            maxSizeMB: 1, 
-            maxWidthOrHeight: 1920, 
+            maxSizeMB: 1,
+            maxWidthOrHeight: 1920,
             useWebWorker: true,
             initialQuality: 0.85,
           });
@@ -139,8 +146,8 @@ export default function AddBikeDialog() {
         const processedDocs = await Promise.all(
           docImages.map(async (file) => {
             const compressedBlob = await imageCompression(file, {
-              maxSizeMB: 1, 
-              maxWidthOrHeight: 1920, 
+              maxSizeMB: 1,
+              maxWidthOrHeight: 1920,
               useWebWorker: true,
               fileType: "image/jpeg",
               initialQuality: 0.85,
@@ -191,7 +198,7 @@ export default function AddBikeDialog() {
       // ---------------------------------------------------------
       const res = await fetch("/api/bike", {
         method: "POST",
-        body: formData, 
+        body: formData,
       });
 
       if (!res.ok) {
@@ -214,6 +221,7 @@ export default function AddBikeDialog() {
         purchasePrice: "",
         chassisNumber: "",
         sellerAddress: "",
+        ownerSerial: "1",
       });
 
       setImages([]);
@@ -305,6 +313,31 @@ export default function AddBikeDialog() {
                 placeholder="Engine Number"
                 onChange={handleChange}
               />
+
+              <div>
+                <p className="mb-2 text-sm font-medium">Owner Series</p>
+
+                <Select
+                  value={form.ownerSerial}
+                  onValueChange={(value) =>
+                    setForm({
+                      ...form,
+                      ownerSerial: value ?? "1",
+                    })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select Owner" />
+                  </SelectTrigger>
+
+                  <SelectContent>
+                    <SelectItem value="1">1st Owner</SelectItem>
+                    <SelectItem value="2">2nd Owner</SelectItem>
+                    <SelectItem value="3">3rd Owner</SelectItem>
+                    <SelectItem value="4">4th Owner</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
             <h3 className="mt-10 mb-5 text-lg font-semibold">
@@ -352,7 +385,8 @@ export default function AddBikeDialog() {
             <div className="mt-8">
               <p className="mb-3 text-sm font-medium">Seller Documents</p>
               <p className="mb-3 text-xs text-slate-500">
-                Upload Aadhaar / PAN / Voter ID / Driving License (Multiple files allowed)
+                Upload Aadhaar / PAN / Voter ID / Driving License (Multiple
+                files allowed)
               </p>
 
               <Input

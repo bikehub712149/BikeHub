@@ -5,7 +5,7 @@ import {
   MapPin,
   FileText,
   Pencil,
-  Download,
+  ExternalLink,
 } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
@@ -30,48 +30,6 @@ export default function PartyCard({
   receipt,
   onEdit,
 }: PartyCardProps) {
-  
-  // Helper function to fetch and download the file with a strict name
-  const handleDownload = async (url: string, desiredFileName: string) => {
-    if (!url) return;
-
-    try {
-      // 1. Ensure the filename ends with .pdf
-      const finalFileName = desiredFileName.endsWith(".pdf")
-        ? desiredFileName
-        : `${desiredFileName}.pdf`;
-
-      // 2. Fetch the actual file data from Cloudinary
-      const response = await fetch(url);
-      
-      if (!response.ok) {
-        throw new Error("Failed to fetch file");
-      }
-
-      // 3. Convert the response to a raw data Blob
-      const blob = await response.blob();
-      
-      // 4. Create a temporary local URL for the Blob
-      const localUrl = window.URL.createObjectURL(blob);
-
-      // 5. Trigger the download using the local URL
-      const link = document.createElement("a");
-      link.href = localUrl;
-      link.download = finalFileName; // The browser will strictly respect this name now
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-
-      // 6. Clean up the memory
-      window.URL.revokeObjectURL(localUrl);
-      
-    } catch (error) {
-      console.error("Download failed:", error);
-      // Fallback: If the fetch fails for any reason, just open it in a new tab
-      window.open(url, "_blank");
-    }
-  };
-
   return (
     <Card className="rounded-3xl shadow-sm">
       <CardContent className="p-8">
@@ -113,53 +71,89 @@ export default function PartyCard({
               />
             </div>
 
-            {(documents.length > 0 || receipt) && (
-              <div className="mt-8">
-                <h3 className="mb-4 font-semibold">Uploaded Documents</h3>
+            {documents.length > 0 || receipt ? (
+  <div className="mt-8">
+    <h3 className="mb-4 font-semibold">Uploaded Documents</h3>
 
-                <div className="space-y-3">
-                  {documents.map((docUrl, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center justify-between rounded-xl border p-3"
-                    >
-                      <div className="flex items-center gap-3">
-                        <FileText size={18} className="text-blue-600" />
-                        <span className="truncate capitalize font-semibold">
-                          Seller Document {index + 1}
-                        </span>
-                      </div>
+    {title === "Seller Information" ? (
+      // Seller Layout
+      <div>
+        {documents.map((docUrl, index) => (
+          <div
+            key={index}
+            className="flex items-center justify-between rounded-xl border p-3"
+          >
+            <div className="flex items-center gap-3">
+              <FileText size={18} className="text-blue-600" />
+              <span className="font-semibold">
+                Seller Document {index + 1}
+              </span>
+            </div>
 
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleDownload(docUrl, `document-${index + 1}.pdf`)}
-                      >
-                        <Download size={16} />
-                      </Button>
-                    </div>
-                  ))}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() =>
+                window.open(docUrl, "_blank", "noopener,noreferrer")
+              }
+            >
+              <ExternalLink size={16} />
+            </Button>
+          </div>
+        ))}
+      </div>
+    ) : (
+      // Buyer Layout
+      <div className="grid grid-cols-2 gap-3">
+        {documents.map((docUrl, index) => (
+          <div
+            key={index}
+            className="flex items-center justify-between rounded-xl border p-3"
+          >
+            <div className="flex items-center gap-3">
+              <FileText size={18} className="text-blue-600" />
+              <span className="font-semibold">
+                Buyer Document {index + 1}
+              </span>
+            </div>
 
-                  {receipt && (
-                    <div className="flex items-center justify-between rounded-xl border bg-green-50 p-3">
-                      <div className="flex items-center gap-3">
-                        <FileText size={18} className="text-green-700" />
-                        <span className="font-semibold">Sale Receipt</span>
-                      </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() =>
+                window.open(docUrl, "_blank", "noopener,noreferrer")
+              }
+            >
+              <ExternalLink size={16} />
+            </Button>
+          </div>
+        ))}
 
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="text-green-700 hover:bg-green-100"
-                        onClick={() => handleDownload(receipt, "sale-receipt.pdf")}
-                      >
-                        <Download size={16} />
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
+        {receipt && (
+          <div className="flex items-center justify-between rounded-xl border border-green-200 bg-green-50 p-3">
+            <div className="flex items-center gap-3">
+              <FileText size={18} className="text-green-700" />
+              <span className="font-semibold text-green-700">
+                Sale Receipt
+              </span>
+            </div>
+
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-green-700 hover:bg-green-100"
+              onClick={() =>
+                window.open(receipt, "_blank", "noopener,noreferrer")
+              }
+            >
+              <ExternalLink size={16} />
+            </Button>
+          </div>
+        )}
+      </div>
+    )}
+  </div>
+) : null}
           </>
         )}
       </CardContent>

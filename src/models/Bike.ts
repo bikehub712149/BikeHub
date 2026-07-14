@@ -1,5 +1,4 @@
 import { Schema, model, models } from "mongoose";
-console.log("Loading Bike model");
 const BikeSchema = new Schema(
   {
     id: {
@@ -59,6 +58,12 @@ const BikeSchema = new Schema(
     engineNumber: String,
 
     chassisNumber: String,
+
+    ownerSerial: {
+      type: String,
+      default: "1st Owner",
+      required: true,
+    },
   },
   {
     timestamps: true,

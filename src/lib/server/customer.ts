@@ -16,13 +16,18 @@ export async function createCustomer(data: any) {
   return CustomerTransaction.create(data);
 }
 
-export async function updateCustomer(id: string, data: any) {
+export async function updateCustomer(
+  bikeId: string,
+  data: any
+) {
   await connectDB();
 
   return CustomerTransaction.findOneAndUpdate(
-    { id },
+    { bikeId },
     data,
-    { new: true }
+    {
+      new: true,
+    }
   );
 }
 

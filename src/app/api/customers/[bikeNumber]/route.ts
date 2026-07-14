@@ -12,7 +12,6 @@ export async function PATCH(
 ) {
   try {
     const { bikeNumber } = await context.params;
-    console.log("Bike number:", bikeNumber);
 
     // 1. Parse FormData instead of JSON
     const formData = await req.formData();
@@ -59,7 +58,6 @@ export async function PATCH(
 
     // 5. Database Updates
     const customer = await getCustomerByBikeId(bikeNumber);
-    console.log("Customer found:", customer);
 
     if (!customer) {
       return NextResponse.json(
