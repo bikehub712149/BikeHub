@@ -44,7 +44,7 @@ export default function BikeCard({
           </div>
 
           {/* Stats Grid */}
-          <div className="grid grid-cols-2 gap-3 rounded-xl border border-border/40 bg-muted/10 p-3">
+          <div className="grid grid-cols-2 gap-3 rounded-xl border border-border/40 bg-muted/30 p-3">
             <div className="flex flex-col gap-1">
               <span className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
                 <Calendar size={14} className="text-primary/70" />
@@ -79,7 +79,7 @@ export default function BikeCard({
 
             <Badge
               variant={status === "Available" ? "default" : "secondary"}
-              className="px-5 py-2 text-xs font-bold tracking-wide shadow-sm"
+              className="px-5 py-3.5 rounded-md text-xs font-bold tracking-wide shadow-sm"
             >
               {status}
             </Badge>
