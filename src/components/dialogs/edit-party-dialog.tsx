@@ -54,7 +54,7 @@ export default function EditPartyDialog({
     try {
       setLoading(true);
 
-      const res = await fetch(`/api/customer/edit/${bikeNumber}`, {
+      const res = await fetch(`/api/customers/edit/${bikeNumber}`, {
         method: "PATCH",
 
         headers: {
