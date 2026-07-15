@@ -40,6 +40,7 @@ export async function markBikeAsSold(bikeId: string) {
     { number: bikeId },
     {
       status: "Sold",
+      paperwork: "Pending",
     },
     { new: true }
   );

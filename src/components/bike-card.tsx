@@ -1,10 +1,9 @@
 import Link from "next/link";
-import Image from "next/image";
 import { Bike } from "@/types/bike";
+import { Calendar, Gauge } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-
 
 export default function BikeCard({
   id,
@@ -17,39 +16,71 @@ export default function BikeCard({
   image,
 }: Bike) {
   return (
-    <Link href={`/inventory/${id}`}>
-      <Card className="overflow-hidden rounded-2xl shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg cursor-pointer">
-        <img
-          src={image}
-          alt={model}
-          width={500}
-          height={300}
-          className="h-48 w-full object-cover"
-        />
+    <Link href={`/inventory/${id}`} className="group block h-full">
+      {/* 
+        Added p-0 here! This forces the card to have NO padding, 
+        ensuring the image touches the absolute top and side borders. 
+      */}
+      <Card className="p-0 flex h-full flex-col overflow-hidden rounded-2xl border-border/50 bg-card shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-xl cursor-pointer">
+        
+        {/* Simplified Image Container */}
+        <div className="h-44 w-full shrink-0 bg-muted/20">
+          <img
+            src={image}
+            alt={model}
+            className="h-full w-full object-cover block"
+          />
+        </div>
 
-        <CardContent className="space-y-3 p-5">
-          <div>
-            <h3 className="text-xl font-bold">{number}</h3>
-
-            <p className="text-muted-foreground">{model}</p>
+        <CardContent className="flex flex-1 flex-col space-y-4 p-5">
+          {/* Header Info */}
+          <div className="space-y-1">
+            <h3 className="text-lg font-extrabold uppercase tracking-tight text-foreground line-clamp-1">
+              {number}
+            </h3>
+            <p className="text-sm font-medium text-muted-foreground line-clamp-1">
+              {model}
+            </p>
           </div>
 
-          <div className="grid grid-cols-2 text-sm">
-            <div>
-              <p className="text-muted-foreground">Year</p>
-              <p>{year}</p>
+          {/* Stats Grid */}
+          <div className="grid grid-cols-2 gap-3 rounded-xl border border-border/40 bg-muted/10 p-3">
+            <div className="flex flex-col gap-1">
+              <span className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                <Calendar size={14} className="text-primary/70" />
+                Year
+              </span>
+              <span className="text-sm font-semibold text-foreground">
+                {year}
+              </span>
             </div>
 
-            <div>
-              <p className="text-muted-foreground">KMS</p>
-              <p>{kms}</p>
+            <div className="flex flex-col gap-1">
+              <span className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                <Gauge size={14} className="text-primary/70" />
+                KMS
+              </span>
+              <span className="text-sm font-semibold text-foreground">
+                {kms}
+              </span>
             </div>
           </div>
 
-          <div className="flex items-center justify-between">
-            <span className="text-xl font-bold">₹{expectedSellingPrice.toLocaleString()}</span>
+          {/* Footer: Price & Status */}
+          <div className="mt-auto flex items-end justify-between pt-3">
+            <div className="flex flex-col">
+              <span className="mb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                Expected Price
+              </span>
+              <span className="text-xl font-black tracking-tight text-foreground transition-colors group-hover:text-primary">
+                ₹{expectedSellingPrice.toLocaleString('en-IN')}
+              </span>
+            </div>
 
-            <Badge variant={status === "Available" ? "default" : "secondary"}>
+            <Badge
+              variant={status === "Available" ? "default" : "secondary"}
+              className="px-5 py-2 text-xs font-bold tracking-wide shadow-sm"
+            >
               {status}
             </Badge>
           </div>

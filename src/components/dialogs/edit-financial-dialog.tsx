@@ -68,7 +68,7 @@ export default function EditFinancialDialog({
       setLoading(true);
 
       const res = await fetch(
-        `/api/customer/${bikeNumber}`,
+        `/api/customers/edit/${bikeNumber}`,
         {
           method: "PATCH",
 

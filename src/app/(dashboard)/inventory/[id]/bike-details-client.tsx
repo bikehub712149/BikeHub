@@ -146,6 +146,7 @@ export default function BikeDetailsClient({
               person={transaction.buyer}
               documents={transaction.buyer?.documents ?? []}
               receipt={transaction.receipt}
+              saleDate={transaction.saleDate}
               onEdit={() => setBuyerOpen(true)}
             />
           </div>

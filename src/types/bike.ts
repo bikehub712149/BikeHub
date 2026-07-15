@@ -10,10 +10,8 @@ export interface Bike {
   status: BikeStatus;
   image: string; // cover image (thumbnail)
   images?: string[]; // all uploaded images
-  color?: string;
-
+  paperwork?: "Pending" | "Completed";
   ownerSerial: string;
-  engineNumber?: string;
-
-  chassisNumber?: string;
+  engineNumber: string;
+  chassisNumber: string;
 }

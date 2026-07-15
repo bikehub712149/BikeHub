@@ -42,7 +42,6 @@ const BikeSchema = new Schema(
     paperwork: {
       type: String,
       enum: ["Completed", "Pending"],
-      default: "Pending",
     },
 
     image: {

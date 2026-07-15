@@ -426,9 +426,6 @@ export default function AddBikeDialog() {
             </div>
 
             <div className="mt-8 flex justify-end gap-4">
-              <Button variant="outline" className="px-8">
-                Cancel
-              </Button>
 
               <Button
                 className="min-w-[150px]"

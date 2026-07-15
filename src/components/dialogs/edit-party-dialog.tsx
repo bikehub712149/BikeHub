@@ -6,6 +6,7 @@ import { Loader2, Save } from "lucide-react";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -53,32 +54,29 @@ export default function EditPartyDialog({
     try {
       setLoading(true);
 
-      const res = await fetch(
-        `/api/customers/edit/${bikeNumber}`,
-        {
-          method: "PATCH",
+      const res = await fetch(`/api/customer/edit/${bikeNumber}`, {
+        method: "PATCH",
 
-          headers: {
-            "Content-Type": "application/json",
+        headers: {
+          "Content-Type": "application/json",
+        },
+
+        body: JSON.stringify({
+          [type]: {
+            name,
+            phone,
+            address,
           },
-
-          body: JSON.stringify({
-            [type]: {
-              name,
-              phone,
-              address,
-            },
-          }),
-        }
-      );
+        }),
+      });
 
       if (!res.ok) {
         throw new Error("Failed to update");
       }
 
+      window.location.reload();
       onOpenChange(false);
 
-      window.location.reload();
     } catch (err) {
       console.error(err);
       alert("Failed to update.");
@@ -88,83 +86,87 @@ export default function EditPartyDialog({
   }
 
   return (
-    <Dialog
-      open={open}
-      onOpenChange={onOpenChange}
-    >
-      <DialogContent className="sm:max-w-lg">
-
-        <DialogHeader>
-          <DialogTitle>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[425px] p-0 overflow-hidden rounded-2xl bg-background shadow-xl gap-0 border-border/50">
+        
+        {/* Header Section */}
+        <DialogHeader className="border-b px-6 py-5 bg-muted/20">
+          <DialogTitle className="text-xl font-bold tracking-tight">
             Edit {type === "seller" ? "Seller" : "Buyer"}
           </DialogTitle>
+          <DialogDescription className="text-sm mt-1">
+            Update the contact details and address below.
+          </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-5 py-2">
-
-          <div>
-            <label className="mb-2 block text-sm font-medium">
-              Name
+        {/* Content Section */}
+        <div className="px-6 py-6 space-y-5">
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium text-foreground/80">
+              Full Name
             </label>
-
             <Input
+              className="h-10 bg-background"
+              placeholder="e.g. John Doe"
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
           </div>
 
-          <div>
-            <label className="mb-2 block text-sm font-medium">
-              Phone
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium text-foreground/80">
+              Phone Number
             </label>
-
             <Input
+              className="h-10 bg-background"
+              placeholder="e.g. +91 98765 43210"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
             />
           </div>
 
-          <div>
-            <label className="mb-2 block text-sm font-medium">
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium text-foreground/80">
               Address
             </label>
-
             <Input
+              className="h-10 bg-background"
+              placeholder="Enter full address"
               value={address}
               onChange={(e) => setAddress(e.target.value)}
             />
           </div>
-
-          <div className="flex justify-end gap-3 pt-4">
-
-            <Button
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-            >
-              Cancel
-            </Button>
-
-            <Button
-              onClick={save}
-              disabled={loading}
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Saving...
-                </>
-              ) : (
-                <>
-                  <Save className="mr-2 h-4 w-4" />
-                  Save Changes
-                </>
-              )}
-            </Button>
-
-          </div>
-
         </div>
 
+        {/* Footer Section */}
+        <div className="flex justify-end gap-3 border-t bg-muted/20 px-6 py-4">
+          <Button
+            variant="outline"
+            className="h-10 px-6"
+            onClick={() => onOpenChange(false)}
+          >
+            Cancel
+          </Button>
+
+          <Button
+            className="h-10 min-w-[140px]"
+            onClick={save}
+            disabled={loading}
+          >
+            {loading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              <>
+                <Save className="mr-2 h-4 w-4" />
+                Save Changes
+              </>
+            )}
+          </Button>
+        </div>
+        
       </DialogContent>
     </Dialog>
   );

@@ -103,6 +103,7 @@ export default function SoldBikeDialog() {
           address: form.buyerAddress,
           documents: [], // Backend will inject Cloudinary URL
         },
+        saleDate: form.saleDate,
         sellingPrice: Number(form.sellingPrice),
         receipt: "", // Backend will inject Cloudinary URL
       };

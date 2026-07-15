@@ -17,6 +17,7 @@ import {
   Wallet,
   Receipt,
   Loader2,
+  ExternalLink,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -79,9 +80,6 @@ const StatCard = ({
 export default function SalesPage() {
   const [soldBikes, setSoldBikes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  
-  // Tracks which specific receipt is currently downloading
-  const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchSales() {
@@ -102,41 +100,6 @@ export default function SalesPage() {
 
     fetchSales();
   }, []);
-
-  // The bulletproof download function
-  const handleDownload = async (url: string, desiredFileName: string, recordId: string) => {
-    if (!url) return;
-    
-    // Start the spinner for this specific button
-    setDownloadingId(recordId);
-
-    try {
-      const response = await fetch(url);
-      
-      if (!response.ok) {
-        throw new Error("Failed to fetch file");
-      }
-
-      const blob = await response.blob();
-      const localUrl = window.URL.createObjectURL(blob);
-
-      const link = document.createElement("a");
-      link.href = localUrl;
-      link.download = desiredFileName; 
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-
-      window.URL.revokeObjectURL(localUrl);
-    } catch (error) {
-      console.error("Download failed:", error);
-      // Fallback: If the fetch fails, open it in a new tab
-      window.open(url, "_blank");
-    } finally {
-      // Stop the spinner
-      setDownloadingId(null);
-    }
-  };
 
   // Calculate total revenue
   const totalRevenue = soldBikes.reduce(
@@ -227,7 +190,7 @@ export default function SalesPage() {
         ))}
       </div>
 
-      {/* Sales Table - Using div-based table to avoid shadcn table dependency */}
+      {/* Sales Table */}
       <Card>
         <CardHeader>
           <CardTitle>Sold Vehicles</CardTitle>
@@ -255,6 +218,9 @@ export default function SalesPage() {
                   <th className="px-4 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
                     Est. Profit
                   </th>
+                  <th className="px-4 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+  Sale Date
+</th>
                   <th className="px-4 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider text-right">
                     Action
                   </th>
@@ -305,23 +271,38 @@ export default function SalesPage() {
                           +{formatCurrency(Math.round(profit))}
                         </span>
                       </td>
+                      <td className="px-4 py-4">
+  <div className="text-sm">
+    {bike.saleDate
+      ? new Date(bike.saleDate).toLocaleDateString("en-IN", {
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+        })
+      : "-"}
+  </div>
+</td>
                       <td className="px-4 py-4 text-right">
                         <Button
                           variant="ghost"
                           size="sm"
-                          disabled={downloadingId === bike.id || !bike.receipt} // Disable if no receipt is present
+                          disabled={!bike.receipt}
                           className="text-xs font-medium"
                           onClick={(e) => {
                             e.stopPropagation();
                             if (bike.receipt) {
-                              handleDownload(bike.receipt, `${bike.number}-receipt.jpg`, bike.id);
+                              window.open(bike.receipt, "_blank", "noopener,noreferrer");
                             }
                           }}
                         >
-                          {downloadingId === bike.id ? (
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          ) : null}
-                          {bike.receipt ? "Receipt" : "No Receipt"}
+                          {bike.receipt ? (
+                            <>
+                              <ExternalLink className="mr-2 h-4 w-4" />
+                              Preview Receipt
+                            </>
+                          ) : (
+                            "No Receipt"
+                          )}
                         </Button>
                       </td>
                     </tr>

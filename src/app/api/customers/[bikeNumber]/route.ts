@@ -22,7 +22,7 @@ export async function PATCH(
 
     // 2. Extract the JSON payload we sent from the frontend
     const dataString = formData.get("data") as string;
-    const { buyer, sellingPrice } = JSON.parse(dataString);
+    const { buyer, sellingPrice, saleDate } = JSON.parse(dataString);
 
     let receiptUrl = null;
     const buyerDocsUrls: string[] = [];
@@ -70,11 +70,12 @@ export async function PATCH(
       );
     }
 
-    const updatedCustomer = await updateCustomer(customer.id, {
+    const updatedCustomer = await updateCustomer(bikeNumber, {
       $set: {
         buyer,
         sellingPrice,
-        receipt: receiptUrl, // Save the Cloudinary URL here!
+        receipt: receiptUrl,
+        saleDate,
       },
     });
 

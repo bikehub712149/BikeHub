@@ -17,22 +17,46 @@ export async function PATCH(
     const { bikeNumber } = await params;
     const body = await req.json();
 
-    const update =
-      body.type === "seller"
-        ? {
-            "seller.name": body.name,
-            "seller.phone": body.phone,
-            "seller.address": body.address,
-          }
-        : {
-            "buyer.name": body.name,
-            "buyer.phone": body.phone,
-            "buyer.address": body.address,
-          };
+    const update: Record<string, any> = {};
+
+    if (body.seller) {
+      update["seller.name"] = body.seller.name;
+      update["seller.phone"] = body.seller.phone;
+      update["seller.address"] = body.seller.address;
+    }
+
+    if (body.buyer) {
+      update["buyer.name"] = body.buyer.name;
+      update["buyer.phone"] = body.buyer.phone;
+      update["buyer.address"] = body.buyer.address;
+    }
+
+    if (body.purchasePrice !== undefined) {
+      update.purchasePrice = body.purchasePrice;
+    }
+
+    if (body.sellingPrice !== undefined) {
+      update.sellingPrice = body.sellingPrice;
+    }
+
+    if (body.saleDate !== undefined) {
+      update.saleDate = body.saleDate;
+    }
+
+    if (body.receipt !== undefined) {
+      update.receipt = body.receipt;
+    }
 
     const customer = await updateCustomer(bikeNumber, {
       $set: update,
     });
+
+    if (!customer) {
+      return NextResponse.json(
+        { message: "Customer not found" },
+        { status: 404 }
+      );
+    }
 
     return NextResponse.json(customer);
   } catch (error: any) {

@@ -60,6 +60,11 @@ const CustomerTransactionSchema = new Schema(
       default: null,
     },
 
+    saleDate: {
+      type: Date,
+      default: null,
+    },
+
     receipt: {
       type: String,
       default: null,

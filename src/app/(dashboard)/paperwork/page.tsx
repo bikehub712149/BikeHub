@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
 import { CheckCircle2, Loader2 } from "lucide-react";
 
 import {
@@ -151,7 +150,7 @@ export default function PaperworkPage() {
                     >
                       <td className="px-6 py-4">
                         <div className="h-14 w-20 overflow-hidden rounded-lg border">
-                          <Image
+                          <img
                             src={bike.image}
                             alt={bike.model}
                             width={80}

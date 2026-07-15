@@ -23,6 +23,7 @@ export async function GET() {
           sellingPrice: customer?.sellingPrice,
           purchasePrice: customer?.purchasePrice,
           receipt: customer?.receipt,
+          saleDate: customer?.saleDate,
         };
       });
 
