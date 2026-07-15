@@ -87,7 +87,7 @@ async function DashboardContent() {
             </div>
           </div>
           <div className="absolute bottom-0 left-0 h-1 w-full bg-gradient-to-r from-emerald-500 to-emerald-400 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-        </div>
+        </div> 
 
         {/* Card 3: Pending Paperwork */}
         <div className="group relative overflow-hidden rounded-xl cursor-pointer border border-border/50 bg-card p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md animate-in fade-in slide-in-from-bottom-6 delay-200 fill-mode-both">
