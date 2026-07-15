@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAllBikes } from "@/lib/server/bike";
+import { verifyAdmin } from "@/lib/server/admin-auth";
 
 export async function GET(req: NextRequest) {
   try {
+    const authError = await verifyAdmin();
+    if (authError) return authError;
+
     const { searchParams } = new URL(req.url);
 
     const status = searchParams.get("status");

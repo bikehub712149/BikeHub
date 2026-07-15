@@ -3,6 +3,7 @@ import { getCustomerByBikeId, updateCustomer } from "@/lib/server/customer";
 import { markBikeAsSold } from "@/lib/server/bike";
 // Make sure to import your Cloudinary uploader!
 import { uploadFile } from "@/lib/server/upload"; // Adjust path if necessary
+import { verifyAdmin } from "@/lib/server/admin-auth";
 
 export async function PATCH(
   req: NextRequest,
@@ -11,11 +12,14 @@ export async function PATCH(
   }
 ) {
   try {
+    const authError = await verifyAdmin();
+    if (authError) return authError;
+
     const { bikeNumber } = await context.params;
 
     // 1. Parse FormData instead of JSON
     const formData = await req.formData();
-    
+
     // 2. Extract the JSON payload we sent from the frontend
     const dataString = formData.get("data") as string;
     const { buyer, sellingPrice } = JSON.parse(dataString);
@@ -27,14 +31,14 @@ export async function PATCH(
     const receiptFile = formData.get("receipt") as File | null;
     if (receiptFile) {
       const buffer = Buffer.from(await receiptFile.arrayBuffer());
-      
+
       const uploadResult: any = await uploadFile(
         buffer,
         bikeNumber,
         "receipt", // matches your Cloudinary folder structure
         receiptFile.name.split(".")[0]
       );
-      
+
       receiptUrl = uploadResult.secure_url;
     }
 
@@ -42,14 +46,14 @@ export async function PATCH(
     const buyerDocsFile = formData.get("buyerDocs") as File | null;
     if (buyerDocsFile) {
       const buffer = Buffer.from(await buyerDocsFile.arrayBuffer());
-      
+
       const uploadResult: any = await uploadFile(
         buffer,
         bikeNumber,
         "buyer", // matches your Cloudinary folder structure
         buyerDocsFile.name.split(".")[0]
       );
-      
+
       buyerDocsUrls.push(uploadResult.secure_url);
     }
 

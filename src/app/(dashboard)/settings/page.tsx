@@ -76,9 +76,6 @@ export default function SettingsPage() {
           <TabsTrigger value="account" className="flex items-center gap-2">
             <User size={16} /> Account
           </TabsTrigger>
-          <TabsTrigger value="preferences" className="flex items-center gap-2">
-            <Palette size={16} /> Preferences
-          </TabsTrigger>
           <TabsTrigger value="storage" className="flex items-center gap-2">
             <Database size={16} /> Storage
           </TabsTrigger>
@@ -161,60 +158,6 @@ export default function SettingsPage() {
   </div>
 </TabsContent>
 
-        {/* PREFERENCES */}
-        <TabsContent value="preferences">
-  <Card className="rounded-2xl shadow-sm">
-    <CardHeader>
-      <CardTitle>Dashboard Preferences</CardTitle>
-      <CardDescription>
-        Customize your BikeHub dashboard.
-      </CardDescription>
-    </CardHeader>
-
-    <CardContent className="space-y-6">
-
-      <div className="flex items-center justify-between border rounded-xl p-4">
-        <div>
-          <p className="font-medium">Currency</p>
-          <p className="text-sm text-slate-500">
-            Indian Rupee (₹)
-          </p>
-        </div>
-
-        <Button variant="outline">
-          INR
-        </Button>
-      </div>
-
-      <div className="flex items-center justify-between border rounded-xl p-4">
-        <div>
-          <p className="font-medium">Date Format</p>
-          <p className="text-sm text-slate-500">
-            DD/MM/YYYY
-          </p>
-        </div>
-
-        <Button variant="outline">
-          Change
-        </Button>
-      </div>
-
-      <div className="flex items-center justify-between border rounded-xl p-4">
-        <div>
-          <p className="font-medium">Theme</p>
-          <p className="text-sm text-slate-500">
-            Light Mode
-          </p>
-        </div>
-
-        <Button variant="outline">
-          Light
-        </Button>
-      </div>
-
-    </CardContent>
-  </Card>
-</TabsContent>
 
         {/* STORAGE - ACCURATE CLOUDINARY API DATA */}
         <TabsContent value="storage">

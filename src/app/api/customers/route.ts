@@ -6,16 +6,18 @@ import {
 } from "@/lib/server/customer";
 import { updateCustomer } from "@/lib/server/customer";
 import { getAllBikes, markBikeAsSold } from "@/lib/server/bike";
+import { verifyAdmin } from "@/lib/server/admin-auth";
 
 export async function GET() {
   try {
+    const authError = await verifyAdmin();
+    if (authError) return authError;
+
     const customers = await getCustomers();
     const bikes = await getAllBikes();
 
     const data = customers.map((customer: any) => {
-      const bike = bikes.find(
-        (b: any) => b.number === customer.bikeId
-      );
+      const bike = bikes.find((b: any) => b.number === customer.bikeId);
 
       return {
         ...customer,
@@ -36,6 +38,9 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
+    const authError = await verifyAdmin();
+    if (authError) return authError;
+
     const body = await req.json();
 
     const customer = await createCustomer(body);

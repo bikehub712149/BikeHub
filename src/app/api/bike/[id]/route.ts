@@ -1,12 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { deleteBike, getBikeById, updateBike } from "@/lib/server/bike";
 import { deleteCustomerByBikeId } from "@/lib/server/customer";
+import { verifyAdmin } from "@/lib/server/admin-auth";
 
 export async function DELETE(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const authError = await verifyAdmin();
+    if (authError) return authError;
+
     const { id } = await params;
 
     // Find the bike first
@@ -44,6 +48,9 @@ export async function PATCH(
   }
 ) {
   try {
+    const authError = await verifyAdmin();
+    if (authError) return authError;
+
     const { id } = await params;
 
     const body = await req.json();

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { updateBikePaperwork } from "@/lib/server/bike";
+import { verifyAdmin } from "@/lib/server/admin-auth";
 
 export async function PATCH(
   req: NextRequest,
@@ -8,6 +9,9 @@ export async function PATCH(
   }
 ) {
   try {
+    const authError = await verifyAdmin();
+    if (authError) return authError;
+
     const { bikeNumber } = await context.params;
 
     await updateBikePaperwork(bikeNumber, "Completed");
