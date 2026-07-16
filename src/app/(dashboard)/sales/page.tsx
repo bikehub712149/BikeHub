@@ -20,6 +20,7 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
 
 // Utility Functions
 const formatCurrency = (value: number): string => {
@@ -238,8 +239,9 @@ export default function SalesPage() {
                     >
                       <td className="px-4 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="h-12 w-16 flex-shrink-0 overflow-hidden rounded-lg border border-border bg-muted">
-                            <img
+                          <div className="h-12 w-16 relative flex-shrink-0 overflow-hidden rounded-lg border border-border bg-muted">
+                            <Image
+                              fill
                               src={bike.image}
                               alt={bike.model}
                               className="h-full w-full object-cover"

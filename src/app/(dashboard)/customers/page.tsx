@@ -95,7 +95,7 @@ export default function CustomersPage() {
               <CardContent className="px-10">
                 <div className="flex items-center gap-5">
                   {/* Bike Image */}
-                  <img
+                  <Image
                     src={bike.image}
                     alt={bike.model}
                     width={150}

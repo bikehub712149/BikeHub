@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/alert-dialog";
 
 import { Button } from "@/components/ui/button";
+import Image from "next/image";
 
 type Bike = {
   id: string;
@@ -150,7 +151,7 @@ export default function PaperworkPage() {
                     >
                       <td className="px-6 py-4">
                         <div className="h-14 w-20 overflow-hidden rounded-lg border">
-                          <img
+                          <Image
                             src={bike.image}
                             alt={bike.model}
                             width={80}

@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { ChevronRight, Loader2 } from "lucide-react";
 import { getAllBikes } from "@/lib/server/bike";
+import Image from "next/image";
 
 export default async function InventoryPage({
   searchParams,
@@ -104,7 +105,7 @@ async function InventoryTable({ status }: { status?: string }) {
               <tr key={bike.id} className="group transition hover:bg-slate-50">
                 <td className="px-6 py-4">
                   <div className="h-14 w-20 overflow-hidden rounded-lg border border-slate-200">
-                    <img
+                    <Image
                       src={bike.image}
                       alt={bike.model}
                       width={80}
