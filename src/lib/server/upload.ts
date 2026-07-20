@@ -12,7 +12,7 @@ export async function uploadFile(
         {
           folder: `bike-hub/${bikeNumber}/${folder}`,
           public_id: fileName,
-          overwrite: true,
+          overwrite: false,
           resource_type: "auto",
         },
         (err, result) => {

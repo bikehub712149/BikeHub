@@ -72,6 +72,7 @@ export async function POST(req: Request) {
       bike.image = imageUrls[mainImageIndex] || imageUrls[0];
     }
 
+    console.log(imageUrls, docUrls);
     bike.images = imageUrls;
     customer.seller.documents = docUrls;
 

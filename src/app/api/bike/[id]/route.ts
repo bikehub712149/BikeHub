@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { deleteBike, getBikeById, updateBike } from "@/lib/server/bike";
 import { deleteCustomerByBikeId } from "@/lib/server/customer";
 import { verifyAdmin } from "@/lib/server/admin-auth";
+import { deleteCloudinaryByUrl } from "@/lib/cloudinary";
+import { getCustomerByBikeId } from "@/lib/server/customer";
 
 export async function DELETE(
   req: Request,
@@ -18,6 +20,34 @@ export async function DELETE(
 
     if (!bike) {
       return NextResponse.json({ message: "Bike not found" }, { status: 404 });
+    }
+
+    const customer = await getCustomerByBikeId(bike.number);
+
+    // Delete bike images
+    if (bike.images?.length) {
+      for (const image of bike.images) {
+        await deleteCloudinaryByUrl(image);
+      }
+    }
+
+    // Delete seller docs
+    if (customer?.seller?.documents?.length) {
+      for (const doc of customer.seller.documents) {
+        await deleteCloudinaryByUrl(doc);
+      }
+    }
+
+    // Delete buyer docs
+    if (customer?.buyer?.documents?.length) {
+      for (const doc of customer.buyer.documents) {
+        await deleteCloudinaryByUrl(doc);
+      }
+    }
+
+    // Delete receipt
+    if (customer?.receipt) {
+      await deleteCloudinaryByUrl(customer.receipt);
     }
 
     // Delete customer history using registration number
