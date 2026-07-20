@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { deleteBike, getBikeById, updateBike } from "@/lib/server/bike";
 import { deleteCustomerByBikeId } from "@/lib/server/customer";
 import { verifyAdmin } from "@/lib/server/admin-auth";
-import { deleteCloudinaryByUrl } from "@/lib/cloudinary";
+import { deleteCloudinaryByUrl, deleteCloudinaryFolder } from "@/lib/cloudinary";
 import { getCustomerByBikeId } from "@/lib/server/customer";
 
 export async function DELETE(
@@ -55,6 +55,12 @@ export async function DELETE(
 
     // Delete bike
     await deleteBike(id);
+
+    await deleteCloudinaryFolder(`bike-hub/${bike.number}/images`);
+    await deleteCloudinaryFolder(`bike-hub/${bike.number}/seller`);
+    await deleteCloudinaryFolder(`bike-hub/${bike.number}/buyer`);
+    await deleteCloudinaryFolder(`bike-hub/${bike.number}/receipt`);
+    await deleteCloudinaryFolder(`bike-hub/${bike.number}`);
 
     return NextResponse.json({
       message: "Bike deleted successfully",
