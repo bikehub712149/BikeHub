@@ -1,4 +1,6 @@
 import cloudinary from "@/lib/cloudinary";
+import crypto from "crypto";
+
 
 export async function uploadFile(
   file: Buffer,
@@ -11,7 +13,8 @@ export async function uploadFile(
       .upload_stream(
         {
           folder: `bike-hub/${bikeNumber}/${folder}`,
-          public_id: fileName,
+          public_id:
+`${Date.now()}-${crypto.randomUUID()}`,
           overwrite: false,
           resource_type: "auto",
         },
