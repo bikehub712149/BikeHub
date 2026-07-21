@@ -85,7 +85,7 @@ export default function AddBikeDialog() {
           id: crypto.randomUUID(),
           number: form.number,
           model: form.model,
-          year: Number(form.year),
+          year: form.year,
           kms: form.kms,
           expectedSellingPrice: Number(form.expectedSellingPrice),
           status: "Available",
@@ -118,10 +118,11 @@ export default function AddBikeDialog() {
       const compressedBikeFiles = await Promise.all(
         images.map(async (file) => {
           const compressedBlob = await imageCompression(file, {
-            maxSizeMB: 1,
-            maxWidthOrHeight: 1920,
+            maxSizeMB: 0.5, // 500KB
+            maxWidthOrHeight: 1600, // still HD enough
             useWebWorker: true,
-            initialQuality: 0.85,
+            initialQuality: 0.8,
+            alwaysKeepResolution: false,
           });
           return new File([compressedBlob], file.name, { type: file.type });
         })
@@ -146,11 +147,12 @@ export default function AddBikeDialog() {
         const processedDocs = await Promise.all(
           docImages.map(async (file) => {
             const compressedBlob = await imageCompression(file, {
-              maxSizeMB: 1,
-              maxWidthOrHeight: 1920,
-              useWebWorker: true,
+              maxSizeMB: 0.2, // 200KB
+              maxWidthOrHeight: 1400,
               fileType: "image/jpeg",
-              initialQuality: 0.85,
+              useWebWorker: true,
+              initialQuality: 0.7,
+              alwaysKeepResolution: false,
             });
 
             return new Promise<string>((resolve) => {
@@ -176,7 +178,7 @@ export default function AddBikeDialog() {
             pdfWidth,
             pdfHeight,
             undefined,
-            "FAST"
+            "SLOW"
           );
         });
 
@@ -288,10 +290,9 @@ export default function AddBikeDialog() {
                 onChange={handleChange}
               />
               <Input
+                type="month"
                 name="year"
                 value={form.year}
-                placeholder="Manufacturing Year"
-                type="number"
                 onChange={handleChange}
               />
               <Input
@@ -354,8 +355,24 @@ export default function AddBikeDialog() {
               <Input
                 name="sellerPhone"
                 value={form.sellerPhone}
-                placeholder="Phone Number"
-                onChange={handleChange}
+                placeholder="Phone Number (Alt: 9876543210 / 9123456789)"
+                onChange={(e) => {
+                  let value = e.target.value;
+
+                  // Allow only digits, slash and spaces
+                  value = value.replace(/[^\d/\s]/g, "");
+
+                  // Allow only one slash
+                  const parts = value.split("/");
+                  if (parts.length > 2) {
+                    value = `${parts[0]}/${parts.slice(1).join("")}`;
+                  }
+
+                  setForm((prev) => ({
+                    ...prev,
+                    sellerPhone: value,
+                  }));
+                }}
               />
               <Input
                 name="purchasePrice"
@@ -426,7 +443,6 @@ export default function AddBikeDialog() {
             </div>
 
             <div className="mt-8 flex justify-end gap-4">
-
               <Button
                 className="min-w-[150px]"
                 disabled={isSubmitting}

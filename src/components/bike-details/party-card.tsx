@@ -85,7 +85,7 @@ export default function PartyCard({
               <Info
                 icon={<Phone size={18} />}
                 label="Phone"
-                value={person.phone}
+                value={person.phone?.replaceAll("/", " / ")}
               />
               <Info
                 icon={<MapPin size={18} />}

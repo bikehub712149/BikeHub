@@ -94,12 +94,22 @@ export default function TechnicalCard({
   );
 }
 
-function Info({ title, value }: { title: string; value: React.ReactNode }) {
+function Info({
+  title,
+  value,
+}: {
+  title: string;
+  value: React.ReactNode;
+}) {
   return (
     <div>
       <p className="mb-1 text-sm text-slate-500">{title}</p>
 
-      <h4 className="text-lg font-semibold text-slate-900">{value}</h4>
+      <div className="overflow-x-auto">
+        <h4 className="min-w-max text-lg font-semibold text-slate-900 whitespace-nowrap">
+          {value}
+        </h4>
+      </div>
     </div>
   );
 }
