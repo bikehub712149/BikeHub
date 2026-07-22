@@ -94,7 +94,7 @@ export async function PATCH(
     const bike = await updateBike(id, {
       number: body.number,
       model: body.model,
-      year: Number(body.year),
+      year: body.year,
       kms: body.kms,
       engineNumber: body.engineNumber,
       chassisNumber: body.chassisNumber,

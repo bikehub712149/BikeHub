@@ -21,7 +21,7 @@ type Bike = {
   id: string;
   number: string;
   model: string;
-  year: number;
+  year: string;
   kms: string;
   image: string;
   buyer?: {

@@ -4,7 +4,7 @@ export interface Bike {
   id: string;
   number: string;
   model: string;
-  year: number;
+  year: string;
   kms: string;
   expectedSellingPrice: number;
   status: BikeStatus;

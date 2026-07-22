@@ -9,7 +9,7 @@ type TechnicalCardProps = {
   bikeData: {
     number: string;
     model: string;
-    year: number;
+    year: string;
     kms: string;
     status: string;
     expectedSellingPrice: number;
@@ -47,7 +47,7 @@ export default function TechnicalCard({
 
           <Info title="Model" value={bikeData.model} />
 
-          <Info title="Manufacturing Year" value={bikeData.year} />
+          <Info title="Registration Year" value={bikeData.year} />
 
           <Info title="Kilometers" value={bikeData.kms} />
 
