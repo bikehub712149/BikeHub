@@ -5,7 +5,7 @@ import imageCompression from "browser-image-compression";
 import jsPDF from "jspdf";
 import { Loader2, Plus } from "lucide-react";
 import { toast } from "sonner";
-
+import { useRouter } from "next/navigation";
 import {
   Dialog,
   DialogContent,
@@ -27,7 +27,7 @@ export default function UploadDocumentsDialog({ bikeNumber, type }: Props) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [docs, setDocs] = useState<File[]>([]);
-
+  const router = useRouter();
   async function uploadDocuments() {
     try {
       setLoading(true);
@@ -117,7 +117,8 @@ export default function UploadDocumentsDialog({ bikeNumber, type }: Props) {
       setDocs([]);
       setOpen(false);
 
-      window.location.reload();
+      // Refresh the page to reflect the updated documents
+      router.refresh();
     } catch (err) {
       console.error(err);
 

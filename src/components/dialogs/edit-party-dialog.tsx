@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Loader2, Save } from "lucide-react";
-
+import { useRouter } from "next/navigation";
 import {
   Dialog,
   DialogContent,
@@ -36,6 +36,7 @@ export default function EditPartyDialog({
   type,
   person,
 }: Props) {
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
 
   const [name, setName] = useState("");
@@ -74,7 +75,7 @@ export default function EditPartyDialog({
         throw new Error("Failed to update");
       }
 
-      window.location.reload();
+      router.refresh();
       onOpenChange(false);
 
     } catch (err) {

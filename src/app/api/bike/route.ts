@@ -71,8 +71,6 @@ export async function POST(req: Request) {
       // Safely apply the index, falling back to 0 if anything goes wrong
       bike.image = imageUrls[mainImageIndex] || imageUrls[0];
     }
-
-    console.log(imageUrls, docUrls);
     bike.images = imageUrls;
     customer.seller.documents = docUrls;
 
