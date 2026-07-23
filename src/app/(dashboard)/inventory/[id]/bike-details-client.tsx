@@ -137,6 +137,7 @@ export default function BikeDetailsClient({
             <PartyCard
               title="Seller Information"
               person={transaction.seller}
+              bikeNumber={bike.number}
               documents={transaction.seller?.documents ?? []}
               onEdit={() => setSellerOpen(true)}
             />
@@ -144,6 +145,7 @@ export default function BikeDetailsClient({
             <PartyCard
               title="Buyer Information"
               person={transaction.buyer}
+              bikeNumber={bike.number}
               documents={transaction.buyer?.documents ?? []}
               receipt={transaction.receipt}
               saleDate={transaction.saleDate}

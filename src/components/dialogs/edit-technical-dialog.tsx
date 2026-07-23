@@ -146,12 +146,12 @@ export default function EditTechnicalDialog({
               <div className="space-y-1.5">
                 <label className="text-sm font-medium">Mfg. Year</label>
                 <Input
-  className="h-9"
-  name="year"
-  type="month"
-  value={form.year}
-  onChange={handleChange}
-/>
+                  className="h-9"
+                  name="year"
+                  type="month"
+                  value={form.year}
+                  onChange={handleChange}
+                />
               </div>
 
               <div className="space-y-1.5">

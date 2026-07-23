@@ -152,7 +152,6 @@ export default function AddBikeDialog() {
               fileType: "image/jpeg",
               useWebWorker: true,
               initialQuality: 0.7,
-              alwaysKeepResolution: false,
             });
 
             return new Promise<string>((resolve) => {

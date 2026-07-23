@@ -2,10 +2,8 @@ import { NextResponse } from "next/server";
 import {
   getCustomers,
   createCustomer,
-  getCustomerByBikeId,
 } from "@/lib/server/customer";
-import { updateCustomer } from "@/lib/server/customer";
-import { getAllBikes, markBikeAsSold } from "@/lib/server/bike";
+import { getAllBikes } from "@/lib/server/bike";
 import { verifyAdmin } from "@/lib/server/admin-auth";
 
 export async function GET() {
