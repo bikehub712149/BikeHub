@@ -135,29 +135,6 @@ export default function PartyCard({
                     </div>
                   </div>
                 )}
-
-                {title === "Buyer Information" && receipt && (
-                  <div className="mt-3 flex items-center justify-between rounded-xl border border-green-200 bg-green-50 p-3">
-                    <div className="flex items-center gap-3">
-                      <FileText size={18} className="text-green-700" />
-
-                      <span className="font-semibold text-green-700">
-                        Sale Receipt
-                      </span>
-                    </div>
-
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="text-green-700 hover:bg-green-100"
-                      onClick={() =>
-                        window.open(receipt, "_blank", "noopener,noreferrer")
-                      }
-                    >
-                      <ExternalLink size={16} />
-                    </Button>
-                  </div>
-                )}
               </div>
             )}
           </>
