@@ -80,11 +80,14 @@ export default function BikeCard({
             </div>
 
             <Badge
-              variant={status === "Available" ? "default" : "secondary"}
-              className="px-5 py-3.5 rounded-md text-xs font-bold tracking-wide shadow-sm"
-            >
-              {status}
-            </Badge>
+                className={
+                  status === "Sold"
+                    ? "bg-red-100 text-red-700 hover:bg-red-100"
+                    : "bg-green-100 text-green-700 hover:bg-green-100"
+                }
+              >
+                {status}
+              </Badge>
           </div>
         </CardContent>
       </Card>

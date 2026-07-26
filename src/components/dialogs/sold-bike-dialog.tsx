@@ -18,6 +18,7 @@ import { Bike } from "@/types/bike";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import imageCompression from "browser-image-compression";
+import { validateSoldBike } from "@/types/zod";
 import jsPDF from "jspdf";
 
 export default function SoldBikeDialog() {
@@ -99,16 +100,18 @@ export default function SoldBikeDialog() {
 
       setIsSubmitting(true);
 
+      const values = validateSoldBike(form);
+
       // 1. Create your structured payload
       const payload = {
         buyer: {
-          name: form.buyerName,
-          phone: form.buyerPhone,
-          address: form.buyerAddress,
+          name: values.buyerName,
+          phone: values.buyerPhone,
+          address: values.buyerAddress,
           documents: [], // Backend will inject Cloudinary URL
         },
-        saleDate: form.saleDate,
-        sellingPrice: Number(form.sellingPrice),
+        saleDate: values.saleDate,
+        sellingPrice: Number(values.sellingPrice),
         receipt: "", // Backend will inject Cloudinary URL
       };
 

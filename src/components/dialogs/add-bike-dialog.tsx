@@ -23,6 +23,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import BikeGallery from "../bike-details/bike-gallery";
 import imageCompression from "browser-image-compression";
+import { validateBike } from "@/types/zod";
 import jsPDF from "jspdf";
 
 export default function AddBikeDialog() {
@@ -79,32 +80,33 @@ export default function AddBikeDialog() {
     try {
       setIsSubmitting(true);
 
+      const values = validateBike(form);
       // 1. Create your structured payload
       const payload = {
         bike: {
           id: crypto.randomUUID(),
-          number: form.number,
-          model: form.model,
-          year: form.year,
-          kms: form.kms,
-          expectedSellingPrice: Number(form.expectedSellingPrice),
+          number: values.number,
+          model: values.model,
+          year: values.year,
+          kms: values.kms,
+          expectedSellingPrice: Number(values.expectedSellingPrice),
           status: "Available",
-          engineNumber: form.engineNumber,
-          chassisNumber: form.chassisNumber,
+          engineNumber: values.engineNumber,
+          chassisNumber: values.chassisNumber,
           image: "", // Backend handles this
           images: [], // Backend handles this
-          ownerSerial: form.ownerSerial,
+          ownerSerial: values.ownerSerial,
         },
         customer: {
           id: crypto.randomUUID(),
-          bikeId: form.number,
+          bikeId: values.number,
           seller: {
-            name: form.sellerName,
-            phone: form.sellerPhone,
-            address: form.sellerAddress,
+            name: values.sellerName,
+            phone: values.sellerPhone,
+            address: values.sellerAddress,
             documents: [], // Backend handles this
           },
-          purchasePrice: Number(form.purchasePrice),
+          purchasePrice: Number(values.purchasePrice),
         },
         mainImageIndex: selectedImage,
       };
@@ -184,7 +186,7 @@ export default function AddBikeDialog() {
         const pdfBlob = pdf.output("blob");
         const combinedPdfFile = new File(
           [pdfBlob],
-          `${form.number}-seller-docs.pdf`,
+          `${values.number}-seller-docs.pdf`,
           { type: "application/pdf" }
         );
 
