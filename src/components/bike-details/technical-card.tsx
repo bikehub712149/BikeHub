@@ -78,15 +78,15 @@ export default function TechnicalCard({
           <div>
             <p className="mb-2 text-sm text-slate-500">Status</p>
 
-            <Badge
-              className={
-                bikeData.status === "Sold"
-                  ? "bg-red-100 text-red-700 hover:bg-red-100"
-                  : "bg-green-100 text-green-700 hover:bg-green-100"
-              }
-            >
-              {bikeData.status}
-            </Badge>
+            {bikeData.status === "Sold" ? (
+              <Badge variant="sold" className="text-xs font-bold tracking-wider">
+                Sold
+              </Badge>
+            ) : (
+              <Badge variant="available" className="text-xs font-bold tracking-wider">
+                Available
+              </Badge>
+            )}
           </div>
         </div>
       </CardContent>

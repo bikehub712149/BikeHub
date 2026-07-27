@@ -25,7 +25,6 @@ const BikeSchema = new Schema(
 
     kms: {
       type: String,
-      required: true,
     },
 
     expectedSellingPrice: {
@@ -47,6 +46,7 @@ const BikeSchema = new Schema(
     image: {
       type: String,
       default: "",
+      required: true,
     },
 
     images: {

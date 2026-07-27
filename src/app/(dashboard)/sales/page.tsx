@@ -242,6 +242,7 @@ export default function SalesPage() {
                           <div className="h-12 w-16 relative flex-shrink-0 overflow-hidden rounded-lg border border-border bg-muted">
                             <Image
                               fill
+                              sizes="100vw"
                               src={bike.image}
                               alt={bike.model}
                               className="h-full w-full object-cover"

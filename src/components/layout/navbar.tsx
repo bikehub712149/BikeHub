@@ -144,6 +144,7 @@ export default function Navbar() {
                         <div className="relative h-14 w-20 shrink-0 overflow-hidden rounded-lg bg-muted/30 border border-border/50">
                           <Image
                             fill
+                            sizes="100vw"
                             src={item.image}
                             alt={item.model}
                             className="h-full w-full object-cover"

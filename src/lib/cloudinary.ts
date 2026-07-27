@@ -9,10 +9,20 @@ cloudinary.config({
 /**
  * Delete a Cloudinary asset from its URL.
  */
-export async function deleteCloudinaryByUrl(url: string) {
+export async function deleteCloudinaryByUrl(url?: string) {
+  // Ignore empty/local URLs
+  if (!url || !url.includes("/upload/")) {
+    return null;
+  }
+
+  const uploadPart = url.split("/upload/")[1];
+
+  if (!uploadPart) {
+    return null;
+  }
+
   const publicId = decodeURIComponent(
-    url
-      .split("/upload/")[1]
+    uploadPart
       .replace(/^v\d+\//, "")
       .replace(/\.[^.]+$/, "")
   );

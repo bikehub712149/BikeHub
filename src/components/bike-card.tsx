@@ -28,6 +28,7 @@ export default function BikeCard({
         <div className="h-50 w-full relative shrink-0 bg-muted/20">
           <Image
             fill
+            sizes="100vw"
             src={image}
             alt={model}
             className="h-full w-full object-cover block"
@@ -79,15 +80,17 @@ export default function BikeCard({
               </span>
             </div>
 
-            <Badge
-                className={
-                  status === "Sold"
-                    ? "bg-red-100 text-red-700 hover:bg-red-100"
-                    : "bg-green-100 text-green-700 hover:bg-green-100"
-                }
-              >
-                {status}
-              </Badge>
+            {
+              String(status).toLowerCase() === "sold" ? (
+                <Badge variant="sold" className="text-xs font-bold tracking-wider">
+                  Sold
+                </Badge>
+              ) : (
+                <Badge variant="available" className="text-xs font-bold tracking-wider">
+                  Available
+                </Badge>
+              )
+            }
           </div>
         </CardContent>
       </Card>

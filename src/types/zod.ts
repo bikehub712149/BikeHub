@@ -1,42 +1,43 @@
 import { z } from "zod";
 
+const str = (fallback = "NA") =>
+  z.string().trim().transform((v) => (v === "" ? fallback : v));
+
+const num = () =>
+  z.coerce.number().catch(0);
+
 const bikeSchema = z.object({
-  number: z.string().trim().default("NA"),
-  model: z.string().trim().default("NA"),
-  year: z.string().trim().default("NA"),
-  kms: z.string().trim().default("0"),
+  number: str(),
+  model: str(),
+  year: str(),
+  kms: str("0"),
 
-  expectedSellingPrice: z.coerce.number().default(0),
+  expectedSellingPrice: num(),
 
-  engineNumber: z.string().trim().default("NA"),
-  chassisNumber: z.string().trim().default("NA"),
+  engineNumber: str(),
+  chassisNumber: str(),
 
-  sellerName: z.string().trim().default("NA"),
-  sellerPhone: z.string().trim().default("NA"),
-  sellerAddress: z.string().trim().default("NA"),
+  sellerName: str(),
+  sellerPhone: str(),
+  sellerAddress: str(),
 
-  purchasePrice: z.coerce.number().default(0),
+  purchasePrice: num(),
 
-  ownerSerial: z.string().default("1"),
+  ownerSerial: str("1"),
 });
 
 export function validateBike(data: unknown) {
   return bikeSchema.parse(data);
 }
 
-export function safeValidateBike(data: unknown) {
-  return bikeSchema.safeParse(data);
-}
-
-
 const soldBikeSchema = z.object({
-  buyerName: z.string().trim().default("NA"),
-  buyerPhone: z.string().trim().default("NA"),
-  buyerAddress: z.string().trim().default("NA"),
+  buyerName: str(),
+  buyerPhone: str(),
+  buyerAddress: str(),
 
-  sellingPrice: z.coerce.number().default(0),
+  sellingPrice: num(),
 
-  saleDate: z.string().default(() => new Date().toISOString()),
+  saleDate: str(new Date().toISOString()),
 });
 
 export function validateSoldBike(data: unknown) {

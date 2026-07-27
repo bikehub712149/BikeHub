@@ -108,15 +108,15 @@ export default function CustomersPage() {
                     <div className="flex items-center gap-3 mb-1">
                       <h3 className="text-lg font-semibold">{bike.number}</h3>
 
-                      <Badge
-                        className={
-                          record.buyer
-                            ? "bg-red-100 text-red-700 hover:bg-red-100 p-3 text-xs"
-                            : "bg-green-100 text-green-700 hover:bg-green-100 p-3 text-xs"
-                        }
-                      >
-                        {record.buyer ? "Sold" : "Available"}
-                      </Badge>
+                      {bike.status === "Sold" ? (
+                        <Badge variant="sold" className="text-xs font-bold tracking-wider">
+                          Sold
+                        </Badge>
+                      ) : (
+                        <Badge variant="available" className="text-xs font-bold tracking-wider">
+                          Available
+                        </Badge>
+                      )}
                     </div>
 
                     <p className="text-sm text-slate-500 mb-5">{bike.model}</p>

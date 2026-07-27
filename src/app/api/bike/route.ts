@@ -67,11 +67,13 @@ export async function POST(req: Request) {
     }
 
     // Attach URLs to payload
-    if (imageUrls.length > 0) {
-      // Safely apply the index, falling back to 0 if anything goes wrong
-      bike.image = imageUrls[mainImageIndex] || imageUrls[0];
-    }
-    bike.images = imageUrls;
+    const FALLBACK_IMAGE = "/fallback.bikehub.png"; // Define a fallback image path
+
+    // Attach URLs to payload
+    bike.image = imageUrls[mainImageIndex] ?? imageUrls[0] ?? FALLBACK_IMAGE;
+
+    bike.images = imageUrls.length > 0 ? imageUrls : [FALLBACK_IMAGE];
+
     customer.seller.documents = docUrls;
 
     // Save to DB

@@ -95,48 +95,58 @@ export default function PartyCard({
               />
             </div>
 
-            {(documents[0] || receipt) && (
-              <div className="mt-8">
-                <h3 className="mb-4 font-semibold">Uploaded Documents</h3>
+            <div className="mt-8">
+              <h3 className="mb-4 font-semibold">Uploaded Documents</h3>
 
-                {documents[0] && (
-                  <div className="flex items-center justify-between rounded-xl border p-3">
-                    <div className="flex items-center gap-3">
-                      <FileText size={18} className="text-blue-600" />
+              {documents[0] ? (
+                <div className="flex items-center justify-between rounded-xl border p-3">
+                  <div className="flex items-center gap-3">
+                    <FileText size={18} className="text-blue-600" />
 
-                      <span className="font-semibold">
-                        {title === "Seller Information"
-                          ? "Seller Document"
-                          : "Buyer Document"}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center gap-1">
-                      <UploadDocumentsDialog
-                        bikeNumber={bikeNumber}
-                        type={
-                          title === "Seller Information" ? "seller" : "buyer"
-                        }
-                      />
-
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() =>
-                          window.open(
-                            documents[0],
-                            "_blank",
-                            "noopener,noreferrer"
-                          )
-                        }
-                      >
-                        <ExternalLink size={16} />
-                      </Button>
-                    </div>
+                    <span className="font-semibold">
+                      {title === "Seller Information"
+                        ? "Seller Document"
+                        : "Buyer Document"}
+                    </span>
                   </div>
-                )}
-              </div>
-            )}
+
+                  <div className="flex items-center gap-1">
+                    <UploadDocumentsDialog
+                      bikeNumber={bikeNumber}
+                      type={title === "Seller Information" ? "seller" : "buyer"}
+                    />
+
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() =>
+                        window.open(
+                          documents[0],
+                          "_blank",
+                          "noopener,noreferrer"
+                        )
+                      }
+                    >
+                      <ExternalLink size={16} />
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center justify-between rounded-xl border border-dashed p-4">
+                  <div>
+                    <p className="font-medium">No document uploaded</p>
+                    <p className="text-sm text-slate-500">
+                      Upload documents now or later.
+                    </p>
+                  </div>
+
+                  <UploadDocumentsDialog
+                    bikeNumber={bikeNumber}
+                    type={title === "Seller Information" ? "seller" : "buyer"}
+                  />
+                </div>
+              )}
+            </div>
           </>
         )}
       </CardContent>

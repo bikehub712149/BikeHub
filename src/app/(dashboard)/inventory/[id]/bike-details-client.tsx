@@ -89,15 +89,15 @@ export default function BikeDetailsClient({
             <div className="flex items-center gap-3">
               <h1 className="text-4xl font-bold">{bike.model}</h1>
 
-              <Badge
-                className={
-                  bike.status === "Sold"
-                    ? "bg-red-100 text-red-700"
-                    : "bg-green-100 text-green-700"
-                }
-              >
-                {bike.status}
-              </Badge>
+              {bike.status === "Sold" ? (
+                <Badge variant="sold" className="text-xs font-bold tracking-wider">
+                  Sold
+                </Badge>
+              ) : (
+                <Badge variant="available" className="text-xs font-bold tracking-wider">
+                  Available
+                </Badge>
+              )}
             </div>
 
             <p className="mt-2 text-slate-500">
@@ -198,15 +198,15 @@ export default function BikeDetailsClient({
             </p>
 
             <div className="mt-3">
-              <Badge
-                className={
-                  bike.status === "Sold"
-                    ? "bg-red-100 text-red-700 hover:bg-red-100"
-                    : "bg-green-100 text-green-700 hover:bg-green-100"
-                }
-              >
-                {bike.status}
-              </Badge>
+              {bike.status === "Sold" ? (
+                <Badge variant="sold" className="text-xs font-bold tracking-wider">
+                  Sold
+                </Badge>
+              ) : (
+                <Badge variant="available" className="text-xs font-bold tracking-wider">
+                  Available
+                </Badge>
+              )}
             </div>
           </div>
         </div>
