@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { ChevronRight, Loader2 } from "lucide-react";
 import { getAllBikes } from "@/lib/server/bike";
-import Image from "next/image";
+import Image from "@/components/ui/image";
 
 export default async function InventoryPage({
   searchParams,

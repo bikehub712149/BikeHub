@@ -15,7 +15,8 @@ import {
 } from "@/components/ui/alert-dialog";
 
 import { Button } from "@/components/ui/button";
-import Image from "next/image";
+import Image from "@/components/ui/image";
+import { useSearchParams } from "next/navigation";
 
 type Bike = {
   id: string;
@@ -36,7 +37,12 @@ export default function PaperworkPage() {
   const [loading, setLoading] = useState(true);
 
   const [selectedBike, setSelectedBike] = useState<Bike | null>(null);
-  const [tab, setTab] = useState<"Pending" | "Completed">("Pending");
+  const searchParams = useSearchParams();
+
+  const initialTab =
+    searchParams.get("status") === "completed" ? "Completed" : "Pending";
+
+  const [tab, setTab] = useState<"Pending" | "Completed">(initialTab);
 
   async function fetchData() {
     setLoading(true);
@@ -145,10 +151,7 @@ export default function PaperworkPage() {
                   </tr>
                 ) : (
                   filtered.map((bike) => (
-                    <tr
-                      key={bike.id}
-                      className="transition hover:bg-slate-50"
-                    >
+                    <tr key={bike.id} className="transition hover:bg-slate-50">
                       <td className="px-6 py-4">
                         <div className="h-14 w-20 overflow-hidden rounded-lg border">
                           <Image
@@ -161,15 +164,11 @@ export default function PaperworkPage() {
                         </div>
                       </td>
 
-                      <td className="px-6 py-4 font-semibold">
-                        {bike.number}
-                      </td>
+                      <td className="px-6 py-4 font-semibold">{bike.number}</td>
 
                       <td className="px-6 py-4">{bike.model}</td>
 
-                      <td className="px-6 py-4">
-                        {bike.buyer?.name || "-"}
-                      </td>
+                      <td className="px-6 py-4">{bike.buyer?.name || "-"}</td>
 
                       <td className="px-6 py-4">
                         <span

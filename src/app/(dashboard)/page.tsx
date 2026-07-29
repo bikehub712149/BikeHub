@@ -40,7 +40,9 @@ async function DashboardContent() {
   const allBikes = await getAllBikes();
 
   const recentBikes = allBikes.slice(0, 6);
-  const totalStock = allBikes.filter((bike) => bike.status === "Available").length;
+  const totalStock = allBikes.filter(
+    (bike) => bike.status === "Available"
+  ).length;
   const soldBikes = allBikes.filter((bike) => bike.status === "Sold").length;
   const pendingBikes = allBikes.filter(
     (bike) => bike.paperwork === "Pending"
@@ -54,58 +56,64 @@ async function DashboardContent() {
       */}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
         {/* Card 1: Total Stock */}
-        <div className="group relative overflow-hidden cursor-pointer rounded-xl border border-border/50 bg-card p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md animate-in fade-in slide-in-from-bottom-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="mb-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                Total Stock
-              </p>
-              <h3 className="text-3xl font-extrabold text-foreground tracking-tight">
-                {totalStock}
-              </h3>
+        <Link href="/inventory?status=available">
+          <div className="group relative overflow-hidden cursor-pointer rounded-xl border border-border/50 bg-card p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md animate-in fade-in slide-in-from-bottom-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="mb-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                  Total Stock
+                </p>
+                <h3 className="text-3xl font-extrabold text-foreground tracking-tight">
+                  {totalStock}
+                </h3>
+              </div>
+              <div className="rounded-2xl bg-blue-500/10 p-4 text-blue-600 transition-colors group-hover:bg-blue-500/20">
+                <Bike size={28} strokeWidth={2.5} />
+              </div>
             </div>
-            <div className="rounded-2xl bg-blue-500/10 p-4 text-blue-600 transition-colors group-hover:bg-blue-500/20">
-              <Bike size={28} strokeWidth={2.5} />
-            </div>
+            <div className="absolute bottom-0 left-0 h-1 w-full bg-gradient-to-r from-blue-500 to-blue-400 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
           </div>
-          <div className="absolute bottom-0 left-0 h-1 w-full bg-gradient-to-r from-blue-500 to-blue-400 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-        </div> 
+        </Link>
 
         {/* Card 2: Bikes Sold */}
-        <div className="group relative overflow-hidden cursor-pointer rounded-xl border border-border/50 bg-card p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md animate-in fade-in slide-in-from-bottom-6 delay-100 fill-mode-both">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="mb-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                Bikes Sold
-              </p>
-              <h3 className="text-3xl font-extrabold text-foreground tracking-tight">
-                {soldBikes}
-              </h3>
+        <Link href="/inventory?status=sold">
+          <div className="group relative overflow-hidden cursor-pointer rounded-xl border border-border/50 bg-card p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md animate-in fade-in slide-in-from-bottom-6 delay-100 fill-mode-both">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="mb-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                  Bikes Sold
+                </p>
+                <h3 className="text-3xl font-extrabold text-foreground tracking-tight">
+                  {soldBikes}
+                </h3>
+              </div>
+              <div className="rounded-2xl bg-emerald-500/10 p-4 text-emerald-600 transition-colors group-hover:bg-emerald-500/20">
+                <CheckCircle size={28} strokeWidth={2.5} />
+              </div>
             </div>
-            <div className="rounded-2xl bg-emerald-500/10 p-4 text-emerald-600 transition-colors group-hover:bg-emerald-500/20">
-              <CheckCircle size={28} strokeWidth={2.5} />
-            </div>
+            <div className="absolute bottom-0 left-0 h-1 w-full bg-gradient-to-r from-emerald-500 to-emerald-400 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
           </div>
-          <div className="absolute bottom-0 left-0 h-1 w-full bg-gradient-to-r from-emerald-500 to-emerald-400 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-        </div> 
+        </Link>
 
         {/* Card 3: Pending Paperwork */}
-        <div className="group relative overflow-hidden rounded-xl cursor-pointer border border-border/50 bg-card p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md animate-in fade-in slide-in-from-bottom-6 delay-200 fill-mode-both">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="mb-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                Pending Paperwork
-              </p>
-              <h3 className="text-3xl font-extrabold text-foreground tracking-tight">
-                {pendingBikes}
-              </h3>
+        <Link href="/paperwork?status=pending">
+          <div className="group relative overflow-hidden rounded-xl cursor-pointer border border-border/50 bg-card p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md animate-in fade-in slide-in-from-bottom-6 delay-200 fill-mode-both">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="mb-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                  Pending Paperwork
+                </p>
+                <h3 className="text-3xl font-extrabold text-foreground tracking-tight">
+                  {pendingBikes}
+                </h3>
+              </div>
+              <div className="rounded-2xl bg-amber-500/10 p-4 text-amber-600 transition-colors group-hover:bg-amber-500/20">
+                <Clock size={28} strokeWidth={2.5} />
+              </div>
             </div>
-            <div className="rounded-2xl bg-amber-500/10 p-4 text-amber-600 transition-colors group-hover:bg-amber-500/20">
-              <Clock size={28} strokeWidth={2.5} />
-            </div>
+            <div className="absolute bottom-0 left-0 h-1 w-full bg-gradient-to-r from-amber-500 to-amber-400 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
           </div>
-          <div className="absolute bottom-0 left-0 h-1 w-full bg-gradient-to-r from-amber-500 to-amber-400 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-        </div>
+        </Link>
       </div>
 
       {/* Recent Additions List */}
@@ -125,15 +133,16 @@ async function DashboardContent() {
             className="group flex items-center gap-2 rounded-md duration-300 bg-primary/10 px-5 py-3 text-sm font-semibold text-primary transition-all hover:bg-primary/90 hover:text-primary-foreground"
           >
             View All
-            <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
+            <ArrowRight
+              size={16}
+              className="transition-transform group-hover:translate-x-1"
+            />
           </Link>
         </div>
 
         <div className="grid gap-8 py-6 !px-16 sm:p-8 md:grid-cols-2 xl:grid-cols-3 bg-slate-200/50">
           {recentBikes.length > 0 ? (
-            recentBikes.map((bike) => (
-              <BikeCard key={bike.id} {...bike} />
-            ))
+            recentBikes.map((bike) => <BikeCard key={bike.id} {...bike} />)
           ) : (
             <div className="col-span-full py-12 text-center">
               <p className="text-sm font-medium text-muted-foreground">

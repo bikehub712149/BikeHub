@@ -1,5 +1,5 @@
 "use client";
-import Image from "next/image";
+import Image from "@/components/ui/image";
 import Link from "next/link";
 import { FileText, Download, Loader2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";

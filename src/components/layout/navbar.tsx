@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import { Search, Loader2, X, User, ShoppingBag } from "lucide-react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
+import Image from "@/components/ui/image";
 
 import { Input } from "@/components/ui/input";
 import {

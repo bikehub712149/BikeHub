@@ -20,7 +20,7 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import Image from "next/image";
+import Image from "@/components/ui/image";
 
 // Utility Functions
 const formatCurrency = (value: number): string => {
