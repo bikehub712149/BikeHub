@@ -135,8 +135,7 @@ export default function AddBikeDialog() {
       // ---------------------------------------------------------
       // 4. COMPRESS DOCS & BUNDLE TO PDF (Target ~1MB per doc & HD)
       // ---------------------------------------------------------
-      const docImages = sellerDocs.filter((f) => f.type.startsWith("image/"));
-      const docPdfs = sellerDocs.filter((f) => f.type === "application/pdf");
+      const docImages = sellerDocs;
 
       if (docImages.length > 0) {
         const pdf = new jsPDF({
@@ -149,11 +148,11 @@ export default function AddBikeDialog() {
         const processedDocs = await Promise.all(
           docImages.map(async (file) => {
             const compressedBlob = await imageCompression(file, {
-              maxSizeMB: 0.2, // 200KB
-              maxWidthOrHeight: 1400,
+              maxSizeMB: 0.15,
+              maxWidthOrHeight: 1200,
               fileType: "image/jpeg",
               useWebWorker: true,
-              initialQuality: 0.7,
+              initialQuality: 0.65,
             });
 
             return new Promise<string>((resolve) => {
@@ -177,9 +176,7 @@ export default function AddBikeDialog() {
             0,
             0,
             pdfWidth,
-            pdfHeight,
-            undefined,
-            "SLOW"
+            pdfHeight
           );
         });
 
@@ -192,9 +189,6 @@ export default function AddBikeDialog() {
 
         formData.append("sellerDocs", combinedPdfFile);
       }
-
-      // Append any files that were already PDFs
-      docPdfs.forEach((pdf) => formData.append("sellerDocs", pdf));
 
       // ---------------------------------------------------------
       // 5. SEND TO API
@@ -403,15 +397,15 @@ export default function AddBikeDialog() {
             <div className="mt-8">
               <p className="mb-3 text-sm font-medium">Seller Documents</p>
               <p className="mb-3 text-xs text-slate-500">
-                Upload Aadhaar / PAN / Voter ID / Driving License (Multiple
-                files allowed)
+                Upload document images only. They will be converted into a
+                single PDF automatically.
               </p>
 
               <Input
                 type="file"
                 key={fileKey}
                 multiple
-                accept="image/*,.pdf"
+                accept="image/*"
                 onChange={(e) => {
                   const files = Array.from(e.target.files ?? []);
 

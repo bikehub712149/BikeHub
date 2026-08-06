@@ -18,15 +18,16 @@ export default function AppImage({
   const [src, setSrc] = useState(props.src);
 
   return (
-    <div className={`relative overflow-hidden ${className ?? ""}`}>
+    
+    <div className={`relative flex items-center justify-center overflow-hidden bg-slate-50 ${className ?? ""}`}>
       {loading && (
-        <div className="absolute inset-0 bg-slate-200 animate-pulse" />
+        <div className="absolute inset-0 z-10 animate-pulse bg-slate-200" />
       )}
 
       <Image
         {...props}
         src={src}
-        className="object-cover"
+        className="h-full w-full object-cover drop-shadow-md transition duration-300 group-hover:scale-105"
         onLoad={(e) => {
           setLoading(false);
           onLoad?.(e);

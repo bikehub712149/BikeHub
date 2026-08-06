@@ -3,7 +3,7 @@
 import { useState } from "react";
 import imageCompression from "browser-image-compression";
 import jsPDF from "jspdf";
-import { Loader2, Plus } from "lucide-react";
+import { Loader2, Plus, X } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import {
@@ -32,9 +32,7 @@ export default function UploadDocumentsDialog({ bikeNumber, type }: Props) {
     try {
       setLoading(true);
 
-      const imageFiles = docs.filter((f) => f.type.startsWith("image/"));
-
-      const pdfFiles = docs.filter((f) => f.type === "application/pdf");
+      const imageFiles = docs;
 
       const formData = new FormData();
 
@@ -95,14 +93,6 @@ export default function UploadDocumentsDialog({ bikeNumber, type }: Props) {
         formData.append("document", imagePdf);
       }
 
-      // ----------------------------
-      // Additional PDFs
-      // ----------------------------
-
-      pdfFiles.forEach((file) => {
-        formData.append("document", file);
-      });
-
       const res = await fetch(`/api/customers/documents/${bikeNumber}`, {
         method: "POST",
         body: formData,
@@ -146,27 +136,58 @@ export default function UploadDocumentsDialog({ bikeNumber, type }: Props) {
           </DialogTitle>
 
           <DialogDescription>
-            Upload Images or PDFs. They will be merged with the existing PDF.
-          </DialogDescription>
+  Upload document images only. They will automatically be combined into a PDF and merged with the existing document.
+</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-5">
           <Input
-            multiple
-            type="file"
-            accept="image/*,.pdf"
-            onChange={(e) => setDocs(Array.from(e.target.files ?? []))}
-          />
+  multiple
+  type="file"
+  accept="image/*"
+  onChange={(e) => {
+    const files = Array.from(e.target.files ?? []);
+
+    setDocs((prev) => {
+      const all = [...prev, ...files];
+
+      return all.filter(
+        (file, index, self) =>
+          index ===
+          self.findIndex(
+            (f) =>
+              f.name === file.name &&
+              f.size === file.size &&
+              f.lastModified === file.lastModified
+          )
+      );
+    });
+  }}
+/>
 
           {docs.length > 0 && (
-            <div className="rounded-xl border p-3 space-y-2 max-h-44 overflow-y-auto">
-              {docs.map((file, i) => (
-                <div key={i} className="text-sm truncate">
-                  {file.name}
-                </div>
-              ))}
-            </div>
-          )}
+  <div className="rounded-xl border bg-slate-50 p-4 space-y-2 max-h-44 overflow-y-auto">
+    {docs.map((file, index) => (
+      <div
+        key={index}
+        className="flex items-center justify-between rounded-lg border bg-white px-3 py-2"
+      >
+        <span className="truncate text-sm">{file.name}</span>
+
+        <Button
+          size="icon"
+          variant="ghost"
+          type="button"
+          onClick={() =>
+            setDocs((docs) => docs.filter((_, i) => i !== index))
+          }
+        >
+          <X size={16} />
+        </Button>
+      </div>
+    ))}
+  </div>
+)}
 
           <Button
             className="w-full"

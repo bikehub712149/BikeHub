@@ -110,7 +110,7 @@ async function InventoryTable({ status }: { status?: string }) {
                       alt={bike.model}
                       width={80}
                       height={56}
-                      className="h-full w-full object-cover"
+                      className="h-full w-full"
                     />
                   </div>
                 </td>
