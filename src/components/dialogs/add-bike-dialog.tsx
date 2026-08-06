@@ -412,9 +412,26 @@ export default function AddBikeDialog() {
                 key={fileKey}
                 multiple
                 accept="image/*,.pdf"
-                onChange={(e) =>
-                  setSellerDocs(Array.from(e.target.files ?? []))
-                }
+                onChange={(e) => {
+                  const files = Array.from(e.target.files ?? []);
+
+                  setSellerDocs((prev) => {
+                    const all = [...prev, ...files];
+
+                    return all.filter(
+                      (file, index, self) =>
+                        index ===
+                        self.findIndex(
+                          (f) =>
+                            f.name === file.name &&
+                            f.size === file.size &&
+                            f.lastModified === file.lastModified
+                        )
+                    );
+                  });
+
+                  setFileKey(Date.now());
+                }}
               />
 
               {sellerDocs.length > 0 && (
@@ -429,11 +446,13 @@ export default function AddBikeDialog() {
                       <Button
                         size="icon"
                         variant="ghost"
-                        onClick={() =>
+                        type="button"
+                        onClick={() => {
                           setSellerDocs((docs) =>
                             docs.filter((_, i) => i !== index)
-                          )
-                        }
+                          );
+                          setFileKey(Date.now()); // reset file input
+                        }}
                       >
                         <X size={16} />
                       </Button>
