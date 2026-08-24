@@ -50,6 +50,17 @@ const CustomerTransactionSchema = new Schema(
       default: null,
     },
 
+    // Optional broker information (name and phone/number)
+    brokerName: {
+      type: String,
+      default: null,
+    },
+
+    brokerNumber: {
+      type: String,
+      default: null,
+    },
+
     purchasePrice: {
       type: Number,
       required: true,

@@ -22,7 +22,8 @@ export async function PATCH(
 
     // 2. Extract the JSON payload we sent from the frontend
     const dataString = formData.get("data") as string;
-    const { buyer, sellingPrice, saleDate } = JSON.parse(dataString);
+    // Accept optional broker fields from the frontend as well
+    const { buyer, sellingPrice, saleDate, brokerName, brokerNumber } = JSON.parse(dataString);
 
     let receiptUrl = null;
     const buyerDocsUrls: string[] = [];
@@ -70,13 +71,20 @@ export async function PATCH(
       );
     }
 
+    // Build a $set object so we only set fields that are provided
+    const setObj: Record<string, any> = {
+      buyer,
+      sellingPrice,
+      receipt: receiptUrl,
+      saleDate,
+    };
+
+    // Include optional broker fields if present in the payload
+    if (brokerName !== undefined) setObj.brokerName = brokerName;
+    if (brokerNumber !== undefined) setObj.brokerNumber = brokerNumber;
+
     const updatedCustomer = await updateCustomer(bikeNumber, {
-      $set: {
-        buyer,
-        sellingPrice,
-        receipt: receiptUrl,
-        saleDate,
-      },
+      $set: setObj,
     });
 
     await markBikeAsSold(bikeNumber);

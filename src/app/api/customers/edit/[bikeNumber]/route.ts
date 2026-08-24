@@ -31,21 +31,30 @@ export async function PATCH(
       update["buyer.address"] = body.buyer.address;
     }
 
-    if (body.purchasePrice !== undefined) {
-      update.purchasePrice = body.purchasePrice;
-    }
+        // Support broker fields (optional)
+        if (body.brokerName !== undefined) {
+          update.brokerName = body.brokerName;
+        }
 
-    if (body.sellingPrice !== undefined) {
-      update.sellingPrice = body.sellingPrice;
-    }
+        if (body.brokerNumber !== undefined) {
+          update.brokerNumber = body.brokerNumber;
+        }
 
-    if (body.saleDate !== undefined) {
-      update.saleDate = body.saleDate;
-    }
+        if (body.purchasePrice !== undefined) {
+          update.purchasePrice = body.purchasePrice;
+        }
 
-    if (body.receipt !== undefined) {
-      update.receipt = body.receipt;
-    }
+        if (body.sellingPrice !== undefined) {
+          update.sellingPrice = body.sellingPrice;
+        }
+
+        if (body.saleDate !== undefined) {
+          update.saleDate = body.saleDate;
+        }
+
+        if (body.receipt !== undefined) {
+          update.receipt = body.receipt;
+        }
 
     const customer = await updateCustomer(bikeNumber, {
       $set: update,
