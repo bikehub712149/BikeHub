@@ -131,6 +131,11 @@
     scroll-behavior: smooth;
   }
 
+  input,
+  textarea{
+    text-transform: uppercase !important;
+  }
+
   .font-semibold,
   .font-bold,
   .font-extrabold,

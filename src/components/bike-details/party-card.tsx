@@ -13,13 +13,17 @@ import { Button } from "@/components/ui/button";
 
 type PartyCardProps = {
   bikeNumber: string;
-
   title: string;
 
   person: {
     name: string;
     phone: string;
     address: string;
+  } | null;
+
+  broker?: {
+    name: string;
+    phone: string;
   } | null;
 
   documents?: string[];
@@ -32,8 +36,8 @@ export default function PartyCard({
   bikeNumber,
   title,
   person,
+  broker,
   documents = [],
-  receipt,
   saleDate,
   onEdit,
 }: PartyCardProps) {
@@ -78,16 +82,56 @@ export default function PartyCard({
         ) : (
           <>
             <div className="space-y-5">
-              <Info
-                icon={<User size={18} />}
-                label="Name"
-                value={person.name}
-              />
-              <Info
-                icon={<Phone size={18} />}
-                label="Phone"
-                value={person.phone?.replaceAll("/", " / ")}
-              />
+              {/* Seller + Broker */}
+              {title === "Seller Information" && broker ? (
+                <div className="grid grid-cols-2 gap-6">
+                  {/* Seller - LEFT */}
+                  <div className="space-y-3">
+                    <Info
+                      icon={<User size={18} />}
+                      label="Seller Name"
+                      value={person.name}
+                    />
+
+                    <Info
+                      icon={<Phone size={18} />}
+                      label="Seller Phone"
+                      value={person.phone?.replaceAll("/", " / ")}
+                    />
+                  </div>
+
+                  {/* Broker - RIGHT */}
+                  <div className="space-y-3">
+                    <Info
+                      icon={<User size={18} />}
+                      label="Broker Name"
+                      value={broker.name || "—"}
+                    />
+
+                    <Info
+                      icon={<Phone size={18} />}
+                      label="Broker Phone"
+                      value={broker.phone?.replaceAll("/", " / ") || "—"}
+                    />
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <Info
+                    icon={<User size={18} />}
+                    label="Name"
+                    value={person.name}
+                  />
+
+                  <Info
+                    icon={<Phone size={18} />}
+                    label="Phone"
+                    value={person.phone?.replaceAll("/", " / ")}
+                  />
+                </>
+              )}
+
+              {/* Address */}
               <Info
                 icon={<MapPin size={18} />}
                 label="Address"

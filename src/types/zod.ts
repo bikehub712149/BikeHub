@@ -1,10 +1,12 @@
 import { z } from "zod";
 
 const str = (fallback = "NA") =>
-  z.string().trim().transform((v) => (v === "" ? fallback : v));
+  z
+    .string()
+    .trim()
+    .transform((v) => (v === "" ? fallback : v));
 
-const num = () =>
-  z.coerce.number().catch(0);
+const num = () => z.coerce.number().catch(0);
 
 const bikeSchema = z.object({
   number: str(),
@@ -16,6 +18,8 @@ const bikeSchema = z.object({
 
   engineNumber: str(),
   chassisNumber: str(),
+  brokerName: z.string().trim().optional().default(""),
+  brokerPhone: z.string().trim().optional().default(""),
 
   sellerName: str(),
   sellerPhone: str(),

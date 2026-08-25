@@ -43,6 +43,9 @@ export default function AddBikeDialog() {
     expectedSellingPrice: "",
     engineNumber: "",
 
+    brokerName: "",
+    brokerPhone: "",
+
     sellerName: "",
     sellerPhone: "",
     purchasePrice: "",
@@ -105,6 +108,10 @@ export default function AddBikeDialog() {
             phone: values.sellerPhone,
             address: values.sellerAddress,
             documents: [], // Backend handles this
+          },
+          broker: {
+            name: values.brokerName || "",
+            phone: values.brokerPhone || "",
           },
           purchasePrice: Number(values.purchasePrice),
         },
@@ -170,14 +177,7 @@ export default function AddBikeDialog() {
           const pdfWidth = pdf.internal.pageSize.getWidth();
           const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
 
-          pdf.addImage(
-            base64Str,
-            "JPEG",
-            0,
-            0,
-            pdfWidth,
-            pdfHeight
-          );
+          pdf.addImage(base64Str, "JPEG", 0, 0, pdfWidth, pdfHeight);
         });
 
         const pdfBlob = pdf.output("blob");
@@ -213,6 +213,10 @@ export default function AddBikeDialog() {
         kms: "",
         expectedSellingPrice: "",
         engineNumber: "",
+
+        brokerName: "",
+        brokerPhone: "",
+
         sellerName: "",
         sellerPhone: "",
         purchasePrice: "",
@@ -391,6 +395,45 @@ export default function AddBikeDialog() {
                   placeholder="Seller Address"
                   onChange={handleChange}
                 />
+              </div>
+
+              <div className="col-span-2">
+                <p className="mb-3 text-sm font-medium">
+                  Broker Information{" "}
+                  <span className="text-xs font-normal text-slate-400">
+                    (Optional)
+                  </span>
+                </p>
+
+                <div className="grid grid-cols-2 gap-5">
+                  <Input
+                    name="brokerName"
+                    value={form.brokerName}
+                    placeholder="Broker Name"
+                    onChange={handleChange}
+                  />
+
+                  <Input
+                    name="brokerPhone"
+                    value={form.brokerPhone}
+                    placeholder="Broker Phone"
+                    onChange={(e) => {
+                      let value = e.target.value;
+
+                      value = value.replace(/[^\d/\s]/g, "");
+
+                      const parts = value.split("/");
+                      if (parts.length > 2) {
+                        value = `${parts[0]}/${parts.slice(1).join("")}`;
+                      }
+
+                      setForm((prev) => ({
+                        ...prev,
+                        brokerPhone: value,
+                      }));
+                    }}
+                  />
+                </div>
               </div>
             </div>
 

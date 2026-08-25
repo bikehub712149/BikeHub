@@ -90,11 +90,17 @@ export default function BikeDetailsClient({
               <h1 className="text-4xl font-bold">{bike.model}</h1>
 
               {bike.status === "Sold" ? (
-                <Badge variant="sold" className="text-xs font-bold tracking-wider">
+                <Badge
+                  variant="sold"
+                  className="text-xs font-bold tracking-wider"
+                >
                   Sold
                 </Badge>
               ) : (
-                <Badge variant="available" className="text-xs font-bold tracking-wider">
+                <Badge
+                  variant="available"
+                  className="text-xs font-bold tracking-wider"
+                >
                   Available
                 </Badge>
               )}
@@ -105,10 +111,7 @@ export default function BikeDetailsClient({
             </p>
           </div>
 
-          <DeleteBikeDialog
-            bikeId={bike.id}
-            bikeNumber={bike.number}
-          />
+          <DeleteBikeDialog bikeId={bike.id} bikeNumber={bike.number} />
         </div>
 
         <div className="grid grid-cols-1 xl:grid-cols-[460px_1fr] gap-8 items-start">
@@ -137,6 +140,7 @@ export default function BikeDetailsClient({
             <PartyCard
               title="Seller Information"
               person={transaction.seller}
+              broker={transaction.broker}
               bikeNumber={bike.number}
               documents={transaction.seller?.documents ?? []}
               onEdit={() => setSellerOpen(true)}
@@ -156,9 +160,7 @@ export default function BikeDetailsClient({
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
           <div className="rounded-3xl border bg-white p-6 shadow-sm">
-            <p className="text-sm text-slate-500">
-              Purchase Price
-            </p>
+            <p className="text-sm text-slate-500">Purchase Price</p>
 
             <h2 className="mt-3 text-3xl font-bold">
               ₹{transaction ? transaction.purchasePrice : "--"}
@@ -166,9 +168,7 @@ export default function BikeDetailsClient({
           </div>
 
           <div className="rounded-3xl border bg-white p-6 shadow-sm">
-            <p className="text-sm text-slate-500">
-              Selling Price
-            </p>
+            <p className="text-sm text-slate-500">Selling Price</p>
 
             <h2 className="mt-3 text-3xl font-bold">
               {transaction?.sellingPrice
@@ -178,32 +178,31 @@ export default function BikeDetailsClient({
           </div>
 
           <div className="rounded-3xl border bg-white p-6 shadow-sm">
-            <p className="text-sm text-slate-500">
-              Profit
-            </p>
+            <p className="text-sm text-slate-500">Profit</p>
 
             <h2 className="mt-3 text-3xl font-bold text-emerald-600">
               {transaction?.sellingPrice
-                ? `₹${
-                    transaction.sellingPrice -
-                    transaction.purchasePrice
-                  }`
+                ? `₹${transaction.sellingPrice - transaction.purchasePrice}`
                 : "--"}
             </h2>
           </div>
 
           <div className="rounded-3xl border bg-white p-6 shadow-sm">
-            <p className="text-sm text-slate-500">
-              Current Status
-            </p>
+            <p className="text-sm text-slate-500">Current Status</p>
 
             <div className="mt-3">
               {bike.status === "Sold" ? (
-                <Badge variant="sold" className="text-xs font-bold tracking-wider">
+                <Badge
+                  variant="sold"
+                  className="text-xs font-bold tracking-wider"
+                >
                   Sold
                 </Badge>
               ) : (
-                <Badge variant="available" className="text-xs font-bold tracking-wider">
+                <Badge
+                  variant="available"
+                  className="text-xs font-bold tracking-wider"
+                >
                   Available
                 </Badge>
               )}

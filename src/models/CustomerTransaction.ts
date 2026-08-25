@@ -40,6 +40,17 @@ const CustomerTransactionSchema = new Schema(
       required: true,
     },
 
+    broker: {
+      name: {
+        type: String,
+      },
+
+      phone: {
+        type: String,
+      },
+    },
+
+
     seller: {
       type: PersonSchema,
       required: true,
