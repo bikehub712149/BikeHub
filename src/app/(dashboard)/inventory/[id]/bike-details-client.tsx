@@ -190,6 +190,18 @@ export default function BikeDetailsClient({
           </div>
         )}
 
+        {/* DEBUG: raw transaction JSON (temporary) */}
+        {transaction && (
+          <div className="mt-6">
+            <Card className="rounded-3xl bg-yellow-50 border-yellow-100">
+              <CardContent className="p-4">
+                <h3 className="mb-2 font-semibold">Debug: transaction JSON</h3>
+                <pre className="text-xs overflow-auto max-h-60">{JSON.stringify(transaction, null, 2)}</pre>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
           <div className="rounded-3xl border bg-white p-6 shadow-sm">
             <p className="text-sm text-slate-500">
