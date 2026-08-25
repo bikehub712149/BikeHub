@@ -61,6 +61,7 @@ export default function BikeDetailsClient({
             bikeNumber={bike.number}
             type="seller"
             person={transaction.seller}
+            broker={transaction.broker}
           />
 
           <EditPartyDialog

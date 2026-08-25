@@ -249,18 +249,18 @@ export default function AddBikeDialog() {
         }
       />
 
-      <DialogContent className="!max-w-[82vw] max-h-[90vh] overflow-hidden rounded-3xl gap-0">
-        <DialogHeader className="border-b py-4 px-5">
-          <DialogTitle className="text-3xl leading-3">Add New Bike</DialogTitle>
+      <DialogContent className="!max-w-[82vw] max-h-[90vh] flex flex-col gap-0 overflow-hidden rounded-3xl">
+        <DialogHeader className="shrink-0 border-b bg-muted/20 px-6 py-5">
+          <DialogTitle className="text-2xl font-bold tracking-tight">Add New Bike</DialogTitle>
 
           <p className="text-sm text-slate-500">
             Enter bike details and seller information.
           </p>
         </DialogHeader>
 
-        <div className="grid grid-cols-12 h-[75vh] py-5">
+        <div className="min-h-0 flex-1 grid grid-cols-1 md:grid-cols-12">
           {/* LEFT */}
-          <div className="col-span-5 border-r">
+          <div className="min-h-[240px] border-b md:col-span-5 md:min-h-0 md:border-b-0 md:border-r">
             <BikeGallery
               images={images}
               selectedImage={selectedImage}
@@ -272,7 +272,7 @@ export default function AddBikeDialog() {
           </div>
 
           {/* RIGHT */}
-          <div className="col-span-7 overflow-y-auto p-8">
+          <div className="min-h-0 overflow-y-auto p-5 sm:p-8 md:col-span-7">
             <h3 className="mb-5 text-lg font-semibold">Bike Details</h3>
 
             <div className="grid grid-cols-2 gap-5">

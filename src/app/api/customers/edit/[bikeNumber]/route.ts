@@ -31,6 +31,11 @@ export async function PATCH(
       update["buyer.address"] = body.buyer.address;
     }
 
+    if (body.broker) {
+      update["broker.name"] = body.broker.name;
+      update["broker.phone"] = body.broker.phone;
+    }
+
     if (body.purchasePrice !== undefined) {
       update.purchasePrice = body.purchasePrice;
     }

@@ -27,6 +27,11 @@ type Props = {
     phone: string;
     address: string;
   } | null;
+
+  broker?: {
+    name?: string;
+    phone?: string;
+  } | null;
 };
 
 export default function EditPartyDialog({
@@ -35,6 +40,7 @@ export default function EditPartyDialog({
   bikeNumber,
   type,
   person,
+  broker,
 }: Props) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -42,6 +48,8 @@ export default function EditPartyDialog({
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
+  const [brokerName, setBrokerName] = useState("");
+  const [brokerPhone, setBrokerPhone] = useState("");
 
   useEffect(() => {
     if (!person) return;
@@ -50,6 +58,13 @@ export default function EditPartyDialog({
     setPhone(person.phone);
     setAddress(person.address);
   }, [person]);
+
+  useEffect(() => {
+    if (type !== "seller") return;
+
+    setBrokerName(broker?.name ?? "");
+    setBrokerPhone(broker?.phone ?? "");
+  }, [broker, type]);
 
   async function save() {
     try {
@@ -68,6 +83,12 @@ export default function EditPartyDialog({
             phone,
             address,
           },
+          ...(type === "seller" && {
+            broker: {
+              name: brokerName,
+              phone: brokerPhone,
+            },
+          }),
         }),
       });
 
@@ -88,26 +109,26 @@ export default function EditPartyDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px] p-0 overflow-hidden rounded-2xl bg-background shadow-xl gap-0 border-border/50">
+      <DialogContent className="max-h-[90vh] gap-0 overflow-hidden rounded-2xl border-border/50 bg-background p-0 shadow-xl sm:max-w-lg">
         
         {/* Header Section */}
-        <DialogHeader className="border-b px-6 py-5 bg-muted/20">
+        <DialogHeader className="shrink-0 border-b bg-muted/20 px-6 py-5 gap-0">
           <DialogTitle className="text-xl font-bold tracking-tight">
             Edit {type === "seller" ? "Seller" : "Buyer"}
           </DialogTitle>
-          <DialogDescription className="text-sm mt-1">
+          <DialogDescription className="text-sm">
             Update the contact details and address below.
           </DialogDescription>
         </DialogHeader>
 
         {/* Content Section */}
-        <div className="px-6 py-6 space-y-5">
+        <div className="min-h-0 space-y-6 overflow-y-auto px-6 py-6">
           <div className="space-y-1.5">
             <label className="text-sm font-medium text-foreground/80">
               Full Name
             </label>
             <Input
-              className="h-10 bg-background"
+              className="h-11 bg-background"
               placeholder="e.g. John Doe"
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -119,7 +140,7 @@ export default function EditPartyDialog({
               Phone Number
             </label>
             <Input
-              className="h-10 bg-background"
+              className="h-11 bg-background"
               placeholder="e.g. +91 98765 43210"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
@@ -131,16 +152,49 @@ export default function EditPartyDialog({
               Address
             </label>
             <Input
-              className="h-10 bg-background"
+              className="h-11 bg-background"
               placeholder="Enter full address"
               value={address}
               onChange={(e) => setAddress(e.target.value)}
             />
           </div>
+
+          {type === "seller" && (
+            <div className="space-y-3 border-t pt-5">
+              <p className="text-sm font-medium text-foreground/80">
+                Broker Information
+              </p>
+
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    Broker Name
+                  </label>
+                  <Input
+                    className="h-11"
+                    placeholder="Enter broker name"
+                    value={brokerName}
+                    onChange={(e) => setBrokerName(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    Broker Number
+                  </label>
+                  <Input
+                    className="h-11"
+                    placeholder="Enter broker number"
+                    value={brokerPhone}
+                    onChange={(e) => setBrokerPhone(e.target.value)}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Footer Section */}
-        <div className="flex justify-end gap-3 border-t bg-muted/20 px-6 py-4">
+        <div className="flex shrink-0 justify-end gap-3 border-t bg-muted/20 px-6 py-4">
           <Button
             variant="outline"
             className="h-10 px-6"

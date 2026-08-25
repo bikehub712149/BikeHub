@@ -118,13 +118,11 @@ export default function EditFinancialDialog({
       open={open}
       onOpenChange={onOpenChange}
     >
-      <DialogContent className="max-w-xl rounded-3xl">
+      <DialogContent className="max-h-[90vh] max-w-xl overflow-hidden rounded-3xl p-0">
 
-        <DialogHeader>
+        <DialogHeader className="shrink-0 border-b bg-muted/20 px-7 py-6 gap-0">
 
-          <DialogTitle className="flex items-center gap-2 text-2xl">
-
-            <IndianRupee className="h-6 w-6" />
+          <DialogTitle className="flex items-center text-xl font-bold!">
 
             Edit Financial Information
 
@@ -136,15 +134,16 @@ export default function EditFinancialDialog({
 
         </DialogHeader>
 
-        <div className="mt-6 space-y-5">
+        <div className="min-h-0 space-y-6 overflow-y-auto px-7 py-6">
 
-          <div>
+          <div className="space-y-2">
 
             <label className="mb-2 block text-sm font-medium">
               Purchase Price
             </label>
 
             <Input
+              className="h-11"
               name="purchasePrice"
               type="number"
               value={form.purchasePrice}
@@ -153,13 +152,14 @@ export default function EditFinancialDialog({
 
           </div>
 
-          <div>
+          <div className="space-y-2">
 
             <label className="mb-2 block text-sm font-medium">
               Selling Price
             </label>
 
             <Input
+              className="h-11"
               name="sellingPrice"
               type="number"
               placeholder="Leave empty if bike isn't sold"
@@ -169,7 +169,7 @@ export default function EditFinancialDialog({
 
           </div>
 
-          <div className="rounded-2xl border bg-emerald-50 p-5">
+          <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
 
             <p className="text-sm text-slate-500">
               Estimated Profit
@@ -187,7 +187,7 @@ export default function EditFinancialDialog({
 
         </div>
 
-        <div className="mt-8 flex justify-end gap-3">
+        <div className="flex shrink-0 justify-end gap-3 border-t bg-muted/20 px-7 py-4">
 
           <Button
             variant="outline"
