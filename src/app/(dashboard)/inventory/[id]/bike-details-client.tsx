@@ -9,6 +9,8 @@ import BikeGalleryClient from "./gallery-client";
 import TechnicalCard from "@/components/bike-details/technical-card";
 import FinancialCard from "@/components/bike-details/financial-card";
 import PartyCard from "@/components/bike-details/party-card";
+import { Card, CardContent } from "@/components/ui/card";
+import { User, Phone } from "lucide-react";
 
 import DeleteBikeDialog from "@/components/dialogs/delete-bike-dialog";
 import EditTechnicalDialog from "@/components/dialogs/edit-technical-dialog";
@@ -151,6 +153,40 @@ export default function BikeDetailsClient({
               saleDate={transaction.saleDate}
               onEdit={() => setBuyerOpen(true)}
             />
+          </div>
+        )}
+
+        {/* Broker Information Card */}
+        {transaction && (transaction.brokerName || transaction.brokerNumber) && (
+          <div className="mt-6">
+            <Card className="rounded-3xl shadow-sm">
+              <CardContent className="p-8">
+                <div className="mb-4 flex items-center justify-between">
+                  <div>
+                    <h2 className="text-xl font-bold">Broker Information</h2>
+                    <p className="text-sm text-slate-500">Broker contact details</p>
+                  </div>
+                </div>
+
+                <div className="space-y-5">
+                  <div className="flex items-start gap-4">
+                    <div className="rounded-xl bg-slate-100 p-3 text-slate-600"><User size={18} /></div>
+                    <div>
+                      <p className="text-sm text-slate-500">Name</p>
+                      <p className="font-semibold">{transaction.brokerName ?? "NA"}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-4">
+                    <div className="rounded-xl bg-slate-100 p-3 text-slate-600"><Phone size={18} /></div>
+                    <div>
+                      <p className="text-sm text-slate-500">Number</p>
+                      <p className="font-semibold">{transaction.brokerNumber ?? "NA"}</p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         )}
 
