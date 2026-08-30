@@ -128,11 +128,6 @@
     font-family: var(--font-heading);
   }
 
-  input,
-  textarea{
-    text-transform: uppercase !important;
-  }
-
   .font-semibold,
   .font-bold,
   .font-extrabold,

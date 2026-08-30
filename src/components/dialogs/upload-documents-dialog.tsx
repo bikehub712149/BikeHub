@@ -54,9 +54,9 @@ export default function UploadDocumentsDialog({ bikeNumber, type }: Props) {
           imageFiles.map(async (file) => {
             const compressed = await imageCompression(file, {
               maxSizeMB: 0.2,
-              maxWidthOrHeight: 1400,
+              maxWidthOrHeight: 1920,
               fileType: "image/jpeg",
-              initialQuality: 0.7,
+              initialQuality: 0.85,
               useWebWorker: true,
             });
 
@@ -141,53 +141,61 @@ export default function UploadDocumentsDialog({ bikeNumber, type }: Props) {
         </DialogHeader>
 
         <div className="space-y-5">
-          <Input
-  multiple
-  type="file"
-  accept="image/*"
-  onChange={(e) => {
-    const files = Array.from(e.target.files ?? []);
+          <div className="space-y-2">
+            <label className="text-sm font-medium">
+              Choose Files {docs.length > 0 ? `${docs.length} FILES` : ""}
+            </label>
+            <Input
+              multiple
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                const files = Array.from(e.target.files ?? []);
 
-    setDocs((prev) => {
-      const all = [...prev, ...files];
+                setDocs((prev) => {
+                  const all = [...prev, ...files];
 
-      return all.filter(
-        (file, index, self) =>
-          index ===
-          self.findIndex(
-            (f) =>
-              f.name === file.name &&
-              f.size === file.size &&
-              f.lastModified === file.lastModified
-          )
-      );
-    });
-  }}
-/>
+                  return all.filter(
+                    (file, index, self) =>
+                      index ===
+                      self.findIndex(
+                        (f) =>
+                          f.name === file.name &&
+                          f.size === file.size &&
+                          f.lastModified === file.lastModified
+                      )
+                  );
+                });
+              }}
+            />
+          </div>
 
           {docs.length > 0 && (
-  <div className="rounded-xl border bg-slate-50 p-4 space-y-2 max-h-44 overflow-y-auto">
-    {docs.map((file, index) => (
-      <div
-        key={index}
-        className="flex items-center justify-between rounded-lg border bg-white px-3 py-2"
-      >
-        <span className="truncate text-sm">{file.name}</span>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Selected Files</label>
+              <div className="rounded-xl border bg-slate-50 p-4 space-y-2 max-h-44 overflow-y-auto">
+                {docs.map((file, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center justify-between rounded-lg border bg-white px-3 py-2"
+                  >
+                    <span className="truncate text-sm">{file.name}</span>
 
-        <Button
-          size="icon"
-          variant="ghost"
-          type="button"
-          onClick={() =>
-            setDocs((docs) => docs.filter((_, i) => i !== index))
-          }
-        >
-          <X size={16} />
-        </Button>
-      </div>
-    ))}
-  </div>
-)}
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      type="button"
+                      onClick={() =>
+                        setDocs((docs) => docs.filter((_, i) => i !== index))
+                      }
+                    >
+                      <X size={16} />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           <Button
             className="w-full"

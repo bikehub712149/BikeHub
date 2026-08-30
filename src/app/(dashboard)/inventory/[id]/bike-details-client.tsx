@@ -88,7 +88,7 @@ export default function BikeDetailsClient({
             </Link>
 
             <div className="flex items-center gap-3">
-              <h1 className="text-4xl font-bold">{bike.model}</h1>
+              <h1 className="text-4xl font-bold uppercase!">{bike.model}</h1>
 
               {bike.status === "Sold" ? (
                 <Badge
@@ -107,7 +107,7 @@ export default function BikeDetailsClient({
               )}
             </div>
 
-            <p className="mt-2 text-slate-500">
+            <p className="mt-2 text-slate-500 uppercase!">
               Registration No. {bike.number}
             </p>
           </div>

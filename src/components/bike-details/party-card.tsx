@@ -208,7 +208,7 @@ function Info({
   value: string;
 }) {
   return (
-    <div className="flex items-start gap-4">
+    <div className="flex items-start gap-4 uppercase!">
       <div className="rounded-xl bg-slate-100 p-3 text-slate-600">{icon}</div>
       <div>
         <p className="text-sm text-slate-500">{label}</p>

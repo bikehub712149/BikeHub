@@ -42,7 +42,7 @@ export default function TechnicalCard({
           </Button>
         </div>
 
-        <div className="grid grid-cols-3 gap-x-10 gap-y-8">
+        <div className="grid grid-cols-3 gap-x-10 gap-y-8 uppercase!">
           <Info title="Registration" value={bikeData.number} />
 
           <Info title="Model" value={bikeData.model} />

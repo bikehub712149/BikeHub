@@ -35,7 +35,7 @@ export default function BikeCard({
           />
         </div>
 
-        <CardContent className="flex flex-1 flex-col space-y-2 p-5">
+        <CardContent className="flex flex-1 flex-col space-y-2 p-5 uppercase!">
           {/* Header Info */}
           <div className="space-y-1">
             <h3 className="text-xl font-extrabold uppercase tracking-tight text-foreground line-clamp-1">
