@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { updateCustomer } from "@/lib/server/customer";
 import { verifyAdmin } from "@/lib/server/admin-auth";
+import { uppercaseDbText } from "@/lib/utils";
 
 export async function PATCH(
   req: NextRequest,
@@ -17,22 +18,23 @@ export async function PATCH(
     const { bikeNumber } = await params;
     const body = await req.json();
 
+    const normalizedBikeNumber = uppercaseDbText(bikeNumber);
     const update: Record<string, any> = {};
 
     if (body.seller) {
-      update["seller.name"] = body.seller.name;
+      update["seller.name"] = uppercaseDbText(body.seller.name || "");
       update["seller.phone"] = body.seller.phone;
-      update["seller.address"] = body.seller.address;
+      update["seller.address"] = uppercaseDbText(body.seller.address || "");
     }
 
     if (body.buyer) {
-      update["buyer.name"] = body.buyer.name;
+      update["buyer.name"] = uppercaseDbText(body.buyer.name || "");
       update["buyer.phone"] = body.buyer.phone;
-      update["buyer.address"] = body.buyer.address;
+      update["buyer.address"] = uppercaseDbText(body.buyer.address || "");
     }
 
     if (body.broker) {
-      update["broker.name"] = body.broker.name;
+      update["broker.name"] = uppercaseDbText(body.broker.name || "");
       update["broker.phone"] = body.broker.phone;
     }
 
@@ -52,7 +54,7 @@ export async function PATCH(
       update.receipt = body.receipt;
     }
 
-    const customer = await updateCustomer(bikeNumber, {
+    const customer = await updateCustomer(normalizedBikeNumber, {
       $set: update,
     });
 

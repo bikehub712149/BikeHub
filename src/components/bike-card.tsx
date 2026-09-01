@@ -39,10 +39,10 @@ export default function BikeCard({
           {/* Header Info */}
           <div className="space-y-1">
             <h3 className="text-xl font-extrabold uppercase tracking-tight text-foreground line-clamp-1">
-              {number}
+              {number.toUpperCase()}
             </h3>
             <p className="text-sm font-medium text-muted-foreground line-clamp-1">
-              {model}
+              {model.toUpperCase()}
             </p>
           </div>
 

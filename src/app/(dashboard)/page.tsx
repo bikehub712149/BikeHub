@@ -67,11 +67,11 @@ async function DashboardContent() {
                   {totalStock}
                 </h3>
               </div>
-              <div className="rounded-2xl bg-blue-500/10 p-4 text-blue-600 transition-colors group-hover:bg-blue-500/20">
+              <div className="rounded-2xl bg-green-600/10 p-4 text-green-600 transition-colors group-hover:bg-green-600/20">
                 <Bike size={28} strokeWidth={2.5} />
               </div>
             </div>
-            <div className="absolute bottom-0 left-0 h-1 w-full bg-gradient-to-r from-blue-500 to-blue-400 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+            <div className="absolute bottom-0 left-0 h-1 w-full bg-gradient-to-r from-green-600 to-green-500 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
           </div>
         </Link>
 
@@ -87,11 +87,11 @@ async function DashboardContent() {
                   {soldBikes}
                 </h3>
               </div>
-              <div className="rounded-2xl bg-emerald-500/10 p-4 text-emerald-600 transition-colors group-hover:bg-emerald-500/20">
+              <div className="rounded-2xl bg-red-600/10 p-4 text-red-600 transition-colors group-hover:bg-red-600/20">
                 <CheckCircle size={28} strokeWidth={2.5} />
               </div>
             </div>
-            <div className="absolute bottom-0 left-0 h-1 w-full bg-gradient-to-r from-emerald-500 to-emerald-400 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+            <div className="absolute bottom-0 left-0 h-1 w-full bg-gradient-to-r from-red-600 to-red-500 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
           </div>
         </Link>
 

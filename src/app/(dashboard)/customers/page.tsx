@@ -106,7 +106,7 @@ export default function CustomersPage() {
                   {/* Information */}
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-1">
-                      <h3 className="text-lg font-semibold">{bike.number}</h3>
+                      <h3 className="text-lg font-semibold">{bike.number.toUpperCase()}</h3>
 
                       {bike.status === "Sold" ? (
                         <Badge variant="sold" className="text-xs font-bold tracking-wider">
@@ -119,7 +119,7 @@ export default function CustomersPage() {
                       )}
                     </div>
 
-                    <p className="text-sm text-slate-500 mb-5">{bike.model}</p>
+                    <p className="text-sm text-slate-500 mb-5">{bike.model.toUpperCase()}</p>
 
                     <div className="flex items-start">
                       {/* Seller */}

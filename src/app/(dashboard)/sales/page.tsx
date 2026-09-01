@@ -250,13 +250,13 @@ export default function SalesPage() {
                           </div>
                           <div>
                             <div className="font-semibold text-foreground">
-                              {bike.number}
+                              {bike.number.toUpperCase()}
                             </div>
                           </div>
                         </div>
                       </td>
                       <td className="px-4 py-4">
-                        <div className="text-sm">{bike.model}</div>
+                        <div className="text-sm">{bike.model.toUpperCase()}</div>
                       </td>
                       <td className="px-4 py-4">
                         <div className="text-sm">{bike.year}</div>

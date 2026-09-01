@@ -43,17 +43,17 @@ export default function TechnicalCard({
         </div>
 
         <div className="grid grid-cols-3 gap-x-10 gap-y-8 uppercase!">
-          <Info title="Registration" value={bikeData.number} />
+          <Info title="Registration" value={bikeData.number.toUpperCase()} />
 
-          <Info title="Model" value={bikeData.model} />
+          <Info title="Model" value={bikeData.model.toUpperCase()} />
 
           <Info title="Registration Year" value={bikeData.year} />
 
           <Info title="Kilometers" value={bikeData.kms} />
 
-          <Info title="Engine Number" value={bikeData.engineNumber ?? "--"} />
+          <Info title="Engine Number" value={(bikeData.engineNumber ?? "--").toUpperCase()} />
 
-          <Info title="Chassis Number" value={bikeData.chassisNumber ?? "--"} />
+          <Info title="Chassis Number" value={(bikeData.chassisNumber ?? "--").toUpperCase()} />
 
           <Info
             title="Owner Series"

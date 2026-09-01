@@ -13,6 +13,7 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { uppercaseDbText } from "@/lib/utils";
 
 type Props = {
   open: boolean;
@@ -54,15 +55,15 @@ export default function EditPartyDialog({
   useEffect(() => {
     if (!person) return;
 
-    setName(person.name);
+    setName(uppercaseDbText(person.name));
     setPhone(person.phone);
-    setAddress(person.address);
+    setAddress(uppercaseDbText(person.address));
   }, [person]);
 
   useEffect(() => {
     if (type !== "seller") return;
 
-    setBrokerName(broker?.name ?? "");
+    setBrokerName(uppercaseDbText(broker?.name ?? ""));
     setBrokerPhone(broker?.phone ?? "");
   }, [broker, type]);
 
@@ -79,13 +80,13 @@ export default function EditPartyDialog({
 
         body: JSON.stringify({
           [type]: {
-            name,
+            name: uppercaseDbText(name),
             phone,
-            address,
+            address: uppercaseDbText(address),
           },
           ...(type === "seller" && {
             broker: {
-              name: brokerName,
+              name: uppercaseDbText(brokerName),
               phone: brokerPhone,
             },
           }),

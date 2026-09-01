@@ -1,6 +1,7 @@
 "use client";
 
 import { Plus, X } from "lucide-react";
+import { useState, useEffect } from "react";
 
 type BikeGalleryProps = {
   images: (File | string)[];
@@ -21,11 +22,36 @@ export default function BikeGallery({
   onAddImages,
   onRemoveImage,
 }: BikeGalleryProps) {
+  const [loadingImages, setLoadingImages] = useState<Set<number>>(new Set());
+
+  // Initialize loading state for all images on mount and when images change
+  useEffect(() => {
+    if (images.length > 0) {
+      setLoadingImages(new Set(images.map((_, i) => i)));
+    }
+  }, [images]);
+
+  // Reset loading state when selectedImage changes
+  useEffect(() => {
+    setLoadingImages((prev) => {
+      const updated = new Set(prev);
+      updated.add(selectedImage);
+      return updated;
+    });
+  }, [selectedImage]);
+
   function getImageSrc(image: File | string) {
     if (typeof image === "string") return image;
-
     return URL.createObjectURL(image);
   }
+
+  const handleImageLoad = (index: number) => {
+    setLoadingImages((prev) => {
+      const updated = new Set(prev);
+      updated.delete(index);
+      return updated;
+    });
+  };
 
   return (
     <div className="rounded-l-3xl border-r bg-slate-50 p-8">
@@ -35,13 +61,25 @@ export default function BikeGallery({
 
       {/* Main Image */}
 
-      <div className="h-80 overflow-hidden rounded-2xl border bg-white">
+      <div className="h-80 overflow-hidden rounded-2xl border bg-white relative flex items-center justify-center">
         {images.length ? (
-          <img
-            src={getImageSrc(images[selectedImage])}
-            alt=""
-            className="h-full w-full object-cover"
-          />
+          <>
+            {loadingImages.has(selectedImage) && (
+              <div
+                className="absolute inset-0 z-10 rounded-2xl bg-gradient-to-r from-slate-200 via-slate-100 to-slate-200 bg-[length:200%_100%]"
+                style={{
+                  animation: "shimmer 2s infinite",
+                }}
+              />
+            )}
+            <img
+              src={getImageSrc(images[selectedImage])}
+              alt=""
+              className="h-full w-full object-cover"
+              onLoad={() => handleImageLoad(selectedImage)}
+              onError={() => handleImageLoad(selectedImage)}
+            />
+          </>
         ) : (
           <div className="flex h-full items-center justify-center text-slate-400">
             No image selected
@@ -64,10 +102,20 @@ export default function BikeGallery({
                 : "border-slate-200"
             }`}
           >
+            {loadingImages.has(index) && (
+              <div
+                className="absolute inset-0 z-10 rounded-xl bg-gradient-to-r from-slate-200 via-slate-100 to-slate-200 bg-[length:200%_100%]"
+                style={{
+                  animation: "shimmer 2s infinite",
+                }}
+              />
+            )}
             <img
               src={getImageSrc(image)}
               alt=""
               className="h-20 w-full object-cover"
+              onLoad={() => handleImageLoad(index)}
+              onError={() => handleImageLoad(index)}
             />
 
             {editable && (

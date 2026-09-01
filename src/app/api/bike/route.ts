@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import { createBike, getAllBikes } from "@/lib/server/bike";
 import { createCustomer } from "@/lib/server/customer";
-// Adjust this import path to exactly where your uploadFile function lives!
 import { uploadFile } from "@/lib/server/upload";
 import { verifyAdmin } from "@/lib/server/admin-auth";
+import { uppercaseDbText } from "@/lib/utils";
 
 export async function GET() {
   try {
@@ -30,6 +30,15 @@ export async function POST(req: Request) {
     // Extract the JSON payload
     const dataString = formData.get("data") as string;
     const { bike, customer, mainImageIndex } = JSON.parse(dataString);
+
+    bike.number = uppercaseDbText(bike.number || "");
+    bike.model = uppercaseDbText(bike.model || "");
+    bike.engineNumber = uppercaseDbText(bike.engineNumber || "");
+    bike.chassisNumber = uppercaseDbText(bike.chassisNumber || "");
+    customer.bikeId = uppercaseDbText(customer.bikeId || "");
+    customer.seller.name = uppercaseDbText(customer.seller.name || "");
+    customer.seller.address = uppercaseDbText(customer.seller.address || "");
+    customer.broker.name = uppercaseDbText(customer.broker?.name || "");
 
     const bikeNumber = bike.number;
     const imageUrls: string[] = [];

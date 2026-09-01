@@ -66,7 +66,7 @@ export default function BikeSelector({
                 .map((bike) => (
                   <CommandItem
                     key={bike.id}
-                    value={`${bike.number} ${bike.model}`}
+                    value={`${bike.number.toUpperCase()} ${bike.model.toUpperCase()}`}
                     onSelect={() => {
                       onChange(bike);
                       setOpen(false);
@@ -82,10 +82,10 @@ export default function BikeSelector({
                     />
 
                     <div>
-                      <p className="font-medium">{bike.number}</p>
+                      <p className="font-medium">{bike.number.toUpperCase()}</p>
 
                       <p className="text-xs text-muted-foreground">
-                        {bike.model}
+                        {bike.model.toUpperCase()}
                       </p>
                     </div>
                   </CommandItem>

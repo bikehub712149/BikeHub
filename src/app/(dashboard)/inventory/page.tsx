@@ -115,9 +115,9 @@ async function InventoryTable({ status }: { status?: string }) {
                   </div>
                 </td>
                 <td className="px-6 py-4 font-semibold text-slate-900">
-                  {bike.number}
+                  {bike.number.toUpperCase()}
                 </td>
-                <td className="px-6 py-4">{bike.model}</td>
+                <td className="px-6 py-4">{bike.model.toUpperCase()}</td>
                 <td className="px-6 py-4">{bike.year}</td>
                 <td className="px-6 py-4">{bike.kms}</td>
                 <td className="px-6 py-4 font-semibold">
@@ -127,7 +127,9 @@ async function InventoryTable({ status }: { status?: string }) {
                   <span
                     className={`inline-flex rounded-md border px-3 py-1 text-xs font-semibold ${
                       bike.status === "Available"
-                        ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                        ? "border-green-600 bg-green-50 text-green-700"
+                        : bike.status === "Sold"
+                        ? "border-red-600 bg-red-50 text-red-700"
                         : "border-slate-200 bg-slate-100 text-slate-700"
                     }`}
                   >

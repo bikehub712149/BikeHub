@@ -164,9 +164,9 @@ export default function PaperworkPage() {
                         </div>
                       </td>
 
-                      <td className="px-6 py-4 font-semibold">{bike.number}</td>
+                      <td className="px-6 py-4 font-semibold">{bike.number.toUpperCase()}</td>
 
-                      <td className="px-6 py-4">{bike.model}</td>
+                      <td className="px-6 py-4">{bike.model.toUpperCase()}</td>
 
                       <td className="px-6 py-4">{bike.buyer?.name || "-"}</td>
 

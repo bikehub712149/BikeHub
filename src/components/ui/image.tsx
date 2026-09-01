@@ -18,16 +18,20 @@ export default function AppImage({
   const [src, setSrc] = useState(props.src);
 
   return (
-    
-    <div className={`relative flex items-center justify-center overflow-hidden bg-slate-50 ${className ?? ""}`}>
+    <div className={`relative flex items-center justify-center overflow-hidden bg-slate-100 ${className ?? ""}`}>
       {loading && (
-        <div className="absolute inset-0 z-10 animate-pulse bg-slate-200" />
+        <div
+          className="absolute inset-0 z-10 rounded-lg bg-gradient-to-r from-slate-200 via-slate-100 to-slate-200 bg-[length:200%_100%]"
+          style={{
+            animation: "shimmer 2s infinite",
+          }}
+        />
       )}
 
       <Image
         {...props}
         src={src}
-        className="h-full w-full object-cover drop-shadow-md transition duration-300 group-hover:scale-105"
+        className="h-full w-full object-cover drop-shadow-md transition-all duration-300 group-hover:scale-105"
         onLoad={(e) => {
           setLoading(false);
           onLoad?.(e);
@@ -37,6 +41,7 @@ export default function AppImage({
           setSrc(fallbackSrc);
           onError?.(e);
         }}
+        priority={false}
       />
     </div>
   );

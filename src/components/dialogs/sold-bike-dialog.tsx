@@ -20,6 +20,7 @@ import { toast } from "sonner";
 import imageCompression from "browser-image-compression";
 import { validateSoldBike } from "@/types/zod";
 import jsPDF from "jspdf";
+import { capitalizeInputText, uppercaseDbText } from "@/lib/utils";
 
 export default function SoldBikeDialog() {
   const [receipt, setReceipt] = useState<File | null>(null);
@@ -32,6 +33,7 @@ export default function SoldBikeDialog() {
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoadingBikes, setIsLoadingBikes] = useState(false); // Added loading state
+  const [isLoadingImage, setIsLoadingImage] = useState(true); // Added image loading state
 
   // Use a key to force file inputs to reset on success
   const [fileKey, setFileKey] = useState(Date.now());
@@ -85,9 +87,19 @@ export default function SoldBikeDialog() {
   function handleChange(
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) {
+    const { name, value } = e.target;
+
+    const formatField = (fieldName: string, rawValue: string) => {
+      if (["buyerPhone", "sellingPrice", "saleDate"].includes(fieldName)) {
+        return rawValue;
+      }
+
+      return capitalizeInputText(rawValue);
+    };
+
     setForm({
       ...form,
-      [e.target.name]: e.target.value,
+      [name]: formatField(name, value),
     });
   }
 
@@ -101,13 +113,14 @@ export default function SoldBikeDialog() {
       setIsSubmitting(true);
 
       const values = validateSoldBike(form);
+      const normalizedBuyerName = uppercaseDbText(values.buyerName);
+      const normalizedBuyerAddress = uppercaseDbText(values.buyerAddress);
 
-      // 1. Create your structured payload
       const payload = {
         buyer: {
-          name: values.buyerName,
+          name: normalizedBuyerName,
           phone: values.buyerPhone,
-          address: values.buyerAddress,
+          address: normalizedBuyerAddress,
           documents: [], // Backend will inject Cloudinary URL
         },
         saleDate: values.saleDate,
@@ -253,27 +266,40 @@ export default function SoldBikeDialog() {
               value={selectedBike ?? undefined}
               onChange={(bike) => {
                 setSelectedBike(bike);
+                setIsLoadingImage(true);
               }}
             />
 
             {selectedBike && (
               <>
-                <img
-                  src={selectedBike.image}
-                  alt={selectedBike.model}
-                  width={600}
-                  height={400}
-                  className="mt-8 h-60 w-full rounded-2xl border object-cover bg-muted/20"
-                />
+                <div className="mt-8 relative h-60 w-full overflow-hidden rounded-2xl border bg-muted/20 flex items-center justify-center">
+                  {isLoadingImage && (
+                    <div
+                      className="absolute inset-0 z-10 rounded-2xl bg-gradient-to-r from-slate-200 via-slate-100 to-slate-200 bg-[length:200%_100%]"
+                      style={{
+                        animation: "shimmer 2s infinite",
+                      }}
+                    />
+                  )}
+                  <img
+                    src={selectedBike.image}
+                    alt={selectedBike.model}
+                    width={600}
+                    height={400}
+                    className="h-full w-full object-cover"
+                    onLoad={() => setIsLoadingImage(false)}
+                    onError={() => setIsLoadingImage(false)}
+                  />
+                </div>
 
                 <div className="mt-8 grid grid-cols-2 gap-5">
                   <Input
-                    value={selectedBike.number}
+                    value={uppercaseDbText(selectedBike.number)}
                     readOnly
                     className="bg-slate-50 text-slate-700"
                   />
                   <Input
-                    value={selectedBike.model}
+                    value={uppercaseDbText(selectedBike.model)}
                     readOnly
                     className="bg-slate-50 text-slate-700"
                   />

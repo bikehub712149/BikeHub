@@ -25,6 +25,7 @@ import BikeGallery from "../bike-details/bike-gallery";
 import imageCompression from "browser-image-compression";
 import { validateBike } from "@/types/zod";
 import jsPDF from "jspdf";
+import { capitalizeInputText, uppercaseDbText } from "@/lib/utils";
 
 export default function AddBikeDialog() {
   const [images, setImages] = useState<File[]>([]);
@@ -57,9 +58,23 @@ export default function AddBikeDialog() {
   function handleChange(
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) {
+    const { name, value } = e.target;
+
+    const formatField = (fieldName: string, rawValue: string) => {
+      if (["sellerPhone", "brokerPhone", "year", "kms", "expectedSellingPrice", "purchasePrice", "ownerSerial"].includes(fieldName)) {
+        return rawValue;
+      }
+
+      if (["number", "engineNumber", "chassisNumber"].includes(fieldName)) {
+        return uppercaseDbText(rawValue);
+      }
+
+      return capitalizeInputText(rawValue);
+    };
+
     setForm({
       ...form,
-      [e.target.name]: e.target.value,
+      [name]: formatField(name, value),
     });
   }
 
@@ -84,33 +99,40 @@ export default function AddBikeDialog() {
       setIsSubmitting(true);
 
       const values = validateBike(form);
-      // 1. Create your structured payload
+      const normalizedNumber = uppercaseDbText(values.number);
+      const normalizedModel = uppercaseDbText(values.model);
+      const normalizedSellerName = uppercaseDbText(values.sellerName);
+      const normalizedSellerAddress = uppercaseDbText(values.sellerAddress);
+      const normalizedBrokerName = uppercaseDbText(values.brokerName || "");
+      const normalizedEngineNumber = uppercaseDbText(values.engineNumber);
+      const normalizedChassisNumber = uppercaseDbText(values.chassisNumber);
+
       const payload = {
         bike: {
           id: crypto.randomUUID(),
-          number: values.number,
-          model: values.model,
+          number: normalizedNumber,
+          model: normalizedModel,
           year: values.year,
           kms: values.kms,
           expectedSellingPrice: Number(values.expectedSellingPrice),
           status: "Available",
-          engineNumber: values.engineNumber,
-          chassisNumber: values.chassisNumber,
+          engineNumber: normalizedEngineNumber,
+          chassisNumber: normalizedChassisNumber,
           image: "", // Backend handles this
           images: [], // Backend handles this
           ownerSerial: values.ownerSerial,
         },
         customer: {
           id: crypto.randomUUID(),
-          bikeId: values.number,
+          bikeId: normalizedNumber,
           seller: {
-            name: values.sellerName,
+            name: normalizedSellerName,
             phone: values.sellerPhone,
-            address: values.sellerAddress,
+            address: normalizedSellerAddress,
             documents: [], // Backend handles this
           },
           broker: {
-            name: values.brokerName || "",
+            name: normalizedBrokerName,
             phone: values.brokerPhone || "",
           },
           purchasePrice: Number(values.purchasePrice),

@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCustomerByBikeId, updateCustomer } from "@/lib/server/customer";
 import { markBikeAsSold } from "@/lib/server/bike";
-// Make sure to import your Cloudinary uploader!
-import { uploadFile } from "@/lib/server/upload"; // Adjust path if necessary
+import { uploadFile } from "@/lib/server/upload";
 import { verifyAdmin } from "@/lib/server/admin-auth";
+import { uppercaseDbText } from "@/lib/utils";
 
 export async function PATCH(
   req: NextRequest,
@@ -17,12 +17,15 @@ export async function PATCH(
 
     const { bikeNumber } = await context.params;
 
-    // 1. Parse FormData instead of JSON
+    const normalizedBikeNumber = uppercaseDbText(bikeNumber);
+
     const formData = await req.formData();
 
-    // 2. Extract the JSON payload we sent from the frontend
     const dataString = formData.get("data") as string;
     const { buyer, sellingPrice, saleDate } = JSON.parse(dataString);
+
+    buyer.name = uppercaseDbText(buyer.name || "");
+    buyer.address = uppercaseDbText(buyer.address || "");
 
     let receiptUrl = null;
     const buyerDocsUrls: string[] = [];
@@ -34,8 +37,8 @@ export async function PATCH(
 
       const uploadResult: any = await uploadFile(
         buffer,
-        bikeNumber,
-        "receipt", // matches your Cloudinary folder structure
+        normalizedBikeNumber,
+        "receipt",
         receiptFile.name.split(".")[0]
       );
 
@@ -49,8 +52,8 @@ export async function PATCH(
 
       const uploadResult: any = await uploadFile(
         buffer,
-        bikeNumber,
-        "buyer", // matches your Cloudinary folder structure
+        normalizedBikeNumber,
+        "buyer",
         buyerDocsFile.name.split(".")[0]
       );
 
@@ -61,7 +64,7 @@ export async function PATCH(
     buyer.documents = buyerDocsUrls;
 
     // 5. Database Updates
-    const customer = await getCustomerByBikeId(bikeNumber);
+    const customer = await getCustomerByBikeId(normalizedBikeNumber);
 
     if (!customer) {
       return NextResponse.json(
@@ -70,7 +73,7 @@ export async function PATCH(
       );
     }
 
-    const updatedCustomer = await updateCustomer(bikeNumber, {
+    const updatedCustomer = await updateCustomer(normalizedBikeNumber, {
       $set: {
         buyer,
         sellingPrice,
@@ -79,7 +82,7 @@ export async function PATCH(
       },
     });
 
-    await markBikeAsSold(bikeNumber);
+    await markBikeAsSold(normalizedBikeNumber);
 
     return NextResponse.json(updatedCustomer);
   } catch (error: any) {

@@ -15,6 +15,7 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { capitalizeInputText, uppercaseDbText } from "@/lib/utils";
 
 type Bike = {
   id: string;
@@ -57,20 +58,34 @@ export default function EditTechnicalDialog({
     if (!bike) return;
 
     setForm({
-      model: bike.model,
+      model: uppercaseDbText(bike.model),
       year: String(bike.year),
       kms: bike.kms,
       ownerSerial: bike.ownerSerial ?? "",
-      engineNumber: bike.engineNumber ?? "",
-      chassisNumber: bike.chassisNumber ?? "",
+      engineNumber: uppercaseDbText(bike.engineNumber ?? ""),
+      chassisNumber: uppercaseDbText(bike.chassisNumber ?? ""),
       expectedSellingPrice: String(bike.expectedSellingPrice),
     });
   }, [bike]);
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const { name, value } = e.target;
+
+    const formatField = (fieldName: string, rawValue: string) => {
+      if (["year", "kms", "expectedSellingPrice"].includes(fieldName)) {
+        return rawValue;
+      }
+
+      if (["engineNumber", "chassisNumber"].includes(fieldName)) {
+        return uppercaseDbText(rawValue);
+      }
+
+      return capitalizeInputText(rawValue);
+    };
+
     setForm((prev) => ({
       ...prev,
-      [e.target.name]: e.target.value,
+      [name]: formatField(name, value),
     }));
   }
 
@@ -84,12 +99,12 @@ export default function EditTechnicalDialog({
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: form.model,
+          model: uppercaseDbText(form.model),
           year: form.year,
           kms: form.kms,
           ownerSerial: form.ownerSerial,
-          engineNumber: form.engineNumber,
-          chassisNumber: form.chassisNumber,
+          engineNumber: uppercaseDbText(form.engineNumber),
+          chassisNumber: uppercaseDbText(form.chassisNumber),
           expectedSellingPrice: Number(form.expectedSellingPrice),
         }),
       });
