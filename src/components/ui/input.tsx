@@ -3,10 +3,17 @@ import { Input as InputPrimitive } from "@base-ui/react/input"
 
 import { cn } from "@/lib/utils"
 
-function Input({ className, type, ...props }: React.ComponentProps<"input">) {
+function Input({ className, type, onWheel, ...props }: React.ComponentProps<"input">) {
   return (
     <InputPrimitive
       type={type}
+      onWheel={(event) => {
+        onWheel?.(event);
+        if (type === "number") {
+          event.preventDefault();
+          event.currentTarget.blur();
+        }
+      }}
       data-slot="input"
       autoComplete="off"
       className={cn(

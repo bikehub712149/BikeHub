@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { CheckCircle2, Loader2 } from "lucide-react";
 
 import {
@@ -17,6 +17,7 @@ import {
 import { Button } from "@/components/ui/button";
 import Image from "@/components/ui/image";
 import { useSearchParams } from "next/navigation";
+import InfiniteScrollLoader from "@/components/ui/infinite-scroll-loader";
 
 type Bike = {
   id: string;
@@ -35,6 +36,9 @@ type Bike = {
 export default function PaperworkPage() {
   const [bikes, setBikes] = useState<Bike[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [page, setPage] = useState(0);
+  const [hasNextPage, setHasNextPage] = useState(true);
 
   const [selectedBike, setSelectedBike] = useState<Bike | null>(null);
   const searchParams = useSearchParams();
@@ -44,28 +48,46 @@ export default function PaperworkPage() {
 
   const [tab, setTab] = useState<"Pending" | "Completed">(initialTab);
 
-  async function fetchData() {
-    setLoading(true);
+  const fetchData = useCallback(async (nextPage = 1, append = false) => {
+    if (append) setLoadingMore(true);
+    else setLoading(true);
 
     try {
-      const res = await fetch("/api/sales");
+      const res = await fetch(
+        `/api/sales?page=${nextPage}&pageSize=25&paperwork=${tab.toLowerCase()}`
+      );
       const data = await res.json();
 
-      setBikes(data);
+      setBikes((current) => {
+        const nextItems = append ? [...current, ...data.items] : data.items;
+        return Array.from(
+          new Map<string, Bike>(
+            nextItems.map((item: Bike) => [item.id, item] as [string, Bike])
+          ).values()
+        );
+      });
+      setPage(nextPage);
+      setHasNextPage(data.pagination.hasNextPage);
     } finally {
-      setLoading(false);
+      if (append) setLoadingMore(false);
+      else setLoading(false);
     }
-  }
+  }, [tab]);
 
   useEffect(() => {
+    setBikes([]);
     fetchData();
-  }, []);
+  }, [fetchData]);
+
+  const loadMore = useCallback(() => {
+    if (!loadingMore && hasNextPage) fetchData(page + 1, true);
+  }, [fetchData, hasNextPage, loadingMore, page]);
 
   async function completePaperwork() {
     if (!selectedBike) return;
 
     try {
-      await fetch(`/api/paperwork/${selectedBike.number}`, {
+      await fetch(`/api/paperwork/${encodeURIComponent(selectedBike.number)}`, {
         method: "PATCH",
       });
 
@@ -75,8 +97,6 @@ export default function PaperworkPage() {
       console.error(err);
     }
   }
-
-  const filtered = bikes.filter((bike) => bike.paperwork === tab);
 
   return (
     <div className="flex-1 overflow-y-auto p-4 pb-32">
@@ -140,7 +160,7 @@ export default function PaperworkPage() {
               </thead>
 
               <tbody className="divide-y divide-slate-100">
-                {filtered.length === 0 ? (
+                {bikes.length === 0 ? (
                   <tr>
                     <td
                       colSpan={tab === "Pending" ? 6 : 5}
@@ -150,7 +170,7 @@ export default function PaperworkPage() {
                     </td>
                   </tr>
                 ) : (
-                  filtered.map((bike) => (
+                  bikes.map((bike) => (
                     <tr key={bike.id} className="transition hover:bg-slate-50">
                       <td className="px-6 py-4">
                         <div className="h-14 w-20 overflow-hidden rounded-lg border">
@@ -202,6 +222,12 @@ export default function PaperworkPage() {
           </div>
         </div>
       )}
+
+      <InfiniteScrollLoader
+        hasNextPage={hasNextPage}
+        loading={loadingMore}
+        onLoadMore={loadMore}
+      />
 
       {/* Confirmation Dialog */}
       <AlertDialog

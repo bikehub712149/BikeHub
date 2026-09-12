@@ -54,6 +54,13 @@ export async function PATCH(
       update.receipt = body.receipt;
     }
 
+    if (Object.keys(update).length === 0) {
+      return NextResponse.json(
+        { message: "No fields to update" },
+        { status: 400 }
+      );
+    }
+
     const customer = await updateCustomer(normalizedBikeNumber, {
       $set: update,
     });

@@ -1,20 +1,28 @@
 import { NextResponse } from "next/server";
 import {
   getCustomers,
+  getCustomersPage,
   createCustomer,
 } from "@/lib/server/customer";
-import { getAllBikes } from "@/lib/server/bike";
+import { getBikesByNumbers } from "@/lib/server/bike";
 import { verifyAdmin } from "@/lib/server/admin-auth";
+import { getPaginationParams } from "@/lib/server/pagination";
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
     const authError = await verifyAdmin();
     if (authError) return authError;
 
-    const customers = await getCustomers();
-    const bikes = await getAllBikes();
+    const url = new URL(req.url);
+    const paginated = url.searchParams.has("page") || url.searchParams.has("pageSize");
+    const result = paginated
+      ? await getCustomersPage(getPaginationParams(url.searchParams))
+      : { items: await getCustomers(), pagination: undefined };
+    const bikes = await getBikesByNumbers(
+      result.items.map((customer: any) => customer.bikeId)
+    );
 
-    const data = customers.map((customer: any) => {
+    const data = result.items.map((customer: any) => {
       const bike = bikes.find((b: any) => b.number === customer.bikeId);
 
       return {
@@ -23,7 +31,9 @@ export async function GET() {
       };
     });
 
-    return NextResponse.json(data);
+    return NextResponse.json(
+      paginated ? { items: data, pagination: result.pagination } : data
+    );
   } catch (err) {
     console.error(err);
 

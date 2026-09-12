@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { Loader2, Save } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -21,7 +21,7 @@ type Bike = {
   id: string;
   number: string;
   model: string;
-  year: String;
+  year: string;
   kms: string;
   engineNumber?: string;
   chassisNumber?: string;
@@ -43,6 +43,8 @@ export default function EditTechnicalDialog({
   const router = useRouter();
 
   const [loading, setLoading] = useState(false);
+  const [waitingForRefresh, setWaitingForRefresh] = useState(false);
+  const [isPending, startTransition] = useTransition();
 
   const [form, setForm] = useState({
     model: "",
@@ -67,6 +69,23 @@ export default function EditTechnicalDialog({
       expectedSellingPrice: String(bike.expectedSellingPrice),
     });
   }, [bike]);
+
+  function handleOpenChange(nextOpen: boolean) {
+    if (!nextOpen && (loading || waitingForRefresh || isPending)) return;
+    onOpenChange(nextOpen);
+  }
+
+  useEffect(() => {
+    if (waitingForRefresh && !isPending) {
+      const timeoutId = window.setTimeout(() => {
+        setWaitingForRefresh(false);
+        setLoading(false);
+        onOpenChange(false);
+      });
+
+      return () => window.clearTimeout(timeoutId);
+    }
+  }, [isPending, onOpenChange, waitingForRefresh]);
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     const { name, value } = e.target;
@@ -113,17 +132,16 @@ export default function EditTechnicalDialog({
 
       toast.success("Bike information updated successfully.");
 
-      onOpenChange(false);
-      router.refresh();
+      setWaitingForRefresh(true);
+      startTransition(() => router.refresh());
     } catch {
       toast.error("Failed to update bike.");
-    } finally {
       setLoading(false);
     }
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="!max-w-2xl max-h-[90vh] overflow-hidden rounded-2xl bg-background p-0 shadow-xl">
         <DialogHeader className="shrink-0 border-b bg-muted/20 px-7 pb-5 pt-7 !gap-0">
           <DialogTitle className="text-xl font-bold tracking-tight">
@@ -261,7 +279,7 @@ export default function EditTechnicalDialog({
 
           <Button
             className="h-9 min-w-[140px]"
-            disabled={loading}
+            disabled={loading || waitingForRefresh || isPending}
             onClick={saveChanges}
           >
             {loading ? (

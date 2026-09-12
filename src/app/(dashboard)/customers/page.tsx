@@ -5,11 +5,15 @@ import { FileText, Download, Loader2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import InfiniteScrollLoader from "@/components/ui/infinite-scroll-loader";
 
 export default function CustomersPage() {
   const [customers, setCustomers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [page, setPage] = useState(0);
+  const [hasNextPage, setHasNextPage] = useState(true);
   
   // Tracks which specific receipt is currently downloading
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
@@ -17,10 +21,12 @@ export default function CustomersPage() {
   useEffect(() => {
     async function fetchCustomers() {
       try {
-        const res = await fetch("/api/customers");
+        const res = await fetch("/api/customers?page=1&pageSize=25");
         if (!res.ok) throw new Error();
         const data = await res.json();
-        setCustomers(data);
+        setCustomers(data.items);
+        setPage(1);
+        setHasNextPage(data.pagination.hasNextPage);
       } catch (err) {
         console.error(err);
       } finally {
@@ -29,6 +35,26 @@ export default function CustomersPage() {
     }
     fetchCustomers();
   }, []);
+
+  const loadMore = useCallback(async () => {
+    if (loadingMore || !hasNextPage) return;
+    setLoadingMore(true);
+    try {
+      const nextPage = page + 1;
+      const res = await fetch(`/api/customers?page=${nextPage}&pageSize=25`);
+      if (!res.ok) throw new Error();
+      const data = await res.json();
+      setCustomers((current) =>
+        Array.from(
+          new Map([...current, ...data.items].map((item) => [item.id, item])).values()
+        )
+      );
+      setPage(nextPage);
+      setHasNextPage(data.pagination.hasNextPage);
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [hasNextPage, loadingMore, page]);
 
   // Updated to accept the recordId so we can track the loading state
   const handleDownload = async (url: string, desiredFileName: string, recordId: string) => {
@@ -220,6 +246,11 @@ export default function CustomersPage() {
           );
         })}
       </div>
+      <InfiniteScrollLoader
+        hasNextPage={hasNextPage}
+        loading={loadingMore}
+        onLoadMore={loadMore}
+      />
     </div>
   );
 }

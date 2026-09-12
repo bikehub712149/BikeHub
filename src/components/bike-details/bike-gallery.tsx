@@ -1,7 +1,7 @@
 "use client";
 
 import { Plus, X } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 type BikeGalleryProps = {
   images: (File | string)[];
@@ -22,33 +22,29 @@ export default function BikeGallery({
   onAddImages,
   onRemoveImage,
 }: BikeGalleryProps) {
-  const [loadingImages, setLoadingImages] = useState<Set<number>>(new Set());
+  const [loadingImages, setLoadingImages] = useState<Set<File | string>>(
+    new Set()
+  );
+  const loadedImages = useRef<Set<File | string>>(new Set());
 
-  // Initialize loading state for all images on mount and when images change
   useEffect(() => {
-    if (images.length > 0) {
-      setLoadingImages(new Set(images.map((_, i) => i)));
-    }
+    setLoadingImages(
+      new Set(
+        images.filter((image) => !loadedImages.current.has(image))
+      )
+    );
   }, [images]);
-
-  // Reset loading state when selectedImage changes
-  useEffect(() => {
-    setLoadingImages((prev) => {
-      const updated = new Set(prev);
-      updated.add(selectedImage);
-      return updated;
-    });
-  }, [selectedImage]);
 
   function getImageSrc(image: File | string) {
     if (typeof image === "string") return image;
     return URL.createObjectURL(image);
   }
 
-  const handleImageLoad = (index: number) => {
+  const handleImageLoad = (image: File | string) => {
+    loadedImages.current.add(image);
     setLoadingImages((prev) => {
       const updated = new Set(prev);
-      updated.delete(index);
+      updated.delete(image);
       return updated;
     });
   };
@@ -64,7 +60,7 @@ export default function BikeGallery({
       <div className="h-80 overflow-hidden rounded-2xl border bg-white relative flex items-center justify-center">
         {images.length ? (
           <>
-            {loadingImages.has(selectedImage) && (
+            {loadingImages.has(images[selectedImage]) && (
               <div
                 className="absolute inset-0 z-10 rounded-2xl bg-gradient-to-r from-slate-200 via-slate-100 to-slate-200 bg-[length:200%_100%]"
                 style={{
@@ -76,8 +72,8 @@ export default function BikeGallery({
               src={getImageSrc(images[selectedImage])}
               alt=""
               className="h-full w-full object-cover"
-              onLoad={() => handleImageLoad(selectedImage)}
-              onError={() => handleImageLoad(selectedImage)}
+              onLoad={() => handleImageLoad(images[selectedImage])}
+              onError={() => handleImageLoad(images[selectedImage])}
             />
           </>
         ) : (
@@ -102,7 +98,7 @@ export default function BikeGallery({
                 : "border-slate-200"
             }`}
           >
-            {loadingImages.has(index) && (
+            {loadingImages.has(image) && (
               <div
                 className="absolute inset-0 z-10 rounded-xl bg-gradient-to-r from-slate-200 via-slate-100 to-slate-200 bg-[length:200%_100%]"
                 style={{
@@ -114,8 +110,8 @@ export default function BikeGallery({
               src={getImageSrc(image)}
               alt=""
               className="h-20 w-full object-cover"
-              onLoad={() => handleImageLoad(index)}
-              onError={() => handleImageLoad(index)}
+              onLoad={() => handleImageLoad(image)}
+              onError={() => handleImageLoad(image)}
             />
 
             {editable && (

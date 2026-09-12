@@ -1,8 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import imageCompression from "browser-image-compression";
-import jsPDF from "jspdf";
 import { Loader2, Plus, X } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -16,7 +14,8 @@ import {
 } from "@/components/ui/dialog";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import FilePicker from "@/components/ui/file-picker";
+import { createImagePdf } from "@/lib/create-image-pdf";
 
 type Props = {
   bikeNumber: string;
@@ -27,6 +26,7 @@ export default function UploadDocumentsDialog({ bikeNumber, type }: Props) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [docs, setDocs] = useState<File[]>([]);
+  const [fileKey, setFileKey] = useState(0);
   const router = useRouter();
   async function uploadDocuments() {
     try {
@@ -43,60 +43,17 @@ export default function UploadDocumentsDialog({ bikeNumber, type }: Props) {
       // ----------------------------
 
       if (imageFiles.length > 0) {
-        const pdf = new jsPDF({
-          orientation: "p",
-          unit: "mm",
-          format: "a4",
-          compress: true,
-        });
-
-        const processedImages = await Promise.all(
-          imageFiles.map(async (file) => {
-            const compressed = await imageCompression(file, {
-              maxSizeMB: 0.2,
-              maxWidthOrHeight: 1920,
-              fileType: "image/jpeg",
-              initialQuality: 0.85,
-              useWebWorker: true,
-            });
-
-            return new Promise<string>((resolve) => {
-              const reader = new FileReader();
-
-              reader.readAsDataURL(compressed);
-
-              reader.onloadend = () => resolve(reader.result as string);
-            });
-          })
-        );
-
-        processedImages.forEach((img, index) => {
-          if (index > 0) {
-            pdf.addPage();
-          }
-
-          const props = pdf.getImageProperties(img);
-
-          const width = pdf.internal.pageSize.getWidth();
-
-          const height = (props.height * width) / props.width;
-
-          pdf.addImage(img, "JPEG", 0, 0, width, height, undefined, "SLOW");
-        });
-
-        const blob = pdf.output("blob");
-
-        const imagePdf = new File([blob], `${type}-images.pdf`, {
-          type: "application/pdf",
-        });
-
+        const imagePdf = await createImagePdf(imageFiles, `${type}-images.pdf`);
         formData.append("document", imagePdf);
       }
 
-      const res = await fetch(`/api/customers/documents/${bikeNumber}`, {
-        method: "POST",
-        body: formData,
-      });
+      const res = await fetch(
+        `/api/customers/documents/${encodeURIComponent(bikeNumber)}`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
 
       if (!res.ok) {
         throw new Error();
@@ -105,6 +62,7 @@ export default function UploadDocumentsDialog({ bikeNumber, type }: Props) {
       toast.success("Documents updated.");
 
       setDocs([]);
+      setFileKey((key) => key + 1);
       setOpen(false);
 
       // Refresh the page to reflect the updated documents
@@ -129,7 +87,7 @@ export default function UploadDocumentsDialog({ bikeNumber, type }: Props) {
         }
       />
 
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="max-h-[90vh] overflow-y-auto p-7 sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>
             Upload More {type === "seller" ? "Seller" : "Buyer"} Documents
@@ -140,15 +98,17 @@ export default function UploadDocumentsDialog({ bikeNumber, type }: Props) {
 </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-5">
+        <div className="space-y-6">
           <div className="space-y-2">
-            <label className="text-sm font-medium">
+            <label htmlFor={`documents-${type}`} className="text-sm font-medium">
               Choose Files {docs.length > 0 ? `${docs.length} FILES` : ""}
             </label>
-            <Input
+            <FilePicker
+              id={`documents-${type}`}
+              resetKey={fileKey}
               multiple
-              type="file"
               accept="image/*"
+              label="Choose documents"
               onChange={(e) => {
                 const files = Array.from(e.target.files ?? []);
 
@@ -166,6 +126,7 @@ export default function UploadDocumentsDialog({ bikeNumber, type }: Props) {
                       )
                   );
                 });
+                setFileKey((key) => key + 1);
               }}
             />
           </div>
@@ -174,9 +135,9 @@ export default function UploadDocumentsDialog({ bikeNumber, type }: Props) {
             <div className="space-y-2">
               <label className="text-sm font-medium">Selected Files</label>
               <div className="rounded-xl border bg-slate-50 p-4 space-y-2 max-h-44 overflow-y-auto">
-                {docs.map((file, index) => (
+                {docs.map((file) => (
                   <div
-                    key={index}
+                    key={`${file.name}-${file.size}-${file.lastModified}`}
                     className="flex items-center justify-between rounded-lg border bg-white px-3 py-2"
                   >
                     <span className="truncate text-sm">{file.name}</span>
@@ -186,7 +147,7 @@ export default function UploadDocumentsDialog({ bikeNumber, type }: Props) {
                       variant="ghost"
                       type="button"
                       onClick={() =>
-                        setDocs((docs) => docs.filter((_, i) => i !== index))
+                        setDocs((docs) => docs.filter((candidate) => candidate !== file))
                       }
                     >
                       <X size={16} />

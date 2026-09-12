@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Loader2, Save, IndianRupee } from "lucide-react";
+import { useEffect, useState, useTransition } from "react";
+import { Loader2, Save } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
@@ -37,6 +37,8 @@ export default function EditFinancialDialog({
   const router = useRouter();
 
   const [loading, setLoading] = useState(false);
+  const [waitingForRefresh, setWaitingForRefresh] = useState(false);
+  const [isPending, startTransition] = useTransition();
 
   const [form, setForm] = useState({
     purchasePrice: "",
@@ -54,6 +56,23 @@ export default function EditFinancialDialog({
     });
   }, [purchasePrice, sellingPrice]);
 
+  function handleOpenChange(nextOpen: boolean) {
+    if (!nextOpen && (loading || waitingForRefresh || isPending)) return;
+    onOpenChange(nextOpen);
+  }
+
+  useEffect(() => {
+    if (waitingForRefresh && !isPending) {
+      const timeoutId = window.setTimeout(() => {
+        setWaitingForRefresh(false);
+        setLoading(false);
+        onOpenChange(false);
+      });
+
+      return () => window.clearTimeout(timeoutId);
+    }
+  }, [isPending, onOpenChange, waitingForRefresh]);
+
   function handleChange(
     e: React.ChangeEvent<HTMLInputElement>
   ) {
@@ -68,7 +87,7 @@ export default function EditFinancialDialog({
       setLoading(true);
 
       const res = await fetch(
-        `/api/customers/edit/${bikeNumber}`,
+        `/api/customers/edit/${encodeURIComponent(bikeNumber)}`,
         {
           method: "PATCH",
 
@@ -95,14 +114,12 @@ export default function EditFinancialDialog({
         "Financial information updated."
       );
 
-      onOpenChange(false);
-
-      router.refresh();
+      setWaitingForRefresh(true);
+      startTransition(() => router.refresh());
     } catch {
       toast.error(
         "Failed to update financial information."
       );
-    } finally {
       setLoading(false);
     }
   }
@@ -114,10 +131,7 @@ export default function EditFinancialDialog({
         Number(form.purchasePrice);
 
   return (
-    <Dialog
-      open={open}
-      onOpenChange={onOpenChange}
-    >
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-h-[90vh] max-w-xl overflow-hidden rounded-3xl p-0">
 
         <DialogHeader className="shrink-0 border-b bg-muted/20 px-7 py-6 gap-0">
@@ -198,7 +212,7 @@ export default function EditFinancialDialog({
 
           <Button
             onClick={saveChanges}
-            disabled={loading}
+            disabled={loading || waitingForRefresh || isPending}
             className="min-w-[150px]"
           >
             {loading ? (

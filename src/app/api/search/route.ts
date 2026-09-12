@@ -12,6 +12,7 @@ export async function GET(req: Request) {
     const q = searchParams.get("q")?.trim().toLowerCase();
 
     if (!q) return NextResponse.json([]);
+    if (q.length > 100) return NextResponse.json([]);
 
     const [bikes, customers] = await Promise.all([
       getAllBikes(),
@@ -45,7 +46,11 @@ export async function GET(req: Request) {
           item.buyer?.name?.toLowerCase().includes(q) ||
           item.buyer?.phone?.includes(q)
         );
-      });
+      })
+      .filter(
+        (item: any, index: number, items: any[]) =>
+          items.findIndex((candidate) => candidate.bikeId === item.bikeId) === index
+      );
 
     return NextResponse.json(results.slice(0, 8));
   } catch {

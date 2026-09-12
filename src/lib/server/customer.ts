@@ -1,5 +1,7 @@
 import { connectDB } from "@/lib/db";
 import CustomerTransaction from "@/models/CustomerTransaction";
+import { uppercaseDbText } from "@/lib/utils";
+import { buildPagination } from "./pagination";
 
 export async function getCustomers() {
   await connectDB();
@@ -8,7 +10,7 @@ export async function getCustomers() {
 
 export async function getCustomerByBikeId(bikeId: string) {
   await connectDB();
-  return CustomerTransaction.findOne({ bikeId }).lean();
+  return CustomerTransaction.findOne({ bikeId: uppercaseDbText(bikeId) }).lean();
 }
 
 export async function createCustomer(data: any) {
@@ -23,7 +25,7 @@ export async function updateCustomer(
   await connectDB();
 
   return CustomerTransaction.findOneAndUpdate(
-    { bikeId },
+    { bikeId: uppercaseDbText(bikeId) },
     data,
     {
       new: true,
@@ -34,5 +36,31 @@ export async function updateCustomer(
 export async function deleteCustomerByBikeId(bikeId: string) {
   await connectDB();
 
-  return CustomerTransaction.findOneAndDelete({ bikeId });
+  return CustomerTransaction.findOneAndDelete({
+    bikeId: uppercaseDbText(bikeId),
+  });
+}
+
+export async function getCustomersPage({
+  page,
+  pageSize,
+}: {
+  page: number;
+  pageSize: number;
+}) {
+  await connectDB();
+
+  const [items, totalItems] = await Promise.all([
+    CustomerTransaction.find()
+      .sort({ createdAt: -1, _id: -1 })
+      .skip((page - 1) * pageSize)
+      .limit(pageSize)
+      .lean(),
+    CustomerTransaction.countDocuments(),
+  ]);
+
+  return {
+    items,
+    pagination: buildPagination(page, pageSize, totalItems),
+  };
 }

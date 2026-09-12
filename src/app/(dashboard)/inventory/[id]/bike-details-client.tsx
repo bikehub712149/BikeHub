@@ -154,7 +154,11 @@ export default function BikeDetailsClient({
               documents={transaction.buyer?.documents ?? []}
               receipt={transaction.receipt}
               saleDate={transaction.saleDate}
-              onEdit={() => setBuyerOpen(true)}
+              onEdit={
+                bike.status === "Sold"
+                  ? () => setBuyerOpen(true)
+                  : undefined
+              }
             />
           </div>
         )}

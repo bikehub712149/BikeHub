@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { verifyAdmin } from "@/lib/server/admin-auth";
 import { getCustomerByBikeId, updateCustomer } from "@/lib/server/customer";
+import { uppercaseDbText } from "@/lib/utils";
 
 import { uploadFile } from "@/lib/server/upload";
 import { downloadPdf, mergePdfBuffers } from "@/lib/server/mergePdf";
@@ -21,8 +22,9 @@ export async function POST(
     if (authError) return authError;
 
     const { bikeNumber } = await params;
+    const normalizedBikeNumber = uppercaseDbText(bikeNumber);
 
-    const customer = await getCustomerByBikeId(bikeNumber);
+    const customer = await getCustomerByBikeId(normalizedBikeNumber);
 
     if (!customer) {
       return NextResponse.json(
@@ -67,7 +69,7 @@ export async function POST(
 
     const upload: any = await uploadFile(
       finalBuffer,
-      bikeNumber,
+      normalizedBikeNumber,
       type,
       `${type}-merged`
     );
@@ -76,7 +78,7 @@ export async function POST(
       await deleteCloudinaryByUrl(existingUrl);
     }
 
-    await updateCustomer(bikeNumber, {
+    await updateCustomer(normalizedBikeNumber, {
       $set: {
         [`${type}.documents`]: [upload.secure_url],
       },

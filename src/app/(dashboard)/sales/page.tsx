@@ -1,7 +1,7 @@
 // app/sales/page.tsx
 "use client";
 
-import { useState, useEffect } from "react";
+import { useCallback, useState, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Image from "@/components/ui/image";
+import InfiniteScrollLoader from "@/components/ui/infinite-scroll-loader";
 
 // Utility Functions
 const formatCurrency = (value: number): string => {
@@ -81,17 +82,24 @@ const StatCard = ({
 export default function SalesPage() {
   const [soldBikes, setSoldBikes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [page, setPage] = useState(0);
+  const [hasNextPage, setHasNextPage] = useState(true);
+  const [summary, setSummary] = useState({ totalRevenue: 0, totalProfit: 0, bikesSold: 0 });
 
   useEffect(() => {
     async function fetchSales() {
       try {
-        const res = await fetch("/api/sales");
+        const res = await fetch("/api/sales?page=1&pageSize=25");
 
         if (!res.ok) throw new Error();
 
         const data = await res.json();
 
-        setSoldBikes(data);
+        setSoldBikes(data.items);
+        setSummary(data.summary);
+        setPage(1);
+        setHasNextPage(data.pagination.hasNextPage);
       } catch (err) {
         console.error(err);
       } finally {
@@ -102,20 +110,32 @@ export default function SalesPage() {
     fetchSales();
   }, []);
 
-  // Calculate total revenue
-  const totalRevenue = soldBikes.reduce(
-    (sum, bike) => sum + (bike.sellingPrice || 0),
-    0
-  );
+  const loadMore = useCallback(async () => {
+    if (loadingMore || !hasNextPage) return;
+    setLoadingMore(true);
+    try {
+      const nextPage = page + 1;
+      const res = await fetch(`/api/sales?page=${nextPage}&pageSize=25`);
+      if (!res.ok) throw new Error();
+      const data = await res.json();
+      setSoldBikes((current) =>
+        Array.from(
+          new Map([...current, ...data.items].map((item) => [item.id, item])).values()
+        )
+      );
+      setPage(nextPage);
+      setHasNextPage(data.pagination.hasNextPage);
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [hasNextPage, loadingMore, page]);
 
-  // Calculate profit
-  const totalProfit = soldBikes.reduce(
-    (sum, bike) => sum + ((bike.sellingPrice || 0) - (bike.purchasePrice || 0)),
-    0
-  );
+  // Calculate total revenue
+  const totalRevenue = summary.totalRevenue;
+  const totalProfit = summary.totalProfit;
 
   const averageProfit =
-    soldBikes.length > 0 ? totalProfit / soldBikes.length : 0;
+    summary.bikesSold > 0 ? totalProfit / summary.bikesSold : 0;
 
   // Placeholder trend data
   const stats = [
@@ -131,7 +151,7 @@ export default function SalesPage() {
     },
     {
       title: "Bikes Sold",
-      value: soldBikes.length.toString(),
+      value: summary.bikesSold.toString(),
       icon: ShoppingBag,
     },
     {
@@ -316,6 +336,11 @@ export default function SalesPage() {
           </div>
         </CardContent>
       </Card>
+      <InfiniteScrollLoader
+        hasNextPage={hasNextPage}
+        loading={loadingMore}
+        onLoadMore={loadMore}
+      />
     </div>
   );
 }

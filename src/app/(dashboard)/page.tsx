@@ -7,7 +7,7 @@ import {
   ArrowRight,
   TrendingUp,
 } from "lucide-react";
-import { getAllBikes } from "@/lib/server/bike";
+import { getBikeOverview } from "@/lib/server/bike";
 import BikeCard from "@/components/bike-card";
 import Link from "next/link";
 
@@ -37,16 +37,8 @@ export default function DashboardOverview() {
 // 1. Data Fetching Component
 // ------------------------------------------------------
 async function DashboardContent() {
-  const allBikes = await getAllBikes();
-
-  const recentBikes = allBikes.slice(0, 6);
-  const totalStock = allBikes.filter(
-    (bike) => bike.status === "Available"
-  ).length;
-  const soldBikes = allBikes.filter((bike) => bike.status === "Sold").length;
-  const pendingBikes = allBikes.filter(
-    (bike) => bike.paperwork === "Pending"
-  ).length;
+  const { recentBikes, totalStock, soldBikes, pendingBikes } =
+    await getBikeOverview();
 
   return (
     <div className="space-y-10">

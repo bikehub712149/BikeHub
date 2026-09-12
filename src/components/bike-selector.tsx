@@ -45,7 +45,7 @@ export default function BikeSelector({
             className="h-12 w-full justify-between rounded-xl"
           >
             {value
-              ? `${value.number} • ${value.model}`
+              ? `${value.number.toUpperCase()} • ${value.model.toUpperCase()}`
               : "Search & Select Bike"}
 
             <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />

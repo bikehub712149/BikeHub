@@ -1,17 +1,28 @@
 import { NextResponse } from "next/server";
-import { createBike, getAllBikes } from "@/lib/server/bike";
+import { createBike, getAllBikes, getBikesPage } from "@/lib/server/bike";
 import { createCustomer } from "@/lib/server/customer";
 import { uploadFile } from "@/lib/server/upload";
 import { verifyAdmin } from "@/lib/server/admin-auth";
 import { uppercaseDbText } from "@/lib/utils";
+import { getPaginationParams } from "@/lib/server/pagination";
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
     const authError = await verifyAdmin();
     if (authError) return authError;
 
-    const bikes = await getAllBikes();
-    return NextResponse.json(bikes);
+    const url = new URL(req.url);
+    const hasPagination = url.searchParams.has("page") || url.searchParams.has("pageSize");
+
+    if (!hasPagination) {
+      return NextResponse.json(await getAllBikes());
+    }
+
+    const statusParam = url.searchParams.get("status")?.toLowerCase();
+    const status = statusParam === "available" ? "Available" : statusParam === "sold" ? "Sold" : undefined;
+    return NextResponse.json(
+      await getBikesPage({ ...getPaginationParams(url.searchParams), status })
+    );
   } catch {
     return NextResponse.json(
       { message: "Failed to fetch bikes" },

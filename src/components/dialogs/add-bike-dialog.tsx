@@ -22,12 +22,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import BikeGallery from "../bike-details/bike-gallery";
-import imageCompression from "browser-image-compression";
 import { validateBike } from "@/types/zod";
-import jsPDF from "jspdf";
 import { capitalizeInputText, uppercaseDbText } from "@/lib/utils";
+import FilePicker from "@/components/ui/file-picker";
+import { createImagePdf } from "@/lib/create-image-pdf";
+import { prepareUploadImage } from "@/lib/prepare-upload-image";
 
 export default function AddBikeDialog() {
+  const [open, setOpen] = useState(false);
   const [images, setImages] = useState<File[]>([]);
   const [selectedImage, setSelectedImage] = useState(0);
   const [sellerDocs, setSellerDocs] = useState<File[]>([]);
@@ -143,72 +145,16 @@ export default function AddBikeDialog() {
       // 2. Initialize FormData
       const formData = new FormData();
       formData.append("data", JSON.stringify(payload));
-      // ---------------------------------------------------------
-      // 3. COMPRESS BIKE IMAGES (Target ~1MB & HD)
-      // ---------------------------------------------------------
-      const compressedBikeFiles = await Promise.all(
-        images.map(async (file) => {
-          const compressedBlob = await imageCompression(file, {
-            maxSizeMB: 0.5, // 500KB
-            maxWidthOrHeight: 1600, // still HD enough
-            useWebWorker: true,
-            initialQuality: 0.8,
-            alwaysKeepResolution: false,
-          });
-          return new File([compressedBlob], file.name, { type: file.type });
-        })
-      );
-
-      compressedBikeFiles.forEach((file) => formData.append("images", file));
+      const preparedImages = await Promise.all(images.map(prepareUploadImage));
+      preparedImages.forEach((file) => formData.append("images", file));
 
       // ---------------------------------------------------------
-      // 4. COMPRESS DOCS & BUNDLE TO PDF (Target ~1MB per doc & HD)
-      // ---------------------------------------------------------
-      const docImages = sellerDocs;
-
-      if (docImages.length > 0) {
-        const pdf = new jsPDF({
-          orientation: "p",
-          unit: "mm",
-          format: "a4",
-          compress: true,
-        });
-
-        const processedDocs = await Promise.all(
-          docImages.map(async (file) => {
-            const compressedBlob = await imageCompression(file, {
-              maxSizeMB: 0.15,
-              maxWidthOrHeight: 1200,
-              fileType: "image/jpeg",
-              useWebWorker: true,
-              initialQuality: 0.65,
-            });
-
-            return new Promise<string>((resolve) => {
-              const reader = new FileReader();
-              reader.readAsDataURL(compressedBlob);
-              reader.onloadend = () => resolve(reader.result as string);
-            });
-          })
+      // 4. Bundle original document images into a print-safe PDF.
+      if (sellerDocs.length > 0) {
+        const combinedPdfFile = await createImagePdf(
+          sellerDocs,
+          `${values.number}-seller-docs.pdf`
         );
-
-        processedDocs.forEach((base64Str, i) => {
-          if (i > 0) pdf.addPage();
-
-          const imgProps = pdf.getImageProperties(base64Str);
-          const pdfWidth = pdf.internal.pageSize.getWidth();
-          const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-
-          pdf.addImage(base64Str, "JPEG", 0, 0, pdfWidth, pdfHeight);
-        });
-
-        const pdfBlob = pdf.output("blob");
-        const combinedPdfFile = new File(
-          [pdfBlob],
-          `${values.number}-seller-docs.pdf`,
-          { type: "application/pdf" }
-        );
-
         formData.append("sellerDocs", combinedPdfFile);
       }
 
@@ -252,6 +198,7 @@ export default function AddBikeDialog() {
       setSelectedImage(0);
       setFileKey(Date.now());
 
+      setOpen(false);
       router.refresh();
     } catch (err: any) {
       toast.error(err.message || "Something went wrong.");
@@ -261,7 +208,7 @@ export default function AddBikeDialog() {
   }
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger
         render={
           <Button className="h-12 rounded-xl px-6">
@@ -271,7 +218,7 @@ export default function AddBikeDialog() {
         }
       />
 
-      <DialogContent className="!max-w-[82vw] max-h-[90vh] flex flex-col gap-0 overflow-hidden rounded-3xl">
+      <DialogContent className="!max-w-[82vw] max-h-[90vh] flex flex-col gap-0 overflow-hidden rounded-3xl p-7">
         <DialogHeader className="shrink-0 border-b bg-muted/20 px-6 py-5">
           <DialogTitle className="text-2xl font-bold tracking-tight">Add New Bike</DialogTitle>
 
@@ -466,11 +413,12 @@ export default function AddBikeDialog() {
                 single PDF automatically.
               </p>
 
-              <Input
-                type="file"
-                key={fileKey}
+              <FilePicker
+                id="seller-documents"
                 multiple
                 accept="image/*"
+                label="Choose seller documents"
+                resetKey={fileKey}
                 onChange={(e) => {
                   const files = Array.from(e.target.files ?? []);
 
@@ -495,9 +443,9 @@ export default function AddBikeDialog() {
 
               {sellerDocs.length > 0 && (
                 <div className="mt-4 space-y-2 rounded-xl border bg-slate-50 p-4">
-                  {sellerDocs.map((file, index) => (
+                  {sellerDocs.map((file) => (
                     <div
-                      key={index}
+                      key={`${file.name}-${file.size}-${file.lastModified}`}
                       className="flex items-center justify-between rounded-lg bg-white px-3 py-2 border"
                     >
                       <span className="truncate text-sm">{file.name}</span>
@@ -508,7 +456,7 @@ export default function AddBikeDialog() {
                         type="button"
                         onClick={() => {
                           setSellerDocs((docs) =>
-                            docs.filter((_, i) => i !== index)
+                            docs.filter((candidate) => candidate !== file)
                           );
                           setFileKey(Date.now()); // reset file input
                         }}

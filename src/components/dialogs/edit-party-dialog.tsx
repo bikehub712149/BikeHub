@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { Loader2, Save } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
@@ -45,6 +46,8 @@ export default function EditPartyDialog({
 }: Props) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [waitingForRefresh, setWaitingForRefresh] = useState(false);
+  const [isPending, startTransition] = useTransition();
 
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -67,49 +70,72 @@ export default function EditPartyDialog({
     setBrokerPhone(broker?.phone ?? "");
   }, [broker, type]);
 
+  function handleOpenChange(nextOpen: boolean) {
+    if (!nextOpen && (loading || waitingForRefresh || isPending)) return;
+    onOpenChange(nextOpen);
+  }
+
+  useEffect(() => {
+    if (waitingForRefresh && !isPending) {
+      const timeoutId = window.setTimeout(() => {
+        setWaitingForRefresh(false);
+        setLoading(false);
+        onOpenChange(false);
+      });
+
+      return () => window.clearTimeout(timeoutId);
+    }
+  }, [isPending, onOpenChange, waitingForRefresh]);
+
   async function save() {
     try {
       setLoading(true);
 
-      const res = await fetch(`/api/customers/edit/${bikeNumber}`, {
-        method: "PATCH",
+      const res = await fetch(
+        `/api/customers/edit/${encodeURIComponent(bikeNumber)}`,
+        {
+          method: "PATCH",
 
-        headers: {
-          "Content-Type": "application/json",
-        },
-
-        body: JSON.stringify({
-          [type]: {
-            name: uppercaseDbText(name),
-            phone,
-            address: uppercaseDbText(address),
+          headers: {
+            "Content-Type": "application/json",
           },
-          ...(type === "seller" && {
-            broker: {
-              name: uppercaseDbText(brokerName),
-              phone: brokerPhone,
+
+          body: JSON.stringify({
+            [type]: {
+              name: uppercaseDbText(name),
+              phone,
+              address: uppercaseDbText(address),
             },
+            ...(type === "seller" && {
+              broker: {
+                name: uppercaseDbText(brokerName),
+                phone: brokerPhone,
+              },
+            }),
           }),
-        }),
-      });
+        }
+      );
 
       if (!res.ok) {
         throw new Error("Failed to update");
       }
 
-      router.refresh();
-      onOpenChange(false);
+      toast.success(
+        `${type === "seller" ? "Seller" : "Buyer"} information updated.`
+      );
+      setWaitingForRefresh(true);
+      startTransition(() => router.refresh());
 
-    } catch (err) {
-      console.error(err);
-      alert("Failed to update.");
-    } finally {
+    } catch {
+      toast.error(
+        `Failed to update ${type === "seller" ? "seller" : "buyer"} information.`
+      );
       setLoading(false);
     }
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-h-[90vh] gap-0 overflow-hidden rounded-2xl border-border/50 bg-background p-0 shadow-xl sm:max-w-lg">
         
         {/* Header Section */}
@@ -207,7 +233,7 @@ export default function EditPartyDialog({
           <Button
             className="h-10 min-w-[140px]"
             onClick={save}
-            disabled={loading}
+            disabled={loading || waitingForRefresh || isPending}
           >
             {loading ? (
               <>

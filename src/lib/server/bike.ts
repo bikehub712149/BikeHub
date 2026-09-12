@@ -1,19 +1,37 @@
 import { connectDB } from "@/lib/db";
 import Bike from "@/models/Bike";
 import { Bike as BikeType } from "@/types/bike";
+import { uppercaseDbText } from "@/lib/utils";
+import { buildPagination } from "./pagination";
+
+function normalizeBike(bike: BikeType): BikeType {
+  return {
+    ...bike,
+    number: uppercaseDbText(bike.number),
+    model: uppercaseDbText(bike.model),
+    engineNumber: uppercaseDbText(bike.engineNumber ?? ""),
+    chassisNumber: uppercaseDbText(bike.chassisNumber ?? ""),
+  };
+}
+
+function normalizeBikes(bikes: BikeType[]) {
+  return bikes.map(normalizeBike);
+}
 
 export async function getAllBikes() {
   await connectDB();
 
-  return await Bike.find()
+  const bikes = await Bike.find()
     .sort({ createdAt: -1 })
     .lean<BikeType[]>();
+  return normalizeBikes(bikes);
 }
 
 export async function getBikeById(id: string) {
   await connectDB();
 
-  return await Bike.findOne({ id }).lean<BikeType | null>();
+  const bike = await Bike.findOne({ id }).lean<BikeType | null>();
+  return bike ? normalizeBike(bike) : null;
 }
 
 export async function createBike(data: BikeType) {
@@ -66,4 +84,64 @@ export async function deleteBike(id: string) {
   await connectDB();
 
   return await Bike.findOneAndDelete({ id });
+}
+
+export async function getBikesPage({
+  status,
+  paperwork,
+  page,
+  pageSize,
+}: {
+  status?: "Available" | "Sold";
+  paperwork?: "Pending" | "Completed";
+  page: number;
+  pageSize: number;
+}) {
+  await connectDB();
+
+  const filter = {
+    ...(status ? { status } : {}),
+    ...(paperwork ? { paperwork } : {}),
+  };
+  const [items, totalItems] = await Promise.all([
+    Bike.find(filter)
+      .sort({ createdAt: -1, _id: -1 })
+      .skip((page - 1) * pageSize)
+      .limit(pageSize)
+      .lean<BikeType[]>(),
+    Bike.countDocuments(filter),
+  ]);
+
+  return {
+    items: normalizeBikes(items),
+    pagination: buildPagination(page, pageSize, totalItems),
+  };
+}
+
+export async function getBikesByNumbers(numbers: string[]) {
+  await connectDB();
+
+  if (numbers.length === 0) return [];
+
+  const normalizedNumbers = numbers.map((number) => uppercaseDbText(number));
+  const bikes = await Bike.find({ number: { $in: normalizedNumbers } }).lean<BikeType[]>();
+  return normalizeBikes(bikes);
+}
+
+export async function getBikeOverview() {
+  await connectDB();
+
+  const [recentBikes, totalStock, soldBikes, pendingBikes] = await Promise.all([
+    Bike.find().sort({ createdAt: -1, _id: -1 }).limit(6).lean<BikeType[]>(),
+    Bike.countDocuments({ status: "Available" }),
+    Bike.countDocuments({ status: "Sold" }),
+    Bike.countDocuments({ paperwork: "Pending" }),
+  ]);
+
+  return {
+    recentBikes: normalizeBikes(recentBikes),
+    totalStock,
+    soldBikes,
+    pendingBikes,
+  };
 }

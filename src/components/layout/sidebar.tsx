@@ -48,7 +48,7 @@ export default function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="sticky top-0 z-40 h-screen w-64 flex-col border-r bg-background">
+    <aside className="sticky top-0 z-40 flex h-screen w-64 flex-col border-r bg-background">
       {/* Logo */}
       <div className="border-b h-26 flex items-center justify-center">
         <h1 className="text-2xl font-bold">BikeHub</h1>
@@ -76,6 +76,16 @@ export default function Sidebar() {
           );
         })}
       </nav>
+
+      <div className="border-t px-4 py-4 text-right text-[13px] text-muted-foreground">
+        <Link
+          href="/terms"
+          className="block font-medium transition-colors hover:text-foreground"
+        >
+          Terms &amp; Conditions
+        </Link>
+        <span className="mt-1 block text-[13px]">-- dev.nasim</span>
+      </div>
     </aside>
   );
 }
