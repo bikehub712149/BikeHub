@@ -48,14 +48,14 @@ export default function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="sticky top-0 z-40 flex h-screen w-64 flex-col border-r bg-background">
+    <aside className="sticky top-0 z-40 flex h-screen w-56 flex-col border-r bg-background">
       {/* Logo */}
-      <div className="border-b h-26 flex items-center justify-center">
-        <h1 className="text-2xl font-bold">BikeHub</h1>
+      <div className="flex h-22 items-center justify-center border-b">
+        <h1 className="text-xl font-bold">BikeHub</h1>
       </div>
 
       {/* Navigation */}
-      <nav className="flex flex-1 flex-col gap-2 p-4">
+      <nav className="flex flex-1 flex-col gap-1 p-3">
         {links.map((link) => {
           const Icon = link.icon;
           const active = pathname === link.href;
@@ -64,27 +64,27 @@ export default function Sidebar() {
             <Link
               key={link.href}
               href={link.href}
-              className={`flex items-center gap-3 rounded-lg px-4 py-3 transition-colors ${
+              className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors ${
                 active
                   ? "bg-primary text-primary-foreground"
                   : "hover:bg-muted"
               }`}
             >
-              <Icon size={20} />
+              <Icon size={18} />
               <span>{link.title}</span>
             </Link>
           );
         })}
       </nav>
 
-      <div className="border-t px-4 py-4 text-right text-[13px] text-muted-foreground">
+      <div className="border-t px-3 py-3 text-right text-xs text-muted-foreground">
         <Link
           href="/terms"
           className="block font-medium transition-colors hover:text-foreground"
         >
           Terms &amp; Conditions
         </Link>
-        <span className="mt-1 block text-[13px]">-- dev.nasim</span>
+        <span className="mt-1 block text-xs">-- dev.nasim</span>
       </div>
     </aside>
   );
