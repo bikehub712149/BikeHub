@@ -5,6 +5,7 @@ import { uppercaseDbText } from "@/lib/utils";
 import { buildPagination } from "./pagination";
 
 function normalizeBike(bike: BikeType): BikeType {
+  // Normalize read results so identifiers and search comparisons match stored uppercase data.
   return {
     ...bike,
     number: uppercaseDbText(bike.number),
@@ -54,6 +55,7 @@ export async function updateBike(
 export async function markBikeAsSold(bikeId: string) {
   await connectDB();
 
+  // Sales are keyed by registration number; completing a sale also resets paperwork to pending.
   return Bike.findOneAndUpdate(
     { number: bikeId },
     {
@@ -99,6 +101,7 @@ export async function getBikesPage({
 }) {
   await connectDB();
 
+  // The _id tie-breaker keeps page order stable when bikes share a createdAt timestamp.
   const filter = {
     ...(status ? { status } : {}),
     ...(paperwork ? { paperwork } : {}),

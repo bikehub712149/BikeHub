@@ -60,6 +60,7 @@ export default function SoldBikeDialog() {
   // Triggered every time the modal is opened
   async function fetchBikes() {
     try {
+      // Refresh on every open so bikes sold elsewhere are not left in a stale selector.
       setIsLoadingBikes(true); // Start loading
       const res = await fetch("/api/bike");
       if (!res.ok) {
@@ -68,7 +69,6 @@ export default function SoldBikeDialog() {
       const data: Bike[] = await res.json();
       setBikes(data.filter((bike) => bike.status === "Available"));
     } catch (err) {
-      console.error(err);
       toast.error("Failed to load bikes");
     } finally {
       setIsLoadingBikes(false); // Stop loading regardless of success/fail
@@ -81,6 +81,7 @@ export default function SoldBikeDialog() {
     if (isOpen) {
       fetchBikes(); // Fetch fresh data when opening
     } else {
+      // Closing resets files and fields so the next sale starts from a clean form.
       resetForm(); // Clean up when closing
     }
   };

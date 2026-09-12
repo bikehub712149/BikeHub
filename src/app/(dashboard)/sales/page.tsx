@@ -101,7 +101,6 @@ export default function SalesPage() {
         setPage(1);
         setHasNextPage(data.pagination.hasNextPage);
       } catch (err) {
-        console.error(err);
       } finally {
         setLoading(false);
       }

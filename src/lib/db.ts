@@ -6,20 +6,10 @@ if (!MONGODB_URI) {
   throw new Error("Please define MONGODB_URI");
 }
 
-let cached = (global as any).mongoose;
-
-if (!cached) {
-  cached = (global as any).mongoose = {
-    conn: null,
-    promise: null,
-  };
-}
-
-
 export async function connectDB() {
   try {
+    // Reuse an existing Mongoose connection across requests in the same server process.
     if (mongoose.connection.readyState >= 1) {
-      console.log("Already Connected");
       return;
     }
 
@@ -27,7 +17,6 @@ export async function connectDB() {
 
     console.log("Mongo Connected ✅");
   } catch (err) {
-    console.error("Mongo Error:", err);
     throw err;
   }
 }

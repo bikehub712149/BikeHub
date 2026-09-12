@@ -31,6 +31,7 @@ export default function InventoryList({ status }: { status?: string }) {
       const response = await fetch(`/api/bike?${query}`);
       if (!response.ok) throw new Error("Failed to fetch inventory");
       const data = await response.json();
+      // Replace on refresh, append on scroll, and deduplicate in case pages overlap.
       setBikes((current) => {
         const nextItems = nextPage === 1 ? data.items : [...current, ...data.items];
         return Array.from(
@@ -40,6 +41,7 @@ export default function InventoryList({ status }: { status?: string }) {
         );
       });
       setPage(nextPage);
+      // Pagination metadata is authoritative; item count alone is ambiguous at page boundaries.
       setHasNextPage(data.pagination.hasNextPage);
     } finally {
       setLoading(false);

@@ -10,7 +10,7 @@ cloudinary.config({
  * Delete a Cloudinary asset from its URL.
  */
 export async function deleteCloudinaryByUrl(url?: string) {
-  // Ignore empty/local URLs
+  // Ignore empty/local URLs; only Cloudinary upload URLs contain a removable public ID.
   if (!url || !url.includes("/upload/")) {
     return null;
   }
@@ -27,7 +27,7 @@ export async function deleteCloudinaryByUrl(url?: string) {
       .replace(/\.[^.]+$/, "")
   );
 
-  // Try image
+  // The same URL can represent an image, PDF (raw), or video, so try each resource type.
   let result = await cloudinary.uploader.destroy(publicId, {
     resource_type: "image",
     invalidate: true,
@@ -58,9 +58,8 @@ export async function deleteCloudinaryByUrl(url?: string) {
 export async function deleteCloudinaryFolder(folder: string) {
   try {
     return await cloudinary.api.delete_folder(folder);
-  } catch (err: any) {
-    // Ignore if folder isn't empty or doesn't exist
-    console.log(`Folder "${folder}" not deleted: ${err.message}`);
+  } catch {
+    // Ignore if folder isn't empty or doesn't exist.
     return null;
   }
 }

@@ -51,6 +51,8 @@ export async function POST(
         ? customer.seller?.documents?.[0]
         : customer.buyer?.documents?.[0];
 
+      // Each side stores one merged PDF URL; append new pages before replacing the old asset.
+
     const buffers: Buffer[] = [];
 
     for (const file of files) {
@@ -74,6 +76,7 @@ export async function POST(
       `${type}-merged`
     );
 
+    // Delete the previous PDF only after the replacement upload succeeds.
     if (existingUrl) {
       await deleteCloudinaryByUrl(existingUrl);
     }
@@ -89,7 +92,6 @@ export async function POST(
       url: upload.secure_url,
     });
   } catch (err: any) {
-    console.error(err);
 
     return NextResponse.json(
       {

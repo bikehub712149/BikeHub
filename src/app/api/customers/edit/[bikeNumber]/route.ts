@@ -74,7 +74,6 @@ export async function PATCH(
 
     return NextResponse.json(customer);
   } catch (error: any) {
-    console.error(error);
 
     return NextResponse.json({ message: error.message }, { status: 500 });
   }

@@ -32,6 +32,7 @@ export default function UploadDocumentsDialog({ bikeNumber, type }: Props) {
     try {
       setLoading(true);
 
+      // The client sends one PDF; the server merges it with the existing remote PDF.
       const imageFiles = docs;
 
       const formData = new FormData();
@@ -68,7 +69,6 @@ export default function UploadDocumentsDialog({ bikeNumber, type }: Props) {
       // Refresh the page to reflect the updated documents
       router.refresh();
     } catch (err) {
-      console.error(err);
 
       toast.error("Failed to upload documents.");
     } finally {

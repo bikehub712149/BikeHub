@@ -20,7 +20,6 @@ export async function PATCH(
       message: "Paperwork completed",
     });
   } catch (err) {
-    console.error(err);
     return NextResponse.json(
       { message: "Failed to update paperwork" },
       { status: 500 }

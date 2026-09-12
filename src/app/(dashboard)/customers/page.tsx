@@ -28,7 +28,6 @@ export default function CustomersPage() {
         setPage(1);
         setHasNextPage(data.pagination.hasNextPage);
       } catch (err) {
-        console.error(err);
       } finally {
         setLoading(false);
       }
@@ -56,7 +55,7 @@ export default function CustomersPage() {
     }
   }, [hasNextPage, loadingMore, page]);
 
-  // Updated to accept the recordId so we can track the loading state
+  // Download through a blob for a filename, with a direct URL fallback for remote-file failures.
   const handleDownload = async (url: string, desiredFileName: string, recordId: string) => {
     if (!url) return;
     
@@ -82,7 +81,6 @@ export default function CustomersPage() {
 
       window.URL.revokeObjectURL(localUrl);
     } catch (error) {
-      console.error("Download failed:", error);
       window.open(url, "_blank");
     } finally {
       // Stop the spinner

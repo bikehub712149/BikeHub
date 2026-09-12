@@ -42,7 +42,6 @@ export default function SettingsPage() {
           percentage: data.creditsPercent,
         });
       } catch (error) {
-        console.error(error);
       } finally {
         setLoadingStorage(false);
       }

@@ -84,7 +84,14 @@ export default function Sidebar() {
         >
           Terms &amp; Conditions
         </Link>
-        <span className="mt-1 block text-xs">-- dev.nasim</span>
+        <a
+          href="https://dev-nasim.vercel.app"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-1 block text-xs transition-colors hover:text-foreground"
+        >
+          -- dev.nasim
+        </a>
       </div>
     </aside>
   );

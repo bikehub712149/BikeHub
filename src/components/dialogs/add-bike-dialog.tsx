@@ -100,6 +100,7 @@ export default function AddBikeDialog() {
     try {
       setIsSubmitting(true);
 
+      // The client prepares files; the API uploads assets, applies fallbacks, and writes records.
       const values = validateBike(form);
       const normalizedNumber = uppercaseDbText(values.number);
       const normalizedModel = uppercaseDbText(values.model);
@@ -142,14 +143,14 @@ export default function AddBikeDialog() {
         mainImageIndex: selectedImage,
       };
 
-      // 2. Initialize FormData
+      // Keep the selected image index separate so the server can choose the main image URL.
       const formData = new FormData();
       formData.append("data", JSON.stringify(payload));
       const preparedImages = await Promise.all(images.map(prepareUploadImage));
       preparedImages.forEach((file) => formData.append("images", file));
 
       // ---------------------------------------------------------
-      // 4. Bundle original document images into a print-safe PDF.
+      // Bundle seller document images into one PDF before sending the multipart request.
       if (sellerDocs.length > 0) {
         const combinedPdfFile = await createImagePdf(
           sellerDocs,

@@ -20,6 +20,7 @@ export async function GET(req: Request) {
       page,
       pageSize,
     });
+    // Page sold bikes first, then join their customer transaction data by registration number.
     const customers = await CustomerTransaction.find({
       bikeId: { $in: result.items.map((bike) => bike.number) },
     }).lean();
@@ -37,6 +38,7 @@ export async function GET(req: Request) {
         };
     });
 
+    // Summary totals cover all matching transactions, not only the current page.
     const [summaryResult, bikesSold] = await Promise.all([
       CustomerTransaction.aggregate([
         { $match: { sellingPrice: { $ne: null } } },
@@ -68,7 +70,6 @@ export async function GET(req: Request) {
       pagination: result.pagination,
     });
   } catch (error) {
-    console.error(error);
 
     return NextResponse.json(
       { message: "Failed to fetch sales" },

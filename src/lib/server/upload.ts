@@ -7,6 +7,7 @@ export async function uploadFile(
   folder: "images" | "seller" | "buyer" | "receipt",
   fileName: string
 ) {
+  // Keep assets grouped by bike and use unique IDs to avoid collisions during retries.
   return new Promise((resolve, reject) => {
     cloudinary.uploader
       .upload_stream(
@@ -14,6 +15,7 @@ export async function uploadFile(
           folder: `bike-hub/${bikeNumber}/${folder}`,
           public_id: `${Date.now()}-${crypto.randomUUID()}`,
           overwrite: false,
+          // PDFs are uploaded as raw assets while images use Cloudinary's image type.
           resource_type: "auto",
         },
         (err, result) => {

@@ -18,7 +18,7 @@ export async function DELETE(
 
     const { id } = await params;
 
-    // Find the bike first
+    // Resolve related records before cleanup because their URLs are needed for asset deletion.
     const bike = await getBikeById(id);
 
     if (!bike) {
@@ -27,7 +27,7 @@ export async function DELETE(
 
     const customer = await getCustomerByBikeId(bike.number);
 
-    // Delete bike images
+    // Remove individual assets before deleting their now-empty Cloudinary folders.
     for (const image of bike.images ?? []) {
       await deleteCloudinaryByUrl(image);
     }
@@ -45,7 +45,7 @@ export async function DELETE(
     // Delete receipt
     await deleteCloudinaryByUrl(customer?.receipt);
 
-    // Delete customer history using registration number
+    // Customer history is keyed by registration number, while the bike record uses its id.
     await deleteCustomerByBikeId(bike.number);
 
     // Delete bike
@@ -61,7 +61,6 @@ export async function DELETE(
       message: "Bike deleted successfully",
     });
   } catch (err) {
-    console.error(err);
 
     return NextResponse.json(
       { message: "Failed to delete bike" },

@@ -17,7 +17,6 @@ export async function GET() {
       creditsPercent: result.credits.used_percent, // Your overall percentage used
     });
   } catch (error) {
-    console.error("Cloudinary usage error:", error);
     return NextResponse.json(
       { error: "Failed to fetch storage usage" },
       { status: 500 }

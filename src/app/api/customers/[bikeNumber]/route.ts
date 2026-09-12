@@ -30,7 +30,7 @@ export async function PATCH(
     let receiptUrl = null;
     const buyerDocsUrls: string[] = [];
 
-    // 3. Process Receipt Upload (if the user attached one)
+    // Upload optional receipt and buyer documents before saving their URLs to the transaction.
     const receiptFile = formData.get("receipt") as File | null;
     if (receiptFile) {
       const buffer = Buffer.from(await receiptFile.arrayBuffer());
@@ -45,7 +45,6 @@ export async function PATCH(
       receiptUrl = uploadResult.secure_url;
     }
 
-    // 4. Process Buyer Documents PDF (if the user attached docs)
     const buyerDocsFile = formData.get("buyerDocs") as File | null;
     if (buyerDocsFile) {
       const buffer = Buffer.from(await buyerDocsFile.arrayBuffer());
@@ -63,7 +62,7 @@ export async function PATCH(
     // Attach the Cloudinary URLs back to the buyer object
     buyer.documents = buyerDocsUrls;
 
-    // 5. Database Updates
+    // Sale completion updates the customer transaction and then marks the matching bike sold.
     const customer = await getCustomerByBikeId(normalizedBikeNumber);
 
     if (!customer) {
@@ -86,7 +85,6 @@ export async function PATCH(
 
     return NextResponse.json(updatedCustomer);
   } catch (error: any) {
-    console.error("Failed to process sale:", error);
 
     return NextResponse.json(
       { message: error.message || "Failed to update customer" },

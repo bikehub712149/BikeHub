@@ -14,6 +14,7 @@ export async function GET(req: Request) {
     if (authError) return authError;
 
     const url = new URL(req.url);
+    // Keep the legacy array response unless pagination was explicitly requested.
     const paginated = url.searchParams.has("page") || url.searchParams.has("pageSize");
     const result = paginated
       ? await getCustomersPage(getPaginationParams(url.searchParams))
@@ -22,6 +23,7 @@ export async function GET(req: Request) {
       result.items.map((customer: any) => customer.bikeId)
     );
 
+    // Join customer transactions to bikes at the API boundary; missing bikes remain valid results.
     const data = result.items.map((customer: any) => {
       const bike = bikes.find((b: any) => b.number === customer.bikeId);
 
@@ -35,7 +37,6 @@ export async function GET(req: Request) {
       paginated ? { items: data, pagination: result.pagination } : data
     );
   } catch (err) {
-    console.error(err);
 
     return NextResponse.json(
       { message: "Failed to fetch customers" },
@@ -57,7 +58,6 @@ export async function POST(req: Request) {
       status: 201,
     });
   } catch (err) {
-    console.error(err);
 
     return NextResponse.json(
       { message: "Failed to create customer" },

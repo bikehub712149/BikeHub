@@ -38,7 +38,7 @@ export async function POST(req: Request) {
 
     const formData = await req.formData();
 
-    // Extract the JSON payload
+    // The client sends structured bike/customer data beside the uploaded image files.
     const dataString = formData.get("data") as string;
     const { bike, customer, mainImageIndex } = JSON.parse(dataString);
 
@@ -55,7 +55,7 @@ export async function POST(req: Request) {
     const imageUrls: string[] = [];
     const docUrls: string[] = [];
 
-    // Process Bike Images
+    // Upload assets before writing records so stored URLs are ready for both documents.
     const imageFiles = formData.getAll("images") as File[];
     for (const file of imageFiles) {
       const buffer = Buffer.from(await file.arrayBuffer());
@@ -86,7 +86,7 @@ export async function POST(req: Request) {
       docUrls.push(uploadResult.secure_url);
     }
 
-    // Attach URLs to payload
+    // Preserve the selected main image, with a local fallback when no image was uploaded.
     const FALLBACK_IMAGE = "/fallback.bikehub.png"; // Define a fallback image path
 
     // Attach URLs to payload
@@ -96,7 +96,7 @@ export async function POST(req: Request) {
 
     customer.seller.documents = docUrls;
 
-    // Save to DB
+    // A database failure after uploads can leave orphaned Cloudinary assets for later cleanup.
     const createdBike = await createBike(bike);
     const createdCustomer = await createCustomer(customer);
 
@@ -105,9 +105,8 @@ export async function POST(req: Request) {
       { status: 201 }
     );
   } catch (err: any) {
-    console.error("Upload error:", err);
 
-    // Catch MongoDB duplicate key error specifically
+    // Convert duplicate registration numbers into a useful conflict response.
     if (err.code === 11000) {
       // Find out which key caused the duplicate (usually the bike number)
       const duplicateKey = Object.keys(err.keyPattern || {})[0];

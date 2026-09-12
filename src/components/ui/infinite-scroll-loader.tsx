@@ -16,6 +16,7 @@ export default function InfiniteScrollLoader({
   const loadingRef = useRef(loading);
 
   useEffect(() => {
+    // Keep the observer callback current without recreating the observer on every render.
     loadingRef.current = loading;
   }, [loading]);
 
@@ -27,6 +28,7 @@ export default function InfiniteScrollLoader({
       (entries) => {
         if (entries[0]?.isIntersecting && !loadingRef.current) onLoadMore();
       },
+      // Start loading before the sentinel is visible so scrolling does not pause at page edges.
       { rootMargin: "240px" }
     );
 

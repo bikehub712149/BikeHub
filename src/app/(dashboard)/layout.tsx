@@ -15,10 +15,10 @@ export default async function DashboardLayout({
 }: {
   children: ReactNode;
 }) {
-  // Grab the full auth object instead of just userId
+  // Keep authentication and authorization separate: signed-in users can still be denied.
   const authObject = await auth();
 
-  // 2. If they aren't logged in at all, redirect to sign-in
+  // Unauthenticated users belong on the sign-in route, not an access-denied page.
   if (!authObject.userId) {
     redirect("/sign-in");
   }
@@ -26,7 +26,7 @@ export default async function DashboardLayout({
   // 3. Extract the email from the Clerk session token
   const userEmail = authObject.sessionClaims?.email as string;
 
-  // 4. Block them if their email is NOT in the allowed list
+  // This allowlist must stay aligned with verifyAdmin, which protects the API routes.
   if (!userEmail || !ALLOWED_ADMINS.includes(userEmail)) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-50 font-sans dark:bg-slate-950">
@@ -40,7 +40,7 @@ export default async function DashboardLayout({
     );
   }
 
-  // 5. If they pass the checks, render your actual dashboard!
+  // Only authorized administrators reach the dashboard shell.
   return (
     <div className="flex min-h-screen font-sans">
       <Sidebar />

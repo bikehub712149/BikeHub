@@ -12,6 +12,7 @@ export async function GET(req: Request) {
     const q = searchParams.get("q")?.trim().toLowerCase();
 
     if (!q) return NextResponse.json([]);
+    // Search is intentionally bounded because this route searches normalized data in memory.
     if (q.length > 100) return NextResponse.json([]);
 
     const [bikes, customers] = await Promise.all([
@@ -47,6 +48,7 @@ export async function GET(req: Request) {
           item.buyer?.phone?.includes(q)
         );
       })
+      // A bike can have multiple customer records; return each matching bike once.
       .filter(
         (item: any, index: number, items: any[]) =>
           items.findIndex((candidate) => candidate.bikeId === item.bikeId) === index

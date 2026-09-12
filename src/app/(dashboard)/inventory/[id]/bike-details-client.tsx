@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
@@ -34,6 +34,11 @@ export default function BikeDetailsClient({
   const [financialOpen, setFinancialOpen] = useState(false);
   const [sellerOpen, setSellerOpen] = useState(false);
   const [buyerOpen, setBuyerOpen] = useState(false);
+
+  useEffect(() => {
+    // Navbar uses this event to dismiss navigation feedback after the details UI mounts.
+    window.dispatchEvent(new Event("bike-details-ready"));
+  }, []);
 
   return (
     <>

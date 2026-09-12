@@ -50,6 +50,7 @@ export async function getCustomersPage({
 }) {
   await connectDB();
 
+  // Customer records are paginated independently; API routes enrich them with bike data afterward.
   const [items, totalItems] = await Promise.all([
     CustomerTransaction.find()
       .sort({ createdAt: -1, _id: -1 })

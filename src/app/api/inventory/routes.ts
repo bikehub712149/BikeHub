@@ -19,7 +19,6 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(bikes);
   } catch (error) {
-    console.error(error);
 
     return NextResponse.json(
       { message: "Failed to fetch inventory" },

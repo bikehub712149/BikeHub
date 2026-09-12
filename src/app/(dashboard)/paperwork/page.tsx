@@ -87,6 +87,7 @@ export default function PaperworkPage() {
     if (!selectedBike) return;
 
     try {
+      // Refresh the active tab after the API changes this bike to Completed.
       await fetch(`/api/paperwork/${encodeURIComponent(selectedBike.number)}`, {
         method: "PATCH",
       });
@@ -94,7 +95,6 @@ export default function PaperworkPage() {
       setSelectedBike(null);
       fetchData();
     } catch (err) {
-      console.error(err);
     }
   }
 
