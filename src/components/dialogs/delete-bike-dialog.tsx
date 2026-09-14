@@ -38,6 +38,9 @@ export default function DeleteBikeDialog({
 
     if (res.ok) {
       toast.success("Bike deleted.");
+      window.dispatchEvent(
+        new CustomEvent("navigation-start", { detail: "/inventory" }),
+      );
       router.push("/inventory");
       router.refresh();
     } else {

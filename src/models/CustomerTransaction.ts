@@ -1,10 +1,14 @@
 import { Schema, model, models } from "mongoose";
+import { uppercaseDbText } from "@/lib/utils";
+
+const uppercase = (value: unknown) => uppercaseDbText(String(value ?? ""));
 
 const PersonSchema = new Schema(
   {
     name: {
       type: String,
       required: true,
+      set: uppercase,
     },
 
     phone: {
@@ -15,6 +19,7 @@ const PersonSchema = new Schema(
     address: {
       type: String,
       required: true,
+      set: uppercase,
     },
 
     documents: {
@@ -38,11 +43,13 @@ const CustomerTransactionSchema = new Schema(
     bikeId: {
       type: String,
       required: true,
+      set: uppercase,
     },
 
     broker: {
       name: {
         type: String,
+        set: uppercase,
       },
 
       phone: {

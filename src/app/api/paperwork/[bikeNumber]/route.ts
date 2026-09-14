@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { updateBikePaperwork } from "@/lib/server/bike";
 import { verifyAdmin } from "@/lib/server/admin-auth";
+import { uppercaseDbText } from "@/lib/utils";
 
 export async function PATCH(
   req: NextRequest,
@@ -14,7 +15,7 @@ export async function PATCH(
 
     const { bikeNumber } = await context.params;
 
-    await updateBikePaperwork(bikeNumber, "Completed");
+    await updateBikePaperwork(uppercaseDbText(bikeNumber), "Completed");
 
     return NextResponse.json({
       message: "Paperwork completed",

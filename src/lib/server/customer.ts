@@ -3,14 +3,52 @@ import CustomerTransaction from "@/models/CustomerTransaction";
 import { uppercaseDbText } from "@/lib/utils";
 import { buildPagination } from "./pagination";
 
+function normalizeCustomer(customer: any) {
+  if (!customer) return customer;
+
+  return {
+    ...customer,
+    bikeId: uppercaseDbText(customer.bikeId),
+    broker: customer.broker
+      ? { ...customer.broker, name: uppercaseDbText(customer.broker.name) }
+      : customer.broker,
+    seller: customer.seller
+      ? {
+          ...customer.seller,
+          name: uppercaseDbText(customer.seller.name),
+          address: uppercaseDbText(customer.seller.address),
+        }
+      : customer.seller,
+    buyer: customer.buyer
+      ? {
+          ...customer.buyer,
+          name: uppercaseDbText(customer.buyer.name),
+          address: uppercaseDbText(customer.buyer.address),
+        }
+      : customer.buyer,
+  };
+}
+
+function bikeIdFilter(bikeId: string) {
+  return {
+    bikeId: new RegExp(`^${escapeRegex(uppercaseDbText(bikeId))}$`, "i"),
+  };
+}
+
+function escapeRegex(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 export async function getCustomers() {
   await connectDB();
-  return CustomerTransaction.find().lean();
+  const customers = await CustomerTransaction.find().lean();
+  return customers.map(normalizeCustomer);
 }
 
 export async function getCustomerByBikeId(bikeId: string) {
   await connectDB();
-  return CustomerTransaction.findOne({ bikeId: uppercaseDbText(bikeId) }).lean();
+  const customer = await CustomerTransaction.findOne(bikeIdFilter(bikeId)).lean();
+  return normalizeCustomer(customer);
 }
 
 export async function createCustomer(data: any) {
@@ -25,7 +63,7 @@ export async function updateCustomer(
   await connectDB();
 
   return CustomerTransaction.findOneAndUpdate(
-    { bikeId: uppercaseDbText(bikeId) },
+    bikeIdFilter(bikeId),
     data,
     {
       new: true,
@@ -36,9 +74,7 @@ export async function updateCustomer(
 export async function deleteCustomerByBikeId(bikeId: string) {
   await connectDB();
 
-  return CustomerTransaction.findOneAndDelete({
-    bikeId: uppercaseDbText(bikeId),
-  });
+  return CustomerTransaction.findOneAndDelete(bikeIdFilter(bikeId));
 }
 
 export async function getCustomersPage({
@@ -61,7 +97,7 @@ export async function getCustomersPage({
   ]);
 
   return {
-    items,
+    items: items.map(normalizeCustomer),
     pagination: buildPagination(page, pageSize, totalItems),
   };
 }

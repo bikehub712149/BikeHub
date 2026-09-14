@@ -12,6 +12,7 @@ function normalizeBike(bike: BikeType): BikeType {
     model: uppercaseDbText(bike.model),
     engineNumber: uppercaseDbText(bike.engineNumber ?? ""),
     chassisNumber: uppercaseDbText(bike.chassisNumber ?? ""),
+    ownerSerial: uppercaseDbText(bike.ownerSerial ?? ""),
   };
 }
 
@@ -57,7 +58,7 @@ export async function markBikeAsSold(bikeId: string) {
 
   // Sales are keyed by registration number; completing a sale also resets paperwork to pending.
   return Bike.findOneAndUpdate(
-    { number: bikeId },
+    { number: new RegExp(`^${escapeRegex(uppercaseDbText(bikeId))}$`, "i") },
     {
       status: "Sold",
       paperwork: "Pending",
@@ -73,7 +74,7 @@ export async function updateBikePaperwork(
   await connectDB();
 
   return Bike.updateOne(
-    { number: bikeNumber },
+    { number: new RegExp(`^${escapeRegex(uppercaseDbText(bikeNumber))}$`, "i") },
     {
       $set: {
         paperwork,
@@ -127,8 +128,18 @@ export async function getBikesByNumbers(numbers: string[]) {
   if (numbers.length === 0) return [];
 
   const normalizedNumbers = numbers.map((number) => uppercaseDbText(number));
-  const bikes = await Bike.find({ number: { $in: normalizedNumbers } }).lean<BikeType[]>();
+  const bikes = await Bike.find({
+    number: {
+      $in: normalizedNumbers.map(
+        (number) => new RegExp(`^${escapeRegex(number)}$`, "i")
+      ),
+    },
+  }).lean<BikeType[]>();
   return normalizeBikes(bikes);
+}
+
+function escapeRegex(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 export async function getBikeOverview() {

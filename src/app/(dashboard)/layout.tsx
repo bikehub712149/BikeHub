@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 
 import Sidebar from "@/components/layout/sidebar";
 import Navbar from "@/components/layout/navbar";
+import NavigationToast from "@/components/layout/navigation-toast";
 
 // 1. Define your allowed shop admin emails here
 const ALLOWED_ADMINS = [
@@ -46,6 +47,7 @@ export default async function DashboardLayout({
       <Sidebar />
 
       <main className="flex min-h-screen flex-1 flex-col">
+        <NavigationToast />
         <Navbar />
 
         <div className="flex-1 bg-slate-50 p-8 dark:bg-slate-950">

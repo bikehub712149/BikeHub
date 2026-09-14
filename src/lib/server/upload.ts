@@ -1,5 +1,6 @@
 import cloudinary from "@/lib/cloudinary";
 import crypto from "crypto";
+import { uppercaseDbText } from "@/lib/utils";
 
 export async function uploadFile(
   file: Buffer,
@@ -12,7 +13,7 @@ export async function uploadFile(
     cloudinary.uploader
       .upload_stream(
         {
-          folder: `bike-hub/${bikeNumber}/${folder}`,
+          folder: `bike-hub/${uppercaseDbText(bikeNumber)}/${folder}`,
           public_id: `${Date.now()}-${crypto.randomUUID()}`,
           overwrite: false,
           // PDFs are uploaded as raw assets while images use Cloudinary's image type.
