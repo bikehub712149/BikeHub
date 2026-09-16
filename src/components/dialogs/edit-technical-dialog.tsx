@@ -35,6 +35,11 @@ type Props = {
   bike: Bike;
 };
 
+function formatNumber(value: string) {
+  const digits = value.replace(/[^\d]/g, "");
+  return digits ? Number(digits).toLocaleString("en-IN") : "";
+}
+
 export default function EditTechnicalDialog({
   open,
   onOpenChange,
@@ -66,7 +71,7 @@ export default function EditTechnicalDialog({
       ownerSerial: bike.ownerSerial ?? "",
       engineNumber: uppercaseDbText(bike.engineNumber ?? ""),
       chassisNumber: uppercaseDbText(bike.chassisNumber ?? ""),
-      expectedSellingPrice: String(bike.expectedSellingPrice),
+      expectedSellingPrice: formatNumber(String(bike.expectedSellingPrice)),
     });
   }, [bike]);
 
@@ -91,8 +96,12 @@ export default function EditTechnicalDialog({
     const { name, value } = e.target;
 
     const formatField = (fieldName: string, rawValue: string) => {
-      if (["year", "kms", "expectedSellingPrice"].includes(fieldName)) {
+      if (fieldName === "year") {
         return rawValue;
+      }
+
+      if (["kms", "expectedSellingPrice"].includes(fieldName)) {
+        return formatNumber(rawValue);
       }
 
       if (["engineNumber", "chassisNumber"].includes(fieldName)) {
@@ -120,11 +129,11 @@ export default function EditTechnicalDialog({
         body: JSON.stringify({
           model: uppercaseDbText(form.model),
           year: form.year,
-          kms: form.kms,
+          kms: form.kms.replace(/,/g, ""),
           ownerSerial: form.ownerSerial,
           engineNumber: uppercaseDbText(form.engineNumber),
           chassisNumber: uppercaseDbText(form.chassisNumber),
-          expectedSellingPrice: Number(form.expectedSellingPrice),
+          expectedSellingPrice: Number(form.expectedSellingPrice.replace(/,/g, "")),
         }),
       });
 
@@ -256,7 +265,8 @@ export default function EditTechnicalDialog({
                   <Input
                     className="h-10 pl-7"
                     name="expectedSellingPrice"
-                    type="number"
+                    type="text"
+                    inputMode="numeric"
                     placeholder="1,50,000"
                     value={form.expectedSellingPrice}
                     onChange={handleChange}

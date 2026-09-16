@@ -40,7 +40,8 @@ export default function NavigationToast() {
     };
 
     const start = (destination: string) => {
-      if (destination === window.location.pathname) return;
+      const destinationPath = destination.split(/[?#]/)[0];
+      if (destinationPath === window.location.pathname) return;
 
       dismiss();
       pendingPath.current = destination;

@@ -15,12 +15,15 @@ export async function PATCH(
 
     const { bikeNumber } = await context.params;
 
-    await updateBikePaperwork(uppercaseDbText(bikeNumber), "Completed");
+    const result = await updateBikePaperwork(uppercaseDbText(bikeNumber), "Completed");
+    if (result.matchedCount === 0) {
+      return NextResponse.json({ message: "Bike not found" }, { status: 404 });
+    }
 
     return NextResponse.json({
       message: "Paperwork completed",
     });
-  } catch (err) {
+  } catch {
     return NextResponse.json(
       { message: "Failed to update paperwork" },
       { status: 500 }

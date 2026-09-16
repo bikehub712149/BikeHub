@@ -31,23 +31,24 @@ export default function DeleteBikeDialog({
 
   async function deleteBike() {
     setLoading(true);
+    try {
+      const res = await fetch(`/api/bike/${bikeId}`, { method: "DELETE" });
 
-    const res = await fetch(`/api/bike/${bikeId}`, {
-      method: "DELETE",
-    });
-
-    if (res.ok) {
-      toast.success("Bike deleted.");
-      window.dispatchEvent(
-        new CustomEvent("navigation-start", { detail: "/inventory" }),
-      );
-      router.push("/inventory");
-      router.refresh();
-    } else {
+      if (res.ok) {
+        toast.success("Bike deleted.");
+        window.dispatchEvent(
+          new CustomEvent("navigation-start", { detail: "/inventory" }),
+        );
+        router.push("/inventory");
+        router.refresh();
+      } else {
+        toast.error("Failed to delete bike.");
+      }
+    } catch {
       toast.error("Failed to delete bike.");
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   }
 
   return (

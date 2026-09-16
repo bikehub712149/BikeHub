@@ -16,7 +16,10 @@ export default async function BikeDetailsPage({
     return <div>Bike Not Found</div>;
   }
 
-  const transaction = await getCustomerByBikeId(bike.number);
+  // Current records use the registration number; retain an ID fallback for older records.
+  const transaction =
+    (await getCustomerByBikeId(bike.number)) ??
+    (await getCustomerByBikeId(bike.id));
 
   return (
     <BikeDetailsClient

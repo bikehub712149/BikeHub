@@ -27,6 +27,11 @@ type Props = {
   sellingPrice?: number | null;
 };
 
+function formatNumber(value: string) {
+  const digits = value.replace(/[^\d]/g, "");
+  return digits ? Number(digits).toLocaleString("en-IN") : "";
+}
+
 export default function EditFinancialDialog({
   open,
   onOpenChange,
@@ -47,11 +52,11 @@ export default function EditFinancialDialog({
 
   useEffect(() => {
     setForm({
-      purchasePrice: String(purchasePrice),
+      purchasePrice: formatNumber(String(purchasePrice)),
 
       sellingPrice:
         sellingPrice != null
-          ? String(sellingPrice)
+          ? formatNumber(String(sellingPrice))
           : "",
     });
   }, [purchasePrice, sellingPrice]);
@@ -76,10 +81,10 @@ export default function EditFinancialDialog({
   function handleChange(
     e: React.ChangeEvent<HTMLInputElement>
   ) {
-    setForm({
-      ...form,
-      [e.target.name]: e.target.value,
-    });
+    setForm((prev) => ({
+      ...prev,
+      [e.target.name]: formatNumber(e.target.value),
+    }));
   }
 
   async function saveChanges() {
@@ -96,12 +101,12 @@ export default function EditFinancialDialog({
           },
 
           body: JSON.stringify({
-            purchasePrice: Number(form.purchasePrice),
+            purchasePrice: Number(form.purchasePrice.replace(/,/g, "")),
 
             sellingPrice:
               form.sellingPrice === ""
                 ? null
-                : Number(form.sellingPrice),
+                : Number(form.sellingPrice.replace(/,/g, "")),
           }),
         }
       );
@@ -127,8 +132,8 @@ export default function EditFinancialDialog({
   const profit =
     form.sellingPrice === ""
       ? null
-      : Number(form.sellingPrice) -
-        Number(form.purchasePrice);
+      : Number(form.sellingPrice.replace(/,/g, "")) -
+        Number(form.purchasePrice.replace(/,/g, ""));
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -159,7 +164,8 @@ export default function EditFinancialDialog({
             <Input
               className="h-11"
               name="purchasePrice"
-              type="number"
+              type="text"
+              inputMode="numeric"
               value={form.purchasePrice}
               onChange={handleChange}
             />
@@ -175,7 +181,8 @@ export default function EditFinancialDialog({
             <Input
               className="h-11"
               name="sellingPrice"
-              type="number"
+              type="text"
+              inputMode="numeric"
               placeholder="Leave empty if bike isn't sold"
               value={form.sellingPrice}
               onChange={handleChange}

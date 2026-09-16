@@ -1,7 +1,7 @@
 "use client";
 
 import { Plus, X } from "lucide-react";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 
 type BikeGalleryProps = {
   images: (File | string)[];
@@ -26,6 +26,13 @@ export default function BikeGallery({
     new Set()
   );
   const loadedImages = useRef<Set<File | string>>(new Set());
+  const imageSources = useMemo(() => {
+    const sources = new Map<File, string>();
+    for (const image of images) {
+      if (image instanceof File) sources.set(image, URL.createObjectURL(image));
+    }
+    return sources;
+  }, [images]);
 
   useEffect(() => {
     setLoadingImages(
@@ -35,9 +42,15 @@ export default function BikeGallery({
     );
   }, [images]);
 
+  useEffect(() => {
+    return () => {
+      for (const url of imageSources.values()) URL.revokeObjectURL(url);
+    };
+  }, [imageSources]);
+
   function getImageSrc(image: File | string) {
     if (typeof image === "string") return image;
-    return URL.createObjectURL(image);
+    return imageSources.get(image) ?? "";
   }
 
   const handleImageLoad = (image: File | string) => {

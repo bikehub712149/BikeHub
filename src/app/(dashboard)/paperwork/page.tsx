@@ -56,6 +56,7 @@ export default function PaperworkPage() {
       const res = await fetch(
         `/api/sales?page=${nextPage}&pageSize=25&paperwork=${tab.toLowerCase()}`
       );
+      if (!res.ok) throw new Error("Failed to load paperwork");
       const data = await res.json();
 
       setBikes((current) => {
@@ -75,7 +76,6 @@ export default function PaperworkPage() {
   }, [tab]);
 
   useEffect(() => {
-    setBikes([]);
     fetchData();
   }, [fetchData]);
 
@@ -88,13 +88,16 @@ export default function PaperworkPage() {
 
     try {
       // Refresh the active tab after the API changes this bike to Completed.
-      await fetch(`/api/paperwork/${encodeURIComponent(selectedBike.number)}`, {
+      const res = await fetch(`/api/paperwork/${encodeURIComponent(selectedBike.number)}`, {
         method: "PATCH",
       });
+      if (!res.ok) throw new Error("Failed to complete paperwork");
 
       setSelectedBike(null);
       fetchData();
     } catch (err) {
+      // Keep the dialog open so a failed completion can be retried.
+      console.error(err);
     }
   }
 

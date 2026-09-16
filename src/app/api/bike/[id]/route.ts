@@ -27,29 +27,23 @@ export async function DELETE(
 
     const customer = await getCustomerByBikeId(bike.number);
 
-    // Remove individual assets before deleting their now-empty Cloudinary folders.
-    for (const image of bike.images ?? []) {
-      await deleteCloudinaryByUrl(image);
-    }
-
-    // Delete seller docs
-    for (const doc of customer?.seller?.documents ?? []) {
-      await deleteCloudinaryByUrl(doc);
-    }
-
-    // Delete buyer docs
-    for (const doc of customer?.buyer?.documents ?? []) {
-      await deleteCloudinaryByUrl(doc);
-    }
-
-    // Delete receipt
-    await deleteCloudinaryByUrl(customer?.receipt);
-
     // Customer history is keyed by registration number, while the bike record uses its id.
     await deleteCustomerByBikeId(bike.number);
 
     // Delete bike
-    await deleteBike(id);
+    const deletedBike = await deleteBike(id);
+    if (!deletedBike) {
+      return NextResponse.json({ message: "Bike not found" }, { status: 404 });
+    }
+
+    // Asset cleanup is best effort and must not prevent database records from being removed.
+    const imageUrls = new Set([bike.image, ...(bike.images ?? [])]);
+    await Promise.allSettled([
+      ...[...imageUrls].map((image) => deleteCloudinaryByUrl(image)),
+      ...(customer?.seller?.documents ?? []).map((doc: string) => deleteCloudinaryByUrl(doc)),
+      ...(customer?.buyer?.documents ?? []).map((doc: string) => deleteCloudinaryByUrl(doc)),
+      deleteCloudinaryByUrl(customer?.receipt),
+    ]);
 
     await deleteCloudinaryFolder(`bike-hub/${bike.number}/images`);
     await deleteCloudinaryFolder(`bike-hub/${bike.number}/seller`);
@@ -60,7 +54,7 @@ export async function DELETE(
     return NextResponse.json({
       message: "Bike deleted successfully",
     });
-  } catch (err) {
+  } catch {
 
     return NextResponse.json(
       { message: "Failed to delete bike" },
@@ -85,8 +79,9 @@ export async function PATCH(
 
     const body = await req.json();
 
+    // Registration is intentionally not editable in the technical dialog.
+    // Do not include the absent field in the update or MongoDB can clear it.
     const bike = await updateBike(id, {
-      number: body.number,
       model: body.model,
       year: body.year,
       kms: body.kms,
@@ -95,6 +90,10 @@ export async function PATCH(
       ownerSerial: body.ownerSerial,
       expectedSellingPrice: Number(body.expectedSellingPrice),
     });
+
+    if (!bike) {
+      return NextResponse.json({ message: "Bike not found" }, { status: 404 });
+    }
 
     return NextResponse.json(bike);
   } catch (error: any) {

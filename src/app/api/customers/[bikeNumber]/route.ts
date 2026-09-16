@@ -62,7 +62,7 @@ export async function PATCH(
     // Attach the Cloudinary URLs back to the buyer object
     buyer.documents = buyerDocsUrls;
 
-    // Sale completion updates the customer transaction and then marks the matching bike sold.
+    // Verify the transaction exists before uploading assets or changing sale state.
     const customer = await getCustomerByBikeId(normalizedBikeNumber);
 
     if (!customer) {
@@ -81,7 +81,13 @@ export async function PATCH(
       },
     });
 
-    await markBikeAsSold(normalizedBikeNumber);
+    const soldBike = await markBikeAsSold(normalizedBikeNumber);
+    if (!soldBike) {
+      return NextResponse.json(
+        { message: "Bike not found or could not be marked as sold" },
+        { status: 404 }
+      );
+    }
 
     return NextResponse.json(updatedCustomer);
   } catch (error: any) {

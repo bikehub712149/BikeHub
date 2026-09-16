@@ -28,12 +28,22 @@ import FilePicker from "@/components/ui/file-picker";
 import { createImagePdf } from "@/lib/create-image-pdf";
 import { prepareUploadImage } from "@/lib/prepare-upload-image";
 
+const NUMERIC_FIELDS = ["kms", "expectedSellingPrice", "purchasePrice"];
+
+function formatNumberInput(value: string) {
+  const digits = value.replace(/[^\d]/g, "");
+  return digits ? Number(digits).toLocaleString("en-IN") : "";
+}
+
+function unformatNumberInput(value: string) {
+  return value.replace(/,/g, "");
+}
 export default function AddBikeDialog() {
   const [open, setOpen] = useState(false);
   const [images, setImages] = useState<File[]>([]);
   const [selectedImage, setSelectedImage] = useState(0);
   const [sellerDocs, setSellerDocs] = useState<File[]>([]);
-  const [fileKey, setFileKey] = useState(Date.now());
+  const [fileKey, setFileKey] = useState(() => Date.now());
   const router = useRouter();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -63,8 +73,12 @@ export default function AddBikeDialog() {
     const { name, value } = e.target;
 
     const formatField = (fieldName: string, rawValue: string) => {
-      if (["sellerPhone", "brokerPhone", "year", "kms", "expectedSellingPrice", "purchasePrice", "ownerSerial"].includes(fieldName)) {
+      if (["sellerPhone", "brokerPhone", "year", "ownerSerial"].includes(fieldName)) {
         return rawValue;
+      }
+
+      if (NUMERIC_FIELDS.includes(fieldName)) {
+        return formatNumberInput(rawValue);
       }
 
       if (["number", "engineNumber", "chassisNumber"].includes(fieldName)) {
@@ -101,7 +115,12 @@ export default function AddBikeDialog() {
       setIsSubmitting(true);
 
       // The client prepares files; the API uploads assets, applies fallbacks, and writes records.
-      const values = validateBike(form);
+      const values = validateBike({
+        ...form,
+        kms: unformatNumberInput(form.kms),
+        expectedSellingPrice: unformatNumberInput(form.expectedSellingPrice),
+        purchasePrice: unformatNumberInput(form.purchasePrice),
+      });
       const normalizedNumber = uppercaseDbText(values.number);
       const normalizedModel = uppercaseDbText(values.model);
       const normalizedSellerName = uppercaseDbText(values.sellerName);
@@ -201,8 +220,8 @@ export default function AddBikeDialog() {
 
       setOpen(false);
       router.refresh();
-    } catch (err: any) {
-      toast.error(err.message || "Something went wrong.");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Something went wrong.");
     } finally {
       setIsSubmitting(false);
     }
@@ -274,7 +293,8 @@ export default function AddBikeDialog() {
                 name="expectedSellingPrice"
                 value={form.expectedSellingPrice}
                 placeholder="Expected Selling Price"
-                type="number"
+                type="text"
+                inputMode="numeric"
                 onChange={handleChange}
               />
               <Input
@@ -347,7 +367,8 @@ export default function AddBikeDialog() {
                 name="purchasePrice"
                 value={form.purchasePrice}
                 placeholder="Purchase Price"
-                type="number"
+                type="text"
+                inputMode="numeric"
                 onChange={handleChange}
               />
               <Input
