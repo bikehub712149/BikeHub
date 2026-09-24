@@ -33,17 +33,23 @@ export async function POST(
       );
     }
 
-    const formData = await req.formData();
+    const contentType = req.headers.get("content-type") || "";
+    let type: "seller" | "buyer";
+    let documentUrl: string | undefined;
+    let files: File[] = [];
 
-    const type = formData.get("type") as "seller" | "buyer";
+    if (contentType.includes("application/json")) {
+      const body = await req.json();
+      type = body.type;
+      documentUrl = body.documentUrl;
+    } else {
+      const formData = await req.formData();
+      type = formData.get("type") as "seller" | "buyer";
+      files = formData.getAll("document") as File[];
+    }
 
-    const files = formData.getAll("document") as File[];
-
-    if (files.length === 0) {
-      return NextResponse.json(
-        { message: "Document missing" },
-        { status: 400 }
-      );
+    if ((type !== "seller" && type !== "buyer") || (!documentUrl && files.length === 0)) {
+      return NextResponse.json({ message: "Document missing" }, { status: 400 });
     }
 
     const existingUrl =
@@ -53,11 +59,11 @@ export async function POST(
 
       // Each side stores one merged PDF URL; append new pages before replacing the old asset.
 
-    const buffers: Buffer[] = [];
-
-    for (const file of files) {
-      buffers.push(Buffer.from(await file.arrayBuffer()));
-    }
+    const buffers: Buffer[] = documentUrl
+      ? [await downloadPdf(documentUrl)]
+      : await Promise.all(
+          files.map(async (file) => Buffer.from(await file.arrayBuffer()))
+        );
 
     let finalBuffer: Buffer;
 
@@ -69,12 +75,18 @@ export async function POST(
       finalBuffer = await mergePdfBuffers(buffers);
     }
 
-    const upload: any = await uploadFile(
-      finalBuffer,
-      normalizedBikeNumber,
-      type,
-      `${type}-merged`
-    );
+    const upload: any = existingUrl
+      ? await uploadFile(finalBuffer, normalizedBikeNumber, type, `${type}-merged`)
+      : { secure_url: documentUrl };
+
+    if (!upload.secure_url) {
+      throw new Error("Document upload URL missing");
+    }
+
+    // Remove the temporary direct upload after it has been merged into the stored PDF.
+    if (documentUrl && existingUrl) {
+      await deleteCloudinaryByUrl(documentUrl);
+    }
 
     // Delete the previous PDF only after the replacement upload succeeds.
     if (existingUrl) {

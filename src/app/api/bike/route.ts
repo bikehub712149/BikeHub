@@ -36,11 +36,45 @@ export async function POST(req: Request) {
     const authError = await verifyAdmin();
     if (authError) return authError;
 
-    const formData = await req.formData();
+    const contentType = req.headers.get("content-type") || "";
+    let bike: any;
+    let customer: any;
+    let mainImageIndex: number;
+    let imageUrls: string[] = [];
+    let docUrls: string[] = [];
 
-    // The client sends structured bike/customer data beside the uploaded image files.
-    const dataString = formData.get("data") as string;
-    const { bike, customer, mainImageIndex } = JSON.parse(dataString);
+    if (contentType.includes("application/json")) {
+      const payload = await req.json();
+      ({ bike, customer, mainImageIndex, imageUrls, docUrls } = payload);
+    } else {
+      const formData = await req.formData();
+      const dataString = formData.get("data") as string;
+      ({ bike, customer, mainImageIndex, docUrls = [] } = JSON.parse(dataString));
+
+      const imageFiles = formData.getAll("images") as File[];
+      for (const file of imageFiles) {
+        const buffer = Buffer.from(await file.arrayBuffer());
+        const uploadResult: any = await uploadFile(
+          buffer,
+          bike.number,
+          "images",
+          file.name.split(".")[0]
+        );
+        imageUrls.push(uploadResult.secure_url);
+      }
+
+      const docFiles = formData.getAll("sellerDocs") as File[];
+      for (const file of docFiles) {
+        const buffer = Buffer.from(await file.arrayBuffer());
+        const uploadResult: any = await uploadFile(
+          buffer,
+          bike.number,
+          "seller",
+          file.name.split(".")[0]
+        );
+        docUrls.push(uploadResult.secure_url);
+      }
+    }
 
     bike.number = uppercaseDbText(bike.number || "");
     bike.model = uppercaseDbText(bike.model || "");
@@ -50,41 +84,6 @@ export async function POST(req: Request) {
     customer.seller.name = uppercaseDbText(customer.seller.name || "");
     customer.seller.address = uppercaseDbText(customer.seller.address || "");
     customer.broker.name = uppercaseDbText(customer.broker?.name || "");
-
-    const bikeNumber = bike.number;
-    const imageUrls: string[] = [];
-    const docUrls: string[] = [];
-
-    // Upload assets before writing records so stored URLs are ready for both documents.
-    const imageFiles = formData.getAll("images") as File[];
-    for (const file of imageFiles) {
-      const buffer = Buffer.from(await file.arrayBuffer());
-
-      // We cast to 'any' here so TypeScript knows .secure_url exists
-      const uploadResult: any = await uploadFile(
-        buffer,
-        bikeNumber,
-        "images", // matches your strict type
-        file.name.split(".")[0]
-      );
-
-      imageUrls.push(uploadResult.secure_url);
-    }
-
-    // Process Seller Documents
-    const docFiles = formData.getAll("sellerDocs") as File[];
-    for (const file of docFiles) {
-      const buffer = Buffer.from(await file.arrayBuffer());
-
-      const uploadResult: any = await uploadFile(
-        buffer,
-        bikeNumber,
-        "seller", // Changed from "documents" to match your strict type!
-        file.name.split(".")[0]
-      );
-
-      docUrls.push(uploadResult.secure_url);
-    }
 
     // Preserve the selected main image, with a local fallback when no image was uploaded.
     const FALLBACK_IMAGE = "/fallback.bikehub.png"; // Define a fallback image path

@@ -138,15 +138,44 @@ export default function SoldBikeDialog() {
         formData.append("receipt", await prepareUploadImage(receipt));
       }
 
-      // ---------------------------------------------------------
+      let buyerDocsUrl = "";
       if (buyerDocs.length > 0) {
         const combinedPdfFile = await createImagePdf(
           buyerDocs,
           `${selectedBike.number}-buyer-docs.pdf`
         );
 
-        formData.append("buyerDocs", combinedPdfFile);
+        const signatureResponse = await fetch("/api/cloudinary/signature", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ bikeNumber: selectedBike.number, type: "buyer" }),
+        });
+        const signatureData = await signatureResponse.json();
+        if (!signatureResponse.ok) {
+          throw new Error(signatureData.message || "Failed to prepare PDF upload");
+        }
+
+        const cloudinaryData = new FormData();
+        cloudinaryData.append("file", combinedPdfFile);
+        cloudinaryData.append("api_key", signatureData.apiKey);
+        cloudinaryData.append("timestamp", String(signatureData.timestamp));
+        cloudinaryData.append("folder", signatureData.folder);
+        cloudinaryData.append("public_id", signatureData.publicId);
+        cloudinaryData.append("signature", signatureData.signature);
+
+        const cloudinaryResponse = await fetch(
+          `https://api.cloudinary.com/v1_1/${signatureData.cloudName}/raw/upload`,
+          { method: "POST", body: cloudinaryData }
+        );
+        const cloudinaryResult = await cloudinaryResponse.json();
+        if (!cloudinaryResponse.ok) {
+          throw new Error(cloudinaryResult.error?.message || "Failed to upload PDF");
+        }
+
+        buyerDocsUrl = cloudinaryResult.secure_url;
       }
+
+      formData.append("buyerDocsUrl", buyerDocsUrl);
 
       // ---------------------------------------------------------
       // 5. SEND TO API

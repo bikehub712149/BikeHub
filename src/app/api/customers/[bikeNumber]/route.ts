@@ -46,7 +46,10 @@ export async function PATCH(
     }
 
     const buyerDocsFile = formData.get("buyerDocs") as File | null;
-    if (buyerDocsFile) {
+    const buyerDocsUrl = String(formData.get("buyerDocsUrl") || "");
+    if (buyerDocsUrl) {
+      buyerDocsUrls.push(buyerDocsUrl);
+    } else if (buyerDocsFile) {
       const buffer = Buffer.from(await buyerDocsFile.arrayBuffer());
 
       const uploadResult: any = await uploadFile(

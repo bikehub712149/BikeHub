@@ -32,32 +32,51 @@ export default function UploadDocumentsDialog({ bikeNumber, type }: Props) {
     try {
       setLoading(true);
 
-      // The client sends one PDF; the server merges it with the existing remote PDF.
       const imageFiles = docs;
+      const imagePdf = await createImagePdf(
+        imageFiles,
+        `${type}-images.pdf`
+      );
 
-      const formData = new FormData();
+      const signatureResponse = await fetch("/api/cloudinary/signature", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ bikeNumber, type }),
+      });
+      const signatureData = await signatureResponse.json();
+      if (!signatureResponse.ok) {
+        throw new Error(signatureData.message || "Failed to prepare upload");
+      }
 
-      formData.append("type", type);
+      const cloudinaryData = new FormData();
+      cloudinaryData.append("file", imagePdf);
+      cloudinaryData.append("api_key", signatureData.apiKey);
+      cloudinaryData.append("timestamp", String(signatureData.timestamp));
+      cloudinaryData.append("folder", signatureData.folder);
+      cloudinaryData.append("public_id", signatureData.publicId);
+      cloudinaryData.append("signature", signatureData.signature);
 
-      // ----------------------------
-      // Images -> One PDF
-      // ----------------------------
-
-      if (imageFiles.length > 0) {
-        const imagePdf = await createImagePdf(imageFiles, `${type}-images.pdf`);
-        formData.append("document", imagePdf);
+      const cloudinaryResponse = await fetch(
+        `https://api.cloudinary.com/v1_1/${signatureData.cloudName}/raw/upload`,
+        { method: "POST", body: cloudinaryData }
+      );
+      const cloudinaryResult = await cloudinaryResponse.json();
+      if (!cloudinaryResponse.ok) {
+        throw new Error(cloudinaryResult.error?.message || "Failed to upload PDF");
       }
 
       const res = await fetch(
         `/api/customers/documents/${encodeURIComponent(bikeNumber)}`,
         {
           method: "POST",
-          body: formData,
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ type, documentUrl: cloudinaryResult.secure_url }),
         }
       );
 
       if (!res.ok) {
-        throw new Error();
+        const result = await res.json();
+        throw new Error(result.message || "Failed to update documents");
       }
 
       toast.success("Documents updated.");

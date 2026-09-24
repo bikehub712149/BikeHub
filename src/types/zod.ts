@@ -9,7 +9,7 @@ const str = (fallback = "NA") =>
 const num = () => z.coerce.number().catch(0);
 
 const bikeSchema = z.object({
-  number: str(),
+  number: z.string().trim().min(1, "Registration number is required"),
   model: str(),
   year: str(),
   kms: str("0"),

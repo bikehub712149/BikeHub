@@ -163,24 +163,48 @@ export default function AddBikeDialog() {
       };
 
       // Keep the selected image index separate so the server can choose the main image URL.
-      const formData = new FormData();
-      formData.append("data", JSON.stringify(payload));
       const preparedImages = await Promise.all(images.map(prepareUploadImage));
-      preparedImages.forEach((file) => formData.append("images", file));
 
-      // ---------------------------------------------------------
-      // Bundle seller document images into one PDF before sending the multipart request.
+      let docUrls: string[] = [];
       if (sellerDocs.length > 0) {
         const combinedPdfFile = await createImagePdf(
           sellerDocs,
           `${values.number}-seller-docs.pdf`
         );
-        formData.append("sellerDocs", combinedPdfFile);
+        const signatureResponse = await fetch("/api/cloudinary/signature", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ bikeNumber: normalizedNumber, type: "seller" }),
+        });
+        const signatureData = await signatureResponse.json();
+        if (!signatureResponse.ok) {
+          throw new Error(signatureData.message || "Failed to prepare PDF upload");
+        }
+
+        const cloudinaryData = new FormData();
+        cloudinaryData.append("file", combinedPdfFile);
+        cloudinaryData.append("api_key", signatureData.apiKey);
+        cloudinaryData.append("timestamp", String(signatureData.timestamp));
+        cloudinaryData.append("folder", signatureData.folder);
+        cloudinaryData.append("public_id", signatureData.publicId);
+        cloudinaryData.append("signature", signatureData.signature);
+
+        const cloudinaryResponse = await fetch(
+          `https://api.cloudinary.com/v1_1/${signatureData.cloudName}/raw/upload`,
+          { method: "POST", body: cloudinaryData }
+        );
+        const cloudinaryResult = await cloudinaryResponse.json();
+        if (!cloudinaryResponse.ok) {
+          throw new Error(cloudinaryResult.error?.message || "Failed to upload PDF");
+        }
+
+        docUrls = [cloudinaryResult.secure_url];
       }
 
-      // ---------------------------------------------------------
-      // 5. SEND TO API
-      // ---------------------------------------------------------
+      const formData = new FormData();
+      formData.append("data", JSON.stringify({ ...payload, docUrls }));
+      preparedImages.forEach((file) => formData.append("images", file));
+
       const res = await fetch("/api/bike", {
         method: "POST",
         body: formData,
@@ -269,6 +293,7 @@ export default function AddBikeDialog() {
                 name="number"
                 value={form.number}
                 placeholder="Registration Number"
+                required
                 onChange={handleChange}
               />
               <Input
