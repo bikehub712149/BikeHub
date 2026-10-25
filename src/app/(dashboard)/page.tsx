@@ -13,7 +13,7 @@ import Link from "next/link";
 
 export default function DashboardOverview() {
   return (
-    <div className="flex-1 overflow-y-auto p-4 md:p-8 bg-muted/10 min-h-screen">
+    <div className="min-h-screen flex-1 overflow-y-auto bg-muted/10 p-0">
       {/* Header with subtle fade-in */}
       <div className="mb-8 animate-in fade-in duration-700 slide-in-from-top-4">
         <h1 className="text-3xl font-extrabold tracking-tight text-foreground">
@@ -110,7 +110,7 @@ async function DashboardContent() {
 
       {/* Recent Additions List */}
       <div className="overflow-hidden rounded-xl border-2 border-border/70 bg-card shadow-sm animate-in fade-in duration-700 delay-300 fill-mode-both">
-        <div className="flex items-center justify-between border-b-2 border-border/100 px-6 py-8 sm:px-8">
+        <div className="flex items-center justify-between border-b-2 border-border/100 px-4 py-6 sm:px-8 sm:py-8">
           <div>
             <h2 className="text-2xl font-bold tracking-tight text-foreground leading-4">
               Recent Additions
@@ -132,7 +132,7 @@ async function DashboardContent() {
           </Link>
         </div>
 
-        <div className="grid gap-8 py-6 !px-16 sm:p-8 md:grid-cols-2 xl:grid-cols-3 bg-slate-200/50">
+        <div className="grid gap-5 bg-slate-200/50 px-3 py-5 sm:gap-8 sm:p-8 md:grid-cols-2 xl:grid-cols-3">
           {recentBikes.length > 0 ? (
             recentBikes.map((bike) => <BikeCard key={bike.id} {...bike} />)
           ) : (

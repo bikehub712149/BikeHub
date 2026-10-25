@@ -50,7 +50,7 @@ export default async function DashboardLayout({
         <NavigationToast />
         <Navbar />
 
-        <div className="flex-1 bg-slate-50 p-8 dark:bg-slate-950">
+        <div className="flex-1 bg-slate-50 p-3 pb-24 sm:p-5 sm:pb-5 lg:p-8 dark:bg-slate-950">
           {children}
         </div>
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { Plus, X } from "lucide-react";
+import { Camera, Plus, X } from "lucide-react";
 import { useState, useEffect, useMemo, useRef } from "react";
 
 type BikeGalleryProps = {
@@ -63,14 +63,14 @@ export default function BikeGallery({
   };
 
   return (
-    <div className="rounded-l-3xl border-r bg-slate-50 p-8">
+    <div className="rounded-t-3xl border-b bg-slate-50 p-4 sm:rounded-l-3xl sm:rounded-tr-none sm:border-b-0 sm:border-r sm:p-8">
       <h3 className="mb-5 text-lg font-semibold">
         Bike Photos
       </h3>
 
       {/* Main Image */}
 
-      <div className="h-80 overflow-hidden rounded-2xl border bg-white relative flex items-center justify-center">
+      <div className="relative flex h-56 items-center justify-center overflow-hidden rounded-2xl border bg-white sm:h-80">
         {images.length ? (
           <>
             {loadingImages.has(images[selectedImage]) && (
@@ -98,7 +98,7 @@ export default function BikeGallery({
 
       {/* Thumbnails */}
 
-      <div className="mt-5 grid grid-cols-5 gap-3">
+      <div className="mt-5 grid grid-cols-4 gap-2 sm:grid-cols-5 sm:gap-3">
         {images.map((image, index) => (
           <div
             key={index}
@@ -144,21 +144,18 @@ export default function BikeGallery({
         ))}
 
         {editable && images.length < 4 && (
-          <label className="flex h-20 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-300 transition hover:border-blue-500 hover:bg-blue-50">
-            <Plus className="mb-1 h-5 w-5" />
-
-            <span className="text-xs font-medium">
-              Add
-            </span>
-
-            <input
-              hidden
-              multiple
-              type="file"
-              accept="image/*"
-              onChange={onAddImages}
-            />
-          </label>
+          <>
+            <label className="flex h-20 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-300 transition hover:border-blue-500 hover:bg-blue-50">
+              <Plus className="mb-1 h-5 w-5" />
+              <span className="text-xs font-medium">Add</span>
+              <input hidden multiple type="file" accept="image/*" onChange={onAddImages} />
+            </label>
+            <label className="flex h-20 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-blue-200 text-blue-700 transition hover:border-blue-500 hover:bg-blue-50 sm:hidden">
+              <Camera className="mb-1 h-5 w-5" />
+              <span className="text-xs font-medium">Photo</span>
+              <input hidden type="file" accept="image/*" capture="environment" onChange={onAddImages} />
+            </label>
+          </>
         )}
       </div>
     </div>

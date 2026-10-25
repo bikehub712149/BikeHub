@@ -255,25 +255,26 @@ export default function AddBikeDialog() {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger
         render={
-          <Button className="h-12 rounded-xl px-6">
-            <Plus className="mr-2 h-4 w-4" />
-            Add Bike
+          <Button className="h-10 rounded-xl px-2.5 text-xs sm:h-12 sm:px-6 sm:text-sm">
+            <Plus className="mr-1.5 h-4 w-4 sm:mr-2" />
+            <span className="sm:hidden">Add</span>
+            <span className="hidden sm:inline">Add Bike</span>
           </Button>
         }
       />
 
-      <DialogContent className="!max-w-[82vw] max-h-[90vh] flex flex-col gap-0 overflow-hidden rounded-3xl p-7">
+      <DialogContent className="!max-w-[calc(100%-1rem)] max-h-[94vh] gap-0 overflow-hidden rounded-2xl p-0 sm:!max-w-[82vw] sm:rounded-3xl">
         <DialogHeader className="shrink-0 border-b bg-muted/20 px-6 py-5">
-          <DialogTitle className="text-2xl font-bold tracking-tight">Add New Bike</DialogTitle>
+          <DialogTitle className="text-xl font-bold tracking-tight sm:text-2xl">Add New Bike</DialogTitle>
 
           <p className="text-sm text-slate-500">
             Enter bike details and seller information.
           </p>
         </DialogHeader>
 
-        <div className="min-h-0 flex-1 grid grid-cols-1 md:grid-cols-12">
+        <div className="min-h-0 flex-1 grid grid-cols-1 overflow-y-auto md:grid-cols-12 md:overflow-hidden">
           {/* LEFT */}
-          <div className="min-h-[240px] border-b md:col-span-5 md:min-h-0 md:border-b-0 md:border-r">
+          <div className="min-h-[220px] border-b md:col-span-5 md:min-h-0 md:border-b-0 md:border-r">
             <BikeGallery
               images={images}
               selectedImage={selectedImage}
@@ -288,7 +289,7 @@ export default function AddBikeDialog() {
           <div className="min-h-0 overflow-y-auto p-5 sm:p-8 md:col-span-7">
             <h3 className="mb-5 text-lg font-semibold">Bike Details</h3>
 
-            <div className="grid grid-cols-2 gap-5">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5">
               <Input
                 name="number"
                 value={form.number}
@@ -359,7 +360,7 @@ export default function AddBikeDialog() {
               Seller Information
             </h3>
 
-            <div className="grid grid-cols-2 gap-5">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5">
               <Input
                 name="sellerName"
                 value={form.sellerName}
@@ -421,7 +422,7 @@ export default function AddBikeDialog() {
                   </span>
                 </p>
 
-                <div className="grid grid-cols-2 gap-5">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5">
                   <Input
                     name="brokerName"
                     value={form.brokerName}

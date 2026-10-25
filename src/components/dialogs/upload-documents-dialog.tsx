@@ -87,7 +87,7 @@ export default function UploadDocumentsDialog({ bikeNumber, type }: Props) {
 
       // Refresh the page to reflect the updated documents
       router.refresh();
-    } catch (err) {
+    } catch {
 
       toast.error("Failed to upload documents.");
     } finally {
@@ -122,32 +122,48 @@ export default function UploadDocumentsDialog({ bikeNumber, type }: Props) {
             <label htmlFor={`documents-${type}`} className="text-sm font-medium">
               Choose Files {docs.length > 0 ? `${docs.length} FILES` : ""}
             </label>
-            <FilePicker
-              id={`documents-${type}`}
-              resetKey={fileKey}
-              multiple
-              accept="image/*"
-              label="Choose documents"
-              onChange={(e) => {
-                const files = Array.from(e.target.files ?? []);
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <FilePicker
+                id={`documents-${type}`}
+                resetKey={fileKey}
+                multiple
+                accept="image/*"
+                label="Choose documents"
+                onChange={(e) => {
+                  const files = Array.from(e.target.files ?? []);
 
-                setDocs((prev) => {
-                  const all = [...prev, ...files];
+                  setDocs((prev) => {
+                    const all = [...prev, ...files];
 
-                  return all.filter(
-                    (file, index, self) =>
-                      index ===
-                      self.findIndex(
-                        (f) =>
-                          f.name === file.name &&
-                          f.size === file.size &&
-                          f.lastModified === file.lastModified
-                      )
-                  );
-                });
-                setFileKey((key) => key + 1);
-              }}
-            />
+                    return all.filter(
+                      (file, index, self) =>
+                        index ===
+                        self.findIndex(
+                          (f) =>
+                            f.name === file.name &&
+                            f.size === file.size &&
+                            f.lastModified === file.lastModified
+                        )
+                    );
+                  });
+                  setFileKey((key) => key + 1);
+                }}
+              />
+              <div className="sm:hidden">
+                <FilePicker
+                  id={`camera-documents-${type}`}
+                  resetKey={fileKey}
+                  accept="image/*"
+                  capture="environment"
+                  label="Take photo"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) setDocs((prev) => [...prev, file]);
+                    setFileKey((key) => key + 1);
+                  }}
+                />
+              </div>
+            </div>
           </div>
 
           {docs.length > 0 && (

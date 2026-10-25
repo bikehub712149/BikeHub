@@ -63,16 +63,16 @@ export default function InventoryList({ status }: { status?: string }) {
     <>
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
         <div className="overflow-x-auto">
-          <table className="w-full border-collapse text-left">
+          <table className="w-full min-w-[760px] border-collapse text-left">
             <thead><tr className="border-b border-slate-200 bg-slate-50 text-xs font-semibold uppercase tracking-wider text-slate-500">
-              <th className="w-24 px-6 py-4">Photo</th><th className="px-6 py-4">Registration</th><th className="px-6 py-4">Model</th><th className="px-6 py-4">Year</th><th className="px-6 py-4">Kilometers</th><th className="px-6 py-4">Price</th><th className="px-6 py-4">Status</th><th className="px-6 py-4 text-right">Action</th>
+              <th className="w-24 px-4 py-4 sm:px-6">Photo</th><th className="px-4 py-4 sm:px-6">Registration</th><th className="px-4 py-4 sm:px-6">Model</th><th className="px-4 py-4 sm:px-6">Year</th><th className="px-4 py-4 sm:px-6">Kilometers</th><th className="px-4 py-4 sm:px-6">Price</th><th className="px-4 py-4 sm:px-6">Status</th><th className="px-4 py-4 text-right sm:px-6">Action</th>
             </tr></thead>
             <tbody className="divide-y divide-slate-100 text-sm">
               {bikes.map((bike) => <tr key={bike.id} className="group transition hover:bg-slate-50">
-                <td className="px-6 py-4"><div className="h-14 w-20 overflow-hidden rounded-lg border border-slate-200"><Image src={bike.image} alt={bike.model} width={80} height={56} className="h-full w-full" /></div></td>
-                <td className="px-6 py-4 font-semibold text-slate-900">{bike.number.toUpperCase()}</td><td className="px-6 py-4">{bike.model.toUpperCase()}</td><td className="px-6 py-4">{bike.year}</td><td className="px-6 py-4">{bike.kms}</td><td className="px-6 py-4 font-semibold">₹{bike.expectedSellingPrice.toLocaleString()}</td>
-                <td className="px-6 py-4"><span className={`inline-flex rounded-md border px-3 py-1 text-xs font-semibold ${bike.status === "Available" ? "border-green-600 bg-green-50 text-green-700" : "border-red-600 bg-red-50 text-red-700"}`}>{bike.status}</span></td>
-                <td className="px-6 py-4 text-right"><Link href={`/inventory/${bike.id}`} className="inline-flex rounded-lg p-2 text-slate-400 transition hover:bg-blue-50 hover:text-blue-600"><ChevronRight size={20} /></Link></td>
+                <td className="px-4 py-4 sm:px-6"><div className="h-14 w-20 overflow-hidden rounded-lg border border-slate-200"><Image src={bike.image} alt={bike.model} width={80} height={56} className="h-full w-full" /></div></td>
+                <td className="px-4 py-4 font-semibold text-slate-900 sm:px-6">{bike.number.toUpperCase()}</td><td className="px-4 py-4 sm:px-6">{bike.model.toUpperCase()}</td><td className="px-4 py-4 sm:px-6">{bike.year}</td><td className="px-4 py-4 sm:px-6">{bike.kms}</td><td className="px-4 py-4 font-semibold sm:px-6">₹{bike.expectedSellingPrice.toLocaleString()}</td>
+                <td className="px-4 py-4 sm:px-6"><span className={`inline-flex rounded-md border px-3 py-1 text-xs font-semibold ${bike.status === "Available" ? "border-green-600 bg-green-50 text-green-700" : "border-red-600 bg-red-50 text-red-700"}`}>{bike.status}</span></td>
+                <td className="px-4 py-4 text-right sm:px-6"><Link href={`/inventory/${bike.id}`} className="inline-flex rounded-lg p-2 text-slate-400 transition hover:bg-blue-50 hover:text-blue-600"><ChevronRight size={20} /></Link></td>
               </tr>)}
             </tbody>
           </table>

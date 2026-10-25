@@ -165,10 +165,10 @@ export default function Navbar() {
   };
 
   return (
-    <header className="sticky top-0 z-40 flex h-22 items-center gap-10 border-b bg-white px-6">
+    <header className="sticky top-0 z-40 flex min-h-16 items-center gap-2 border-b bg-white px-3 py-2 sm:h-22 sm:gap-6 sm:px-6">
 
       {/* Search Bar */}
-      <div className="relative flex-1 max-w-2xl" ref={searchRef}>
+      <div className="relative min-w-0 max-w-2xl flex-1" ref={searchRef}>
         <div className="relative group">
           {loading ? (
             <Loader2
@@ -185,7 +185,7 @@ export default function Navbar() {
             value={query}
             onChange={(e) => handleQueryChange(e.target.value)}
             onFocus={() => query.trim() && setIsOpen(true)}
-            placeholder="Search bikes by model, number, seller, or buyer"
+            placeholder="Search bikes..."
             aria-label="Search bikes"
             className="h-11 w-full rounded-xl border-border/60 bg-muted/20 pl-10 pr-10 shadow-sm transition-all focus-visible:border-primary focus-visible:ring-primary/20"
           />
@@ -294,7 +294,7 @@ export default function Navbar() {
       </div>
 
       {/* Action Buttons */}
-      <div className="ml-auto flex gap-3">
+      <div className="ml-auto flex shrink-0 gap-1.5 sm:gap-3">
         <AddBikeDialog />
         <SoldBikeDialog />
       </div>

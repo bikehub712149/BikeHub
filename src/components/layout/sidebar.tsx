@@ -48,7 +48,8 @@ export default function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="sticky top-0 z-40 flex h-screen w-56 flex-col border-r bg-background">
+    <>
+    <aside className="sticky top-0 z-40 hidden h-screen w-56 flex-col border-r bg-background md:flex">
       {/* Logo */}
       <div className="flex h-22 items-center justify-center border-b">
         <h1 className="text-xl font-bold">BikeHub</h1>
@@ -94,5 +95,25 @@ export default function Sidebar() {
         </a>
       </div>
     </aside>
+    <nav className="fixed inset-x-3 bottom-3 z-50 grid grid-cols-6 rounded-2xl border bg-background/95 p-1.5 shadow-xl backdrop-blur md:hidden">
+      {links.map((link) => {
+        const Icon = link.icon;
+        const active = pathname === link.href;
+        return (
+          <Link
+            key={link.href}
+            href={link.href}
+            aria-label={link.title}
+            className={`flex min-w-0 flex-col items-center gap-1 rounded-xl px-1 py-2 text-[10px] font-medium ${
+              active ? "bg-primary text-primary-foreground" : "text-muted-foreground"
+            }`}
+          >
+            <Icon size={17} />
+            <span className="truncate">{link.title}</span>
+          </Link>
+        );
+      })}
+    </nav>
+    </>
   );
 }
