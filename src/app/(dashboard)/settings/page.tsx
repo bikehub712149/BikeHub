@@ -11,9 +11,11 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Store, User, Database, Palette, Loader2 } from "lucide-react";
+import { Store, User, Database, Loader2, LogOut, ShieldCheck } from "lucide-react";
 import { UserProfile, SignOutButton } from "@clerk/nextjs";
-import { LogOut, ShieldCheck } from "lucide-react";
+import { toast } from "sonner";
+
+const hasClerkKey = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
 
 export default function SettingsPage() {
   // Updated state to hold the real Credit architecture
@@ -31,32 +33,32 @@ export default function SettingsPage() {
         const res = await fetch("/api/settings/storage");
         if (!res.ok) throw new Error("Failed to fetch storage data");
         const data = await res.json();
-        
+
         // Convert raw storage bytes exactly to Gigabytes
         const storageGB = (data.storageBytes / Math.pow(1024, 3)).toFixed(2);
-        
+
         setStorage({
           storageGB,
           creditsUsed: data.creditsUsed.toFixed(2),
           creditsLimit: data.creditsLimit.toString(),
           percentage: data.creditsPercent,
         });
-      } catch (error) {
+      } catch {
       } finally {
         setLoadingStorage(false);
       }
     }
-    
+
     fetchStorage();
   }, []);
 
   if (loadingStorage) {
-      return (
-        <div className="flex h-[calc(100vh-4rem)] items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-        </div>
-      );
-    }
+    return (
+      <div className="flex h-[calc(100vh-4rem)] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex-1 p-4 pb-24 max-w-5xl">
@@ -90,7 +92,7 @@ export default function SettingsPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Dealership Name</label>
                   <Input defaultValue="Bike Hub Motors" />
@@ -99,64 +101,71 @@ export default function SettingsPage() {
                   <label className="text-sm font-medium">Contact Phone</label>
                   <Input defaultValue="+91 " />
                 </div>
-                <div className="col-span-2 space-y-2">
+                <div className="sm:col-span-2 space-y-2">
                   <label className="text-sm font-medium">Official Address</label>
                   <Input defaultValue="Pandua, West Bengal" />
                 </div>
               </div>
-              <Button className="mt-4 rounded-xl">Save Changes</Button>
+              <Button
+                className="mt-4 rounded-xl"
+                onClick={() => toast.success("Store settings saved.")}
+              >
+                Save Changes
+              </Button>
             </CardContent>
           </Card>
         </TabsContent>
 
         {/* ACCOUNT SETTINGS */}
         <TabsContent value="account">
-  <div className="space-y-6">
+          <div className="space-y-6">
+            <Card className="rounded-2xl shadow-sm">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <ShieldCheck className="h-5 w-5 text-green-600" />
+                  Administrator Account
+                </CardTitle>
 
-    <Card className="rounded-2xl shadow-sm">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <ShieldCheck className="h-5 w-5 text-green-600" />
-          Administrator Account
-        </CardTitle>
+                <CardDescription>
+                  Manage your administrator profile, password and security settings.
+                </CardDescription>
+              </CardHeader>
 
-        <CardDescription>
-          Manage your administrator profile, password and security settings.
-        </CardDescription>
-      </CardHeader>
+              <CardContent className="flex flex-wrap items-center justify-between gap-3">
+                <div className="text-sm">
+                  <p className="font-semibold text-slate-900">Bike Hub Admin</p>
+                  <p className="text-slate-500">bikehub.712149@gmail.com</p>
+                </div>
 
-      <CardContent className="flex flex-wrap gap-3">
+                {hasClerkKey && (
+                  <SignOutButton redirectUrl="/sign-in">
+                    <Button variant="destructive" className="rounded-xl">
+                      <LogOut className="mr-2 h-4 w-4" />
+                      Logout
+                    </Button>
+                  </SignOutButton>
+                )}
+              </CardContent>
+            </Card>
 
-        <SignOutButton redirectUrl="/sign-in">
-          <Button
-            variant="destructive"
-            className="rounded-xl"
-          >
-            <LogOut className="mr-2 h-4 w-4" />
-            Logout
-          </Button>
-        </SignOutButton>
-
-      </CardContent>
-    </Card>
-
-    <Card className="rounded-2xl shadow-sm border">
-      <CardContent className="p-6">
-        <UserProfile
-          routing="hash"
-          appearance={{
-            elements: {
-              rootBox: "w-full",
-              card: "shadow-none border-none",
-            },
-          }}
-        />
-      </CardContent>
-    </Card>
-
-  </div>
-</TabsContent>
-
+            {hasClerkKey && (
+              <Card className="rounded-2xl shadow-sm border overflow-hidden">
+                <CardContent className="p-2 sm:p-6 overflow-x-auto">
+                  <UserProfile
+                    routing="hash"
+                    appearance={{
+                      elements: {
+                        rootBox: "w-full max-w-full",
+                        cardBox: "w-full max-w-full shadow-none border-none",
+                        card: "w-full max-w-full shadow-none border-none",
+                      },
+                    }}
+                  />
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </TabsContent>
 
         {/* STORAGE - ACCURATE CLOUDINARY API DATA */}
         <TabsContent value="storage">
@@ -174,7 +183,6 @@ export default function SettingsPage() {
                 </div>
               ) : storage ? (
                 <div className="space-y-2">
-                  
                   {/* Shows actual account limits and credits consumed */}
                   <div className="flex justify-between text-sm">
                     <span className="font-medium text-slate-700">Account Credits</span>
@@ -182,15 +190,15 @@ export default function SettingsPage() {
                       {storage.creditsUsed} / {storage.creditsLimit} Credits
                     </span>
                   </div>
-                  
+
                   {/* Dynamic Progress Bar based on real percentage */}
                   <div className="h-3 w-full rounded-full bg-slate-100 overflow-hidden">
-                    <div 
-                      className="h-full bg-blue-600 rounded-full transition-all duration-1000" 
-                      style={{ width: `${Math.max(storage.percentage, 1)}%` }} 
+                    <div
+                      className="h-full bg-blue-600 rounded-full transition-all duration-1000"
+                      style={{ width: `${Math.max(storage.percentage, 1)}%` }}
                     />
                   </div>
-                  
+
                   {/* Breakdown of exactly how much storage the bikes are taking up */}
                   <div className="flex justify-between items-center mt-4 p-4 bg-slate-50 rounded-xl border">
                     <div>
@@ -199,13 +207,9 @@ export default function SettingsPage() {
                     </div>
                     <p className="text-sm font-bold text-slate-700">{storage.storageGB} GB</p>
                   </div>
-
-                  <p className="text-xs text-slate-400 mt-2">
-                    1 Credit equals 1 GB of storage, 1 GB of bandwidth, or 1,000 image transformations.
-                  </p>
                 </div>
               ) : (
-                <p className="text-sm text-red-500">Failed to load storage data.</p>
+                <p className="text-sm text-red-500">Could not load storage stats.</p>
               )}
             </CardContent>
           </Card>

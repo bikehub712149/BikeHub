@@ -27,13 +27,13 @@ export default function TechnicalCard({
   onEdit,
 }: TechnicalCardProps) {
   return (
-    <Card className="rounded-3xl shadow-sm">
-      <CardContent className="p-8">
-        <div className="mb-8 flex items-center justify-between">
+    <Card className="rounded-2xl sm:rounded-3xl shadow-sm">
+      <CardContent className="p-5 sm:p-8">
+        <div className="mb-6 sm:mb-8 flex items-center justify-between gap-3">
           <div>
-            <h2 className="text-xl font-bold">Technical Information</h2>
+            <h2 className="text-lg sm:text-xl font-bold">Technical Information</h2>
 
-            <p className="text-sm text-slate-500">Bike specifications</p>
+            <p className="text-xs sm:text-sm text-slate-500">Bike specifications</p>
           </div>
 
           <Button variant="outline" size="sm" onClick={onEdit}>
@@ -42,7 +42,7 @@ export default function TechnicalCard({
           </Button>
         </div>
 
-        <div className="grid grid-cols-3 gap-x-10 gap-y-8 uppercase!">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 sm:gap-x-10 gap-y-5 sm:gap-y-8 uppercase!">
           <Info title="Registration" value={bikeData.number.toUpperCase()} />
 
           <Info title="Model" value={bikeData.model.toUpperCase()} />
@@ -72,7 +72,7 @@ export default function TechnicalCard({
 
           <Info
             title="Expected Selling Price"
-            value={`₹${bikeData.expectedSellingPrice}`}
+            value={`₹${bikeData.expectedSellingPrice.toLocaleString("en-IN")}`}
           />
 
           <div>
@@ -102,11 +102,11 @@ function Info({
   value: React.ReactNode;
 }) {
   return (
-    <div>
-      <p className="mb-1 text-sm text-slate-500">{title}</p>
+    <div className="min-w-0">
+      <p className="mb-1 text-xs sm:text-sm text-slate-500">{title}</p>
 
       <div className="overflow-x-auto">
-        <h4 className="min-w-max text-lg font-semibold text-slate-900 whitespace-nowrap">
+        <h4 className="text-base sm:text-lg font-semibold text-slate-900 break-words">
           {value}
         </h4>
       </div>

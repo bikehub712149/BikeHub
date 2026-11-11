@@ -1,4 +1,4 @@
-import cloudinary from "@/lib/cloudinary";
+import cloudinary, { hasCloudinaryConfig } from "@/lib/cloudinary";
 import crypto from "crypto";
 import { uppercaseDbText } from "@/lib/utils";
 
@@ -8,6 +8,16 @@ export async function uploadFile(
   folder: "images" | "seller" | "buyer" | "receipt",
   fileName: string
 ) {
+  if (!hasCloudinaryConfig) {
+    const isPdf =
+      file.length >= 4 &&
+      file.subarray(0, 4).toString("ascii") === "%PDF";
+    const mime = isPdf ? "application/pdf" : "image/jpeg";
+    return {
+      secure_url: `data:${mime};base64,${file.toString("base64")}`,
+    };
+  }
+
   // Keep assets grouped by bike and use unique IDs to avoid collisions during retries.
   return new Promise((resolve, reject) => {
     cloudinary.uploader

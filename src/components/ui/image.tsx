@@ -8,7 +8,7 @@ type Props = ImageProps & {
 };
 
 export default function AppImage({
-  fallbackSrc = "/placeholder-bike.jpg",
+  fallbackSrc = "/fallback.bikehub.png",
   className,
   onLoad,
   onError,

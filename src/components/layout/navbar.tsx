@@ -1,18 +1,26 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { Bike, Loader2, Search, ShoppingBag, User, X } from "lucide-react";
+import { Bike, Loader2, Menu, Search, ShoppingBag, User, X } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { toast } from "sonner";
 import Image from "@/components/ui/image";
 
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import {
   Command,
   CommandGroup,
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
+import {
+  Sheet,
+  SheetContent,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { SidebarNavContent } from "@/components/layout/sidebar";
 
 import AddBikeDialog from "@/components/dialogs/add-bike-dialog";
 import SoldBikeDialog from "@/components/dialogs/sold-bike-dialog";
@@ -32,7 +40,8 @@ export default function Navbar() {
   const [loading, setLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [navigating, setNavigating] = useState(false);
-  
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+
   const router = useRouter();
   const pathname = usePathname();
   const searchRef = useRef<HTMLDivElement>(null);
@@ -165,10 +174,27 @@ export default function Navbar() {
   };
 
   return (
-    <header className="sticky top-0 z-40 flex h-22 items-center gap-10 border-b bg-white px-6">
+    <header className="sticky top-0 z-40 flex flex-wrap md:flex-nowrap md:h-22 items-center justify-between gap-2.5 md:gap-6 lg:gap-10 border-b bg-white px-3 py-2.5 sm:px-4 md:py-0 md:px-6">
+      {/* Mobile Menu Trigger + Brand */}
+      <div className="flex items-center gap-2 lg:hidden">
+        <Sheet open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
+          <SheetTrigger
+            render={
+              <Button variant="outline" size="icon-sm" aria-label="Open navigation menu" className="rounded-xl">
+                <Menu className="h-4 w-4" />
+              </Button>
+            }
+          />
+          <SheetContent side="left" className="w-64 p-0 flex flex-col">
+            <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
+            <SidebarNavContent onNavigate={() => setMobileNavOpen(false)} />
+          </SheetContent>
+        </Sheet>
+        <span className="text-base sm:text-lg font-bold tracking-tight md:hidden">BikeHub</span>
+      </div>
 
       {/* Search Bar */}
-      <div className="relative flex-1 max-w-2xl" ref={searchRef}>
+      <div className="relative order-3 w-full md:order-none md:flex-1 md:max-w-2xl" ref={searchRef}>
         <div className="relative group">
           {loading ? (
             <Loader2
@@ -187,9 +213,9 @@ export default function Navbar() {
             onFocus={() => query.trim() && setIsOpen(true)}
             placeholder="Search bikes by model, number, seller, or buyer"
             aria-label="Search bikes"
-            className="h-11 w-full rounded-xl border-border/60 bg-muted/20 pl-10 pr-10 shadow-sm transition-all focus-visible:border-primary focus-visible:ring-primary/20"
+            className="h-11 w-full rounded-xl border-border/60 bg-muted/20 pl-10 pr-10 text-sm shadow-sm transition-all focus-visible:border-primary focus-visible:ring-primary/20"
           />
-          
+
           {query && (
             <button
               onClick={clearSearch}
@@ -204,14 +230,13 @@ export default function Navbar() {
 
         {/* Dropdown Results */}
         {isOpen && (
-          <div className="absolute top-[calc(100%+8px)] left-0 w-full overflow-hidden rounded-2xl border border-border/50 bg-card shadow-2xl animate-in fade-in slide-in-from-top-2 duration-200">
+          <div className="absolute top-[calc(100%+8px)] left-0 w-full overflow-hidden rounded-2xl border border-border/50 bg-card shadow-2xl animate-in fade-in slide-in-from-top-2 duration-200 z-50">
             {/* 
               shouldFilter={false} is REQUIRED when fetching from an API. 
               Otherwise, cmdk tries to filter your already-filtered API results.
             */}
-            <Command shouldFilter={false} className="max-h-[400px] bg-transparent">
-              <CommandList className="max-h-[400px] overflow-y-auto p-2">
-                
+            <Command shouldFilter={false} className="max-h-[70vh] sm:max-h-[400px] bg-transparent">
+              <CommandList className="max-h-[70vh] sm:max-h-[400px] overflow-y-auto p-2">
                 {/* Loading State */}
                 {loading && (
                   <div className="flex items-center justify-center py-8 text-sm text-muted-foreground">
@@ -241,11 +266,11 @@ export default function Navbar() {
                         key={item.bikeId}
                         value={item.bikeId}
                         onSelect={() => handleBikeSelect(item.bikeId)}
-                        className="mb-1 flex cursor-pointer items-center gap-4 rounded-xl px-3 py-3 transition-colors hover:bg-muted/50 aria-selected:bg-muted/50"
+                        className="mb-1 flex cursor-pointer items-center gap-3 sm:gap-4 rounded-xl px-3 py-3 transition-colors hover:bg-muted/50 aria-selected:bg-muted/50"
                         aria-disabled={navigating}
                       >
                         {/* Thumbnail */}
-                        <div className="relative h-14 w-20 shrink-0 overflow-hidden rounded-lg bg-muted/30 border border-border/50">
+                        <div className="relative h-12 w-16 sm:h-14 sm:w-20 shrink-0 overflow-hidden rounded-lg bg-muted/30 border border-border/50">
                           <Image
                             fill
                             sizes="80px"
@@ -256,29 +281,29 @@ export default function Navbar() {
                         </div>
 
                         {/* Details */}
-                        <div className="flex flex-col flex-1 gap-1">
+                        <div className="flex flex-col flex-1 min-w-0 gap-1">
                           <div className="flex items-center justify-between">
-                            <span className="font-extrabold uppercase tracking-tight text-foreground">
+                            <span className="font-extrabold uppercase tracking-tight text-foreground truncate">
                               {item.number}
                             </span>
                           </div>
-                          
+
                           <span className="text-sm font-medium text-muted-foreground line-clamp-1">
                             {item.model}
                           </span>
 
                           {/* Seller / Buyer Tags */}
-                          <div className="flex items-center gap-3 mt-0.5">
+                          <div className="flex flex-wrap items-center gap-3 mt-0.5">
                             {item.seller?.name && (
                               <span className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                                <User size={12} className="text-blue-500" />
-                                {item.seller.name}
+                                <User size={12} className="text-blue-500 shrink-0" />
+                                <span className="truncate">{item.seller.name}</span>
                               </span>
                             )}
                             {item.buyer?.name && (
                               <span className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                                <ShoppingBag size={12} className="text-green-500" />
-                                {item.buyer.name}
+                                <ShoppingBag size={12} className="text-green-500 shrink-0" />
+                                <span className="truncate">{item.buyer.name}</span>
                               </span>
                             )}
                           </div>
@@ -294,7 +319,7 @@ export default function Navbar() {
       </div>
 
       {/* Action Buttons */}
-      <div className="ml-auto flex gap-3">
+      <div className="ml-auto flex items-center gap-1.5 sm:gap-3">
         <AddBikeDialog />
         <SoldBikeDialog />
       </div>

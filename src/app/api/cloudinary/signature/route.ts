@@ -2,6 +2,7 @@ import crypto from "crypto";
 import { NextResponse } from "next/server";
 import { verifyAdmin } from "@/lib/server/admin-auth";
 import cloudinary from "@/lib/cloudinary";
+import { uppercaseDbText } from "@/lib/utils";
 
 export async function POST(req: Request) {
   try {
@@ -9,10 +10,13 @@ export async function POST(req: Request) {
     if (authError) return authError;
 
     const { bikeNumber, type } = await req.json();
+    const safeBikeNumber =
+      typeof bikeNumber === "string"
+        ? uppercaseDbText(bikeNumber).replace(/[^A-Z0-9_-]/g, "")
+        : "";
 
     if (
-      typeof bikeNumber !== "string" ||
-      !bikeNumber ||
+      !safeBikeNumber ||
       (type !== "seller" && type !== "buyer")
     ) {
       return NextResponse.json(
@@ -22,7 +26,7 @@ export async function POST(req: Request) {
     }
 
     const timestamp = Math.floor(Date.now() / 1000);
-    const folder = `bike-hub/${bikeNumber}/${type}`;
+    const folder = `bike-hub/${safeBikeNumber}/${type}`;
     const publicId = `pending-${crypto.randomUUID()}`;
     const paramsToSign = { folder, public_id: publicId, timestamp };
     const signature = cloudinary.utils.api_sign_request(

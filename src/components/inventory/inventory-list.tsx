@@ -56,28 +56,133 @@ export default function InventoryList({ status }: { status?: string }) {
   }, [loadPage]);
 
   if (loading && bikes.length === 0) {
-    return <div className="flex h-[calc(100vh-16rem)] items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>;
+    return (
+      <div className="flex h-[calc(100vh-16rem)] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
   }
 
   return (
     <>
-      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      {/* Mobile Card List (< md) */}
+      <div className="space-y-3 md:hidden">
+        {bikes.map((bike) => (
+          <Link
+            key={bike.id}
+            href={`/inventory/${bike.id}`}
+            className="flex items-center gap-3.5 rounded-2xl border border-slate-200 bg-white p-3.5 shadow-sm transition active:scale-[0.99]"
+          >
+            <div className="h-20 w-24 shrink-0 overflow-hidden rounded-xl border border-slate-200">
+              <Image
+                src={bike.image}
+                alt={bike.model}
+                width={96}
+                height={80}
+                className="h-full w-full object-cover"
+              />
+            </div>
+
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center justify-between gap-2">
+                <span className="font-bold text-slate-900 truncate">
+                  {bike.number.toUpperCase()}
+                </span>
+                <span
+                  className={`shrink-0 inline-flex rounded-md border px-2 py-0.5 text-[10px] font-semibold ${
+                    bike.status === "Available"
+                      ? "border-green-600 bg-green-50 text-green-700"
+                      : "border-red-600 bg-red-50 text-red-700"
+                  }`}
+                >
+                  {bike.status}
+                </span>
+              </div>
+
+              <p className="mt-0.5 text-xs font-medium text-slate-600 truncate">
+                {bike.model.toUpperCase()}
+              </p>
+
+              <div className="mt-2 flex items-center justify-between text-xs text-slate-500">
+                <span>
+                  {bike.year} • {bike.kms} km
+                </span>
+                <span className="text-sm font-bold text-slate-900">
+                  ₹{bike.expectedSellingPrice.toLocaleString("en-IN")}
+                </span>
+              </div>
+            </div>
+
+            <ChevronRight size={18} className="shrink-0 text-slate-400" />
+          </Link>
+        ))}
+      </div>
+
+      {/* Desktop Table (md+) */}
+      <div className="hidden md:block overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full border-collapse text-left">
-            <thead><tr className="border-b border-slate-200 bg-slate-50 text-xs font-semibold uppercase tracking-wider text-slate-500">
-              <th className="w-24 px-6 py-4">Photo</th><th className="px-6 py-4">Registration</th><th className="px-6 py-4">Model</th><th className="px-6 py-4">Year</th><th className="px-6 py-4">Kilometers</th><th className="px-6 py-4">Price</th><th className="px-6 py-4">Status</th><th className="px-6 py-4 text-right">Action</th>
-            </tr></thead>
+            <thead>
+              <tr className="border-b border-slate-200 bg-slate-50 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                <th className="w-24 px-6 py-4">Photo</th>
+                <th className="px-6 py-4">Registration</th>
+                <th className="px-6 py-4">Model</th>
+                <th className="px-6 py-4">Year</th>
+                <th className="px-6 py-4">Kilometers</th>
+                <th className="px-6 py-4">Price</th>
+                <th className="px-6 py-4">Status</th>
+                <th className="px-6 py-4 text-right">Action</th>
+              </tr>
+            </thead>
             <tbody className="divide-y divide-slate-100 text-sm">
-              {bikes.map((bike) => <tr key={bike.id} className="group transition hover:bg-slate-50">
-                <td className="px-6 py-4"><div className="h-14 w-20 overflow-hidden rounded-lg border border-slate-200"><Image src={bike.image} alt={bike.model} width={80} height={56} className="h-full w-full" /></div></td>
-                <td className="px-6 py-4 font-semibold text-slate-900">{bike.number.toUpperCase()}</td><td className="px-6 py-4">{bike.model.toUpperCase()}</td><td className="px-6 py-4">{bike.year}</td><td className="px-6 py-4">{bike.kms}</td><td className="px-6 py-4 font-semibold">₹{bike.expectedSellingPrice.toLocaleString()}</td>
-                <td className="px-6 py-4"><span className={`inline-flex rounded-md border px-3 py-1 text-xs font-semibold ${bike.status === "Available" ? "border-green-600 bg-green-50 text-green-700" : "border-red-600 bg-red-50 text-red-700"}`}>{bike.status}</span></td>
-                <td className="px-6 py-4 text-right"><Link href={`/inventory/${bike.id}`} className="inline-flex rounded-lg p-2 text-slate-400 transition hover:bg-blue-50 hover:text-blue-600"><ChevronRight size={20} /></Link></td>
-              </tr>)}
+              {bikes.map((bike) => (
+                <tr key={bike.id} className="group transition hover:bg-slate-50">
+                  <td className="px-6 py-4">
+                    <div className="h-14 w-20 overflow-hidden rounded-lg border border-slate-200">
+                      <Image
+                        src={bike.image}
+                        alt={bike.model}
+                        width={80}
+                        height={56}
+                        className="h-full w-full"
+                      />
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 font-semibold text-slate-900 whitespace-nowrap">
+                    {bike.number.toUpperCase()}
+                  </td>
+                  <td className="px-6 py-4">{bike.model.toUpperCase()}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">{bike.year}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">{bike.kms}</td>
+                  <td className="px-6 py-4 font-semibold whitespace-nowrap">
+                    ₹{bike.expectedSellingPrice.toLocaleString("en-IN")}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span
+                      className={`inline-flex rounded-md border px-3 py-1 text-xs font-semibold ${
+                        bike.status === "Available"
+                          ? "border-green-600 bg-green-50 text-green-700"
+                          : "border-red-600 bg-red-50 text-red-700"
+                      }`}
+                    >
+                      {bike.status}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 text-right">
+                    <Link
+                      href={`/inventory/${bike.id}`}
+                      className="inline-flex rounded-lg p-2 text-slate-400 transition hover:bg-blue-50 hover:text-blue-600"
+                    >
+                      <ChevronRight size={20} />
+                    </Link>
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
       </div>
+
       <InfiniteScrollLoader
         hasNextPage={hasNextPage}
         loading={loading}
