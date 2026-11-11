@@ -1,6 +1,6 @@
 "use client";
 
-import { Camera, Upload } from "lucide-react";
+import { Upload } from "lucide-react";
 import { useRef } from "react";
 import { Button } from "@/components/ui/button";
 
@@ -13,7 +13,6 @@ export default function FilePicker({
   disabled = false,
   resetKey,
   selectedFileName,
-  capture,
 }: {
   id: string;
   accept: string;
@@ -23,7 +22,6 @@ export default function FilePicker({
   disabled?: boolean;
   resetKey?: number;
   selectedFileName?: string;
-  capture?: "environment" | "user";
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -37,7 +35,6 @@ export default function FilePicker({
         type="file"
         accept={accept}
         multiple={multiple}
-        capture={capture}
         disabled={disabled}
         onChange={onChange}
       />
@@ -48,11 +45,7 @@ export default function FilePicker({
         onClick={() => inputRef.current?.click()}
         className="shrink-0 bg-white"
       >
-        {capture ? (
-          <Camera className="mr-2 h-4 w-4" />
-        ) : (
-          <Upload className="mr-2 h-4 w-4" />
-        )}
+        <Upload className="mr-2 h-4 w-4" />
         {label}
       </Button>
       <span

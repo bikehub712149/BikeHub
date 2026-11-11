@@ -18,7 +18,6 @@ import {
   Receipt,
   Loader2,
   ExternalLink,
-  CalendarDays,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Image from "@/components/ui/image";
@@ -87,21 +86,11 @@ export default function SalesPage() {
   const [page, setPage] = useState(0);
   const [hasNextPage, setHasNextPage] = useState(true);
   const [summary, setSummary] = useState({ totalRevenue: 0, totalProfit: 0, bikesSold: 0 });
-  const [selectedMonth, setSelectedMonth] = useState(
-    () => new Date().toISOString().slice(0, 7)
-  );
-  const [monthlyReport, setMonthlyReport] = useState({
-    totalRevenue: 0,
-    totalProfit: 0,
-    bikesSold: 0,
-  });
 
   useEffect(() => {
     async function fetchSales() {
       try {
-        const res = await fetch(
-          `/api/sales?page=1&pageSize=25&month=${selectedMonth}`
-        );
+        const res = await fetch("/api/sales?page=1&pageSize=25");
 
         if (!res.ok) throw new Error();
 
@@ -109,13 +98,6 @@ export default function SalesPage() {
 
         setSoldBikes(data.items);
         setSummary(data.summary);
-        setMonthlyReport(
-          data.monthlyReport ?? {
-            totalRevenue: 0,
-            totalProfit: 0,
-            bikesSold: 0,
-          }
-        );
         setPage(1);
         setHasNextPage(data.pagination.hasNextPage);
       } catch (err) {
@@ -125,7 +107,7 @@ export default function SalesPage() {
     }
 
     fetchSales();
-  }, [selectedMonth]);
+  }, []);
 
   const loadMore = useCallback(async () => {
     if (loadingMore || !hasNextPage) return;
@@ -153,10 +135,6 @@ export default function SalesPage() {
 
   const averageProfit =
     summary.bikesSold > 0 ? totalProfit / summary.bikesSold : 0;
-  const monthlyAverageProfit =
-    monthlyReport.bikesSold > 0
-      ? monthlyReport.totalProfit / monthlyReport.bikesSold
-      : 0;
 
   // Placeholder trend data
   const stats = [
@@ -190,92 +168,17 @@ export default function SalesPage() {
     );
   }
 
-  function MonthPicker({
-    value,
-    onChange,
-  }: {
-    value: string;
-    onChange: (value: string) => void;
-  }) {
-    return (
-      <label className="flex w-full items-center gap-2 rounded-xl border bg-card px-3 py-2 shadow-sm sm:w-auto">
-        <CalendarDays className="h-4 w-4 shrink-0 text-muted-foreground" />
-        <span className="text-sm font-medium text-muted-foreground">Report month</span>
-        <input
-          type="month"
-          value={value}
-          onChange={(event) => onChange(event.target.value)}
-          className="min-w-0 bg-transparent text-sm font-semibold outline-none"
-          aria-label="Select report month"
-        />
-      </label>
-    );
-  }
-
-  function MonthlyReport({
-    report,
-    month,
-    averageProfit,
-  }: {
-    report: { totalRevenue: number; totalProfit: number; bikesSold: number };
-    month: string;
-    averageProfit: number;
-  }) {
-    const monthLabel = new Date(`${month}-01T00:00:00`).toLocaleDateString("en-IN", {
-      month: "long",
-      year: "numeric",
-    });
-
-    return (
-      <Card className="overflow-hidden border-primary/20 bg-gradient-to-br from-primary/[0.06] to-card">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-lg">Monthly sales &amp; profit report</CardTitle>
-          <CardDescription>{monthLabel} performance based on completed sales.</CardDescription>
-        </CardHeader>
-        <CardContent className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-          <ReportMetric label="Sales revenue" value={formatCurrency(report.totalRevenue)} />
-          <ReportMetric label="Net profit" value={formatCurrency(report.totalProfit)} tone="profit" />
-          <ReportMetric
-            label={`${report.bikesSold} bikes sold · avg. profit`}
-            value={formatCurrency(Math.round(averageProfit))}
-          />
-        </CardContent>
-      </Card>
-    );
-  }
-
-  function ReportMetric({
-    label,
-    value,
-    tone,
-  }: {
-    label: string;
-    value: string;
-    tone?: "profit";
-  }) {
-    return (
-      <div className="rounded-xl border bg-background/80 p-4">
-        <p className="text-xs font-medium text-muted-foreground">{label}</p>
-        <p className={cn("mt-1 text-xl font-bold", tone === "profit" && "text-emerald-600")}>
-          {value}
-        </p>
-      </div>
-    );
-  }
-
   if (!soldBikes || soldBikes.length === 0) {
     return (
-      <div className="flex flex-col gap-6 p-0 sm:gap-8">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+      <div className="flex flex-col gap-8 p-4">
+        <div className="flex items-end justify-between">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Sales & Revenue</h1>
+            <h1 className="text-2xl font-bold tracking-tight">Sales & Revenue</h1>
             <p className="text-sm text-muted-foreground mt-1">
               Track your store&apos;s financial performance and sold vehicles.
             </p>
           </div>
-          <MonthPicker value={selectedMonth} onChange={setSelectedMonth} />
         </div>
-        <MonthlyReport report={monthlyReport} month={selectedMonth} averageProfit={monthlyAverageProfit} />
         <div className="flex h-56 flex-col items-center justify-center gap-3 text-muted-foreground">
           <ShoppingBag className="h-10 w-10 opacity-30" />
           <p>No bikes have been sold yet.</p>
@@ -285,18 +188,15 @@ export default function SalesPage() {
   }
 
   return (
-    <div className="flex flex-col gap-6 p-0 sm:gap-8">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+    <div className="flex flex-col gap-8 p-4">
+      <div className="flex items-end justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Sales & Revenue</h1>
+          <h1 className="text-2xl font-bold tracking-tight">Sales & Revenue</h1>
           <p className="text-sm text-muted-foreground mt-1">
             Track your store&apos;s financial performance and sold vehicles.
           </p>
         </div>
-        <MonthPicker value={selectedMonth} onChange={setSelectedMonth} />
       </div>
-
-      <MonthlyReport report={monthlyReport} month={selectedMonth} averageProfit={monthlyAverageProfit} />
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -320,7 +220,7 @@ export default function SalesPage() {
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[780px] text-left">
+            <table className="w-full text-left">
               <thead>
                 <tr className="border-b bg-muted/50">
                   <th className="px-4 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">

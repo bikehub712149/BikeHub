@@ -81,9 +81,9 @@ export default function BikeDetailsClient({
 
       {/* ---------------- Page ---------------- */}
 
-      <div className="space-y-6 p-0 sm:space-y-8 sm:p-8">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div className="min-w-0">
+      <div className="space-y-8 p-8">
+        <div className="flex items-start justify-between">
+          <div>
             <Link
               href="/inventory"
               className="mb-4 inline-flex items-center gap-2 text-sm text-slate-500 hover:text-black"
@@ -93,7 +93,7 @@ export default function BikeDetailsClient({
             </Link>
 
             <div className="flex items-center gap-3">
-              <h1 className="break-words text-3xl font-bold uppercase! sm:text-4xl">{bike.model.toUpperCase()}</h1>
+              <h1 className="text-4xl font-bold uppercase!">{bike.model.toUpperCase()}</h1>
 
               {bike.status === "Sold" ? (
                 <Badge
@@ -117,9 +117,7 @@ export default function BikeDetailsClient({
             </p>
           </div>
 
-          <div className="self-end sm:self-start">
-            <DeleteBikeDialog bikeId={bike.id} bikeNumber={bike.number} />
-          </div>
+          <DeleteBikeDialog bikeId={bike.id} bikeNumber={bike.number} />
         </div>
 
         <div className="grid grid-cols-1 xl:grid-cols-[460px_1fr] gap-8 items-start">
@@ -170,8 +168,8 @@ export default function BikeDetailsClient({
           </div>
         )}
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="rounded-3xl border bg-white p-4 shadow-sm sm:p-6">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
+          <div className="rounded-3xl border bg-white p-6 shadow-sm">
             <p className="text-sm text-slate-500">Purchase Price</p>
 
             <h2 className="mt-3 text-3xl font-bold">
@@ -179,7 +177,7 @@ export default function BikeDetailsClient({
             </h2>
           </div>
 
-          <div className="rounded-3xl border bg-white p-4 shadow-sm sm:p-6">
+          <div className="rounded-3xl border bg-white p-6 shadow-sm">
             <p className="text-sm text-slate-500">Selling Price</p>
 
             <h2 className="mt-3 text-3xl font-bold">
@@ -189,7 +187,7 @@ export default function BikeDetailsClient({
             </h2>
           </div>
 
-          <div className="rounded-3xl border bg-white p-4 shadow-sm sm:p-6">
+          <div className="rounded-3xl border bg-white p-6 shadow-sm">
             <p className="text-sm text-slate-500">Profit</p>
 
             <h2 className="mt-3 text-3xl font-bold text-emerald-600">
@@ -199,7 +197,7 @@ export default function BikeDetailsClient({
             </h2>
           </div>
 
-          <div className="rounded-3xl border bg-white p-4 shadow-sm sm:p-6">
+          <div className="rounded-3xl border bg-white p-6 shadow-sm">
             <p className="text-sm text-slate-500">Current Status</p>
 
             <div className="mt-3">

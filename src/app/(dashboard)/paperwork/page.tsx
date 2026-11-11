@@ -102,10 +102,10 @@ export default function PaperworkPage() {
   }
 
   return (
-    <div className="flex-1 overflow-y-auto p-0 pb-28 sm:p-4 sm:pb-32">
+    <div className="flex-1 overflow-y-auto p-4 pb-32">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+        <h1 className="text-2xl font-bold tracking-tight text-slate-900">
           Paperwork Management
         </h1>
 
@@ -115,10 +115,10 @@ export default function PaperworkPage() {
       </div>
 
       {/* Tabs */}
-      <div className="mb-6 grid w-full grid-cols-2 gap-1 rounded-xl border border-slate-200 bg-slate-100 p-1 sm:flex sm:w-max sm:gap-2">
+      <div className="mb-6 flex w-max gap-2 rounded-xl border border-slate-200 bg-slate-100 p-1">
         <button
           onClick={() => setTab("Pending")}
-          className={`rounded-lg px-4 py-2 text-center text-sm font-medium transition ${
+          className={`rounded-lg px-5 py-2 text-sm font-medium transition ${
             tab === "Pending"
               ? "border bg-white shadow-sm"
               : "text-slate-600 hover:bg-white"
@@ -147,7 +147,7 @@ export default function PaperworkPage() {
       ) : (
         <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[680px] border-collapse">
+            <table className="w-full border-collapse">
               <thead>
                 <tr className="border-b bg-slate-50 text-left text-xs uppercase tracking-wider text-slate-500">
                   <th className="px-6 py-4">Photo</th>

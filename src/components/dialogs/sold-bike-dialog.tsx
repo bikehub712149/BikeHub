@@ -208,17 +208,16 @@ export default function SoldBikeDialog() {
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger
         render={
-          <Button variant="secondary" className="h-10 rounded-xl px-2.5 text-xs sm:h-12 sm:px-6 sm:text-sm">
-            <BadgeCheck className="mr-1.5 h-4 w-4 sm:mr-2" />
-            <span className="sm:hidden">Sell</span>
-            <span className="hidden sm:inline">Sold Bike</span>
+          <Button variant="secondary" className="h-12 rounded-xl px-6">
+            <BadgeCheck className="mr-2 h-4 w-4" />
+            Sold Bike
           </Button>
         }
       />
 
-      <DialogContent className="!max-w-[calc(100%-1rem)] max-h-[94vh] overflow-hidden rounded-2xl p-0 sm:!max-w-[80vw] sm:rounded-3xl">
+      <DialogContent className="!max-w-[80vw] max-h-[90vh] overflow-hidden rounded-3xl p-7 gap-0">
         <DialogHeader className="border-b px-5 py-4">
-          <DialogTitle className="text-xl font-bold leading-6 sm:text-3xl">
+          <DialogTitle className="text-3xl font-bold leading-5">
             Complete Bike Sale
           </DialogTitle>
           <p className="text-slate-500 text-xs mt-1">
@@ -226,9 +225,9 @@ export default function SoldBikeDialog() {
           </p>
         </DialogHeader>
 
-        <div className="grid min-h-0 max-h-[calc(94vh-6rem)] grid-cols-1 overflow-y-auto py-3 sm:h-[75vh] sm:max-h-none sm:grid-cols-12 sm:overflow-hidden sm:py-5">
+        <div className="grid h-[75vh] grid-cols-12 py-5">
           {/* LEFT: Added overflow-y-auto and pb-10 so the 3 rows don't get cut off */}
-          <div className="border-b px-4 pb-6 sm:col-span-5 sm:overflow-y-auto sm:border-b-0 sm:border-r sm:px-8 sm:pb-10">
+          <div className="col-span-5 border-r px-8 overflow-y-auto pb-10">
             <div className="mb-4 flex items-center justify-between">
               <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 Bike Information
@@ -275,7 +274,7 @@ export default function SoldBikeDialog() {
                   />
                 </div>
 
-                <div className="mt-6 grid grid-cols-1 gap-4 sm:mt-8 sm:grid-cols-2 sm:gap-5">
+                <div className="mt-8 grid grid-cols-2 gap-5">
                   <Input
                     value={uppercaseDbText(selectedBike.number)}
                     readOnly
@@ -312,12 +311,12 @@ export default function SoldBikeDialog() {
           </div>
 
           {/* RIGHT */}
-          <div className="px-4 py-2 pb-8 sm:col-span-7 sm:overflow-y-auto sm:px-10 sm:pb-10 sm:pr-6">
+          <div className="col-span-7 overflow-y-auto px-10 py-2 pb-10 pr-6">
             <h3 className="mb-5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Buyer Information
             </h3>
 
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5">
+            <div className="grid grid-cols-2 gap-5">
               <Input
                 name="buyerName"
                 value={form.buyerName}
@@ -357,26 +356,14 @@ export default function SoldBikeDialog() {
             <div className="mt-8 space-y-6">
               <div>
                 <p className="mb-2 text-sm font-medium">Upload Receipt</p>
-                <div className="flex flex-col gap-2 sm:flex-row">
-                  <FilePicker
-                    id="sale-receipt"
-                    accept="image/*"
-                    label="Choose receipt"
-                    resetKey={fileKey}
-                    selectedFileName={receipt?.name}
-                    onChange={(e) => setReceipt(e.target.files?.[0] ?? null)}
-                  />
-                  <div className="sm:hidden">
-                    <FilePicker
-                      id="sale-receipt-camera"
-                      accept="image/*"
-                      capture="environment"
-                      label="Take receipt photo"
-                      resetKey={fileKey}
-                      onChange={(e) => setReceipt(e.target.files?.[0] ?? null)}
-                    />
-                  </div>
-                </div>
+                <FilePicker
+                  id="sale-receipt"
+                  accept="image/*"
+                  label="Choose receipt"
+                  resetKey={fileKey}
+                  selectedFileName={receipt?.name}
+                  onChange={(e) => setReceipt(e.target.files?.[0] ?? null)}
+                />
               </div>
 
               <div>
@@ -385,14 +372,13 @@ export default function SoldBikeDialog() {
                   Upload document images only. They will be converted into a
                   single PDF automatically.
                 </p>
-                <div className="flex flex-col gap-2 sm:flex-row">
-                  <FilePicker
-                    id="buyer-documents"
-                    multiple
-                    accept="image/*"
-                    label="Choose buyer documents"
-                    resetKey={fileKey}
-                    onChange={(e) => {
+                <FilePicker
+                  id="buyer-documents"
+                  multiple
+                  accept="image/*"
+                  label="Choose buyer documents"
+                  resetKey={fileKey}
+                  onChange={(e) => {
                     const files = Array.from(e.target.files ?? []);
 
                     setBuyerDocs((prev) => {
@@ -411,22 +397,8 @@ export default function SoldBikeDialog() {
                     });
 
                     setFileKey(Date.now());
-                    }}
-                  />
-                  <div className="sm:hidden">
-                    <FilePicker
-                      id="buyer-documents-camera"
-                      accept="image/*"
-                      capture="environment"
-                      label="Take document photo"
-                      resetKey={fileKey}
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) setBuyerDocs((prev) => [...prev, file]);
-                      }}
-                    />
-                  </div>
-                </div>
+                  }}
+                />
 
                 {buyerDocs.length > 0 && (
                   <div className="mt-4 space-y-2 rounded-xl border bg-slate-50 p-4">

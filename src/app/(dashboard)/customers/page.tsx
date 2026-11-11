@@ -97,9 +97,9 @@ export default function CustomersPage() {
   }
 
   return (
-    <div className="flex-1 p-0 pb-28 sm:p-4 sm:pb-24">
+    <div className="flex-1 p-4 pb-24">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold sm:text-3xl">Customer CRM</h1>
+        <h1 className="text-2xl font-bold">Customer CRM</h1>
         <p className="mt-1 text-sm text-slate-500">
           Track every bike from seller to buyer.
         </p>
@@ -116,20 +116,20 @@ export default function CustomersPage() {
               key={record.id}
               className="rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition"
             >
-              <CardContent className="p-4 sm:px-10">
-                <div className="flex flex-col items-stretch gap-5 sm:flex-row sm:items-center">
+              <CardContent className="px-10">
+                <div className="flex items-center gap-5">
                   {/* Bike Image */}
                   <Image
                     src={bike.image}
                     alt={bike.model}
                     width={150}
                     height={100}
-                    className="h-44 w-full rounded-xl border object-cover sm:h-28 sm:w-40"
+                    className="h-28 w-40 rounded-xl object-cover border"
                   />
 
                   {/* Information */}
                   <div className="flex-1">
-                    <div className="mb-1 flex flex-wrap items-center gap-3">
+                    <div className="flex items-center gap-3 mb-1">
                       <h3 className="text-lg font-semibold">{bike.number.toUpperCase()}</h3>
 
                       {bike.status === "Sold" ? (
@@ -145,7 +145,7 @@ export default function CustomersPage() {
 
                     <p className="text-sm text-slate-500 mb-5">{bike.model.toUpperCase()}</p>
 
-                    <div className="grid gap-5 sm:grid-cols-[1fr_auto_1fr] sm:items-start">
+                    <div className="flex items-start">
                       {/* Seller */}
                       <div className="flex-1">
                         <p className="text-xs uppercase tracking-wider text-slate-400 mb-2">
@@ -163,7 +163,7 @@ export default function CustomersPage() {
                       </div>
 
                       {/* Divider */}
-                      <div className="hidden h-20 w-px bg-slate-200 sm:block" />
+                      <div className="mx-8 h-20 w-px bg-slate-500" />
 
                       {/* Buyer */}
                       <div className="flex-1">
@@ -198,7 +198,7 @@ export default function CustomersPage() {
                   </div>
 
                   {/* Right Buttons */}
-                  <div className="flex w-full flex-col gap-3 sm:w-36">
+                  <div className="flex w-36 flex-col gap-3">
                     <Link href={`/inventory/${bike.id}`}>
                       <Button
                         variant="outline"

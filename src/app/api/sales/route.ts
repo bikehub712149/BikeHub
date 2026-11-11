@@ -12,7 +12,6 @@ export async function GET(req: Request) {
 
     const url = new URL(req.url);
     const { page, pageSize } = getPaginationParams(url.searchParams);
-    const month = url.searchParams.get("month");
     const paperworkParam = url.searchParams.get("paperwork")?.toLowerCase();
     const paperwork = paperworkParam === "pending" ? "Pending" : paperworkParam === "completed" ? "Completed" : undefined;
     const result = await getBikesPage({
@@ -61,55 +60,6 @@ export async function GET(req: Request) {
       result.pagination.totalItems,
     ]);
 
-    let monthlyReport = null;
-    if (month) {
-      if (!/^\d{4}-\d{2}$/.test(month)) {
-        return NextResponse.json({ message: "Month must use YYYY-MM format" }, { status: 400 });
-      }
-
-      const [year, monthNumber] = month.split("-").map(Number);
-      const monthStart = new Date(Date.UTC(year, monthNumber - 1, 1));
-      const nextMonthStart = new Date(Date.UTC(year, monthNumber, 1));
-
-      if (
-        monthStart.getUTCFullYear() !== year ||
-        monthStart.getUTCMonth() !== monthNumber - 1
-      ) {
-        return NextResponse.json({ message: "Invalid month" }, { status: 400 });
-      }
-
-      const monthlyResult = await CustomerTransaction.aggregate([
-        {
-          $match: {
-            saleDate: { $gte: monthStart, $lt: nextMonthStart },
-            sellingPrice: { $ne: null },
-          },
-        },
-        {
-          $group: {
-            _id: null,
-            totalRevenue: { $sum: { $ifNull: ["$sellingPrice", 0] } },
-            totalProfit: {
-              $sum: {
-                $subtract: [
-                  { $ifNull: ["$sellingPrice", 0] },
-                  { $ifNull: ["$purchasePrice", 0] },
-                ],
-              },
-            },
-            bikesSold: { $sum: 1 },
-          },
-        },
-      ]);
-
-      monthlyReport = {
-        month,
-        totalRevenue: monthlyResult[0]?.totalRevenue ?? 0,
-        totalProfit: monthlyResult[0]?.totalProfit ?? 0,
-        bikesSold: monthlyResult[0]?.bikesSold ?? 0,
-      };
-    }
-
     return NextResponse.json({
       items: sales,
       summary: {
@@ -117,7 +67,6 @@ export async function GET(req: Request) {
         totalProfit: summaryResult[0]?.totalProfit ?? 0,
         bikesSold,
       },
-      monthlyReport,
       pagination: result.pagination,
     });
   } catch (error) {
