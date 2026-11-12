@@ -32,23 +32,17 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const publishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
-
-  const content = (
-    <html
-      lang="en"
-      className={`${inter.variable} ${poppins.variable} h-full overflow-x-hidden antialiased`}
-    >
-      <body className="min-h-full flex flex-col overflow-x-hidden">
-        {children}
-        <Toaster richColors position="top-right" />
-      </body>
-    </html>
+  return (
+    <ClerkProvider>
+      <html
+        lang="en"
+        className={`${inter.variable} ${poppins.variable} h-full antialiased`}
+      >
+        <body className="min-h-full flex flex-col">
+          {children}
+          <Toaster richColors position="top-right" />
+        </body>
+      </html>
+    </ClerkProvider>
   );
-
-  if (!publishableKey) {
-    return content;
-  }
-
-  return <ClerkProvider publishableKey={publishableKey}>{content}</ClerkProvider>;
 }

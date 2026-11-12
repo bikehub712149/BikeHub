@@ -1,24 +1,16 @@
 import { v2 as cloudinary } from "cloudinary";
 
-export const hasCloudinaryConfig = Boolean(
-  process.env.CLOUDINARY_CLOUD_NAME &&
-    process.env.CLOUDINARY_API_KEY &&
-    process.env.CLOUDINARY_API_SECRET
-);
-
-if (hasCloudinaryConfig) {
-  cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME!,
-    api_key: process.env.CLOUDINARY_API_KEY!,
-    api_secret: process.env.CLOUDINARY_API_SECRET!,
-  });
-}
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME!,
+  api_key: process.env.CLOUDINARY_API_KEY!,
+  api_secret: process.env.CLOUDINARY_API_SECRET!,
+});
 
 /**
  * Delete a Cloudinary asset from its URL.
  */
 export async function deleteCloudinaryByUrl(url?: string) {
-  if (!hasCloudinaryConfig || !url || !url.includes("/upload/")) {
+  if (!url || !url.includes("/upload/")) {
     return null;
   }
 
@@ -63,10 +55,6 @@ export async function deleteCloudinaryByUrl(url?: string) {
  * Delete an empty folder.
  */
 export async function deleteCloudinaryFolder(folder: string) {
-  if (!hasCloudinaryConfig) {
-    return null;
-  }
-
   try {
     return await cloudinary.api.delete_folder(folder);
   } catch {

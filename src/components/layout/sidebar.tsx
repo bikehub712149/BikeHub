@@ -50,7 +50,7 @@ export function SidebarNavContent({ onNavigate }: { onNavigate?: () => void }) {
   return (
     <>
       {/* Logo */}
-      <div className="flex h-16 lg:h-22 items-center justify-center border-b px-4">
+      <div className="flex h-22 max-lg:h-16 items-center justify-center border-b">
         <h1 className="text-xl font-bold">BikeHub</h1>
       </div>
 
@@ -104,7 +104,7 @@ export function SidebarNavContent({ onNavigate }: { onNavigate?: () => void }) {
 
 export default function Sidebar() {
   return (
-    <aside className="sticky top-0 z-40 hidden lg:flex h-screen w-56 shrink-0 flex-col border-r bg-background">
+    <aside className="sticky top-0 z-40 flex max-lg:hidden h-screen w-56 flex-col border-r bg-background">
       <SidebarNavContent />
     </aside>
   );

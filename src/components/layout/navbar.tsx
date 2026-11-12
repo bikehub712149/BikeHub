@@ -174,13 +174,13 @@ export default function Navbar() {
   };
 
   return (
-    <header className="sticky top-0 z-40 flex flex-wrap md:flex-nowrap md:h-22 items-center justify-between gap-2.5 md:gap-6 lg:gap-10 border-b bg-white px-3 py-2.5 sm:px-4 md:py-0 md:px-6">
+    <header className="sticky top-0 z-40 flex h-22 items-center justify-between gap-10 border-b bg-white px-6 max-md:h-auto max-md:flex-wrap max-md:gap-2.5 max-md:px-3 max-md:py-2.5">
       {/* Mobile Menu Trigger + Brand */}
       <div className="flex items-center gap-2 lg:hidden">
         <Sheet open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
           <SheetTrigger
             render={
-              <Button variant="outline" size="icon-sm" aria-label="Open navigation menu" className="rounded-xl">
+              <Button variant="outline" size="icon-sm" aria-label="Open navigation menu" className="rounded-xl !p-2.5">
                 <Menu className="h-4 w-4" />
               </Button>
             }
@@ -190,11 +190,11 @@ export default function Navbar() {
             <SidebarNavContent onNavigate={() => setMobileNavOpen(false)} />
           </SheetContent>
         </Sheet>
-        <span className="text-base sm:text-lg font-bold tracking-tight md:hidden">BikeHub</span>
+        <span className="text-base font-bold tracking-tight md:hidden">BikeHub</span>
       </div>
 
       {/* Search Bar */}
-      <div className="relative order-3 w-full md:order-none md:flex-1 md:max-w-2xl" ref={searchRef}>
+      <div className="relative flex-1 max-w-2xl max-md:order-3 max-md:w-full max-md:max-w-none max-md:flex-none" ref={searchRef}>
         <div className="relative group">
           {loading ? (
             <Loader2
@@ -235,8 +235,8 @@ export default function Navbar() {
               shouldFilter={false} is REQUIRED when fetching from an API. 
               Otherwise, cmdk tries to filter your already-filtered API results.
             */}
-            <Command shouldFilter={false} className="max-h-[70vh] sm:max-h-[400px] bg-transparent">
-              <CommandList className="max-h-[70vh] sm:max-h-[400px] overflow-y-auto p-2">
+            <Command shouldFilter={false} className="max-h-[400px] max-sm:max-h-[70vh] bg-transparent">
+              <CommandList className="max-h-[400px] max-sm:max-h-[70vh] overflow-y-auto p-2">
                 {/* Loading State */}
                 {loading && (
                   <div className="flex items-center justify-center py-8 text-sm text-muted-foreground">
@@ -266,11 +266,11 @@ export default function Navbar() {
                         key={item.bikeId}
                         value={item.bikeId}
                         onSelect={() => handleBikeSelect(item.bikeId)}
-                        className="mb-1 flex cursor-pointer items-center gap-3 sm:gap-4 rounded-xl px-3 py-3 transition-colors hover:bg-muted/50 aria-selected:bg-muted/50"
+                        className="mb-1 flex cursor-pointer items-center gap-4 max-sm:gap-3 rounded-xl px-3 py-3 transition-colors hover:bg-muted/50 aria-selected:bg-muted/50"
                         aria-disabled={navigating}
                       >
                         {/* Thumbnail */}
-                        <div className="relative h-12 w-16 sm:h-14 sm:w-20 shrink-0 overflow-hidden rounded-lg bg-muted/30 border border-border/50">
+                        <div className="relative h-14 w-20 max-sm:h-12 max-sm:w-16 shrink-0 overflow-hidden rounded-lg bg-muted/30 border border-border/50">
                           <Image
                             fill
                             sizes="80px"
@@ -293,7 +293,7 @@ export default function Navbar() {
                           </span>
 
                           {/* Seller / Buyer Tags */}
-                          <div className="flex flex-wrap items-center gap-3 mt-0.5">
+                          <div className="flex items-center gap-3 mt-0.5 max-sm:flex-wrap">
                             {item.seller?.name && (
                               <span className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
                                 <User size={12} className="text-blue-500 shrink-0" />
@@ -319,7 +319,7 @@ export default function Navbar() {
       </div>
 
       {/* Action Buttons */}
-      <div className="ml-auto flex items-center gap-1.5 sm:gap-3">
+      <div className="flex items-center gap-3 max-sm:ml-auto max-sm:gap-1.5">
         <AddBikeDialog />
         <SoldBikeDialog />
       </div>

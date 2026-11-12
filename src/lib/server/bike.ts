@@ -1,4 +1,4 @@
-import { connectDB, getMemoryStore } from "@/lib/db";
+import { connectDB } from "@/lib/db";
 import Bike from "@/models/Bike";
 import { Bike as BikeType } from "@/types/bike";
 import { uppercaseDbText } from "@/lib/utils";
@@ -21,10 +21,7 @@ function normalizeBikes(bikes: BikeType[]) {
 }
 
 export async function getAllBikes() {
-  const isConnected = await connectDB();
-  if (!isConnected) {
-    return normalizeBikes(getMemoryStore().bikes);
-  }
+  await connectDB();
 
   const bikes = await Bike.find()
     .sort({ createdAt: -1 })
@@ -33,39 +30,14 @@ export async function getAllBikes() {
 }
 
 export async function getBikeById(id: string) {
-  const isConnected = await connectDB();
-  if (!isConnected) {
-    const found = getMemoryStore().bikes.find((b) => b.id === id);
-    return found ? normalizeBike(found) : null;
-  }
+  await connectDB();
 
   const bike = await Bike.findOne({ id }).lean<BikeType | null>();
   return bike ? normalizeBike(bike) : null;
 }
 
 export async function createBike(data: BikeType) {
-  const isConnected = await connectDB();
-  if (!isConnected) {
-    const store = getMemoryStore();
-    const normalizedNumber = uppercaseDbText(data.number);
-    if (
-      store.bikes.some(
-        (b) => uppercaseDbText(b.number) === normalizedNumber
-      )
-    ) {
-      const duplicateErr: any = new Error("Duplicate registration number");
-      duplicateErr.code = 11000;
-      duplicateErr.keyPattern = { number: 1 };
-      throw duplicateErr;
-    }
-
-    const created = {
-      ...normalizeBike(data),
-      createdAt: new Date().toISOString(),
-    };
-    store.bikes.unshift(created);
-    return created;
-  }
+  await connectDB();
 
   return await Bike.create(data);
 }
@@ -74,22 +46,7 @@ export async function updateBike(
   id: string,
   data: Partial<BikeType>
 ) {
-  const isConnected = await connectDB();
-  if (!isConnected) {
-    const store = getMemoryStore();
-    const index = store.bikes.findIndex((b) => b.id === id);
-    if (index === -1) return null;
-
-    const updated = normalizeBike({
-      ...store.bikes[index],
-      ...data,
-    });
-    store.bikes[index] = {
-      ...store.bikes[index],
-      ...updated,
-    };
-    return store.bikes[index];
-  }
+  await connectDB();
 
   return await Bike.findOneAndUpdate({ id }, data, {
     new: true,
@@ -97,23 +54,10 @@ export async function updateBike(
 }
 
 export async function markBikeAsSold(bikeId: string) {
-  const isConnected = await connectDB();
-  const target = uppercaseDbText(bikeId);
-
-  if (!isConnected) {
-    const store = getMemoryStore();
-    const bike = store.bikes.find(
-      (b) => uppercaseDbText(b.number) === target
-    );
-    if (!bike) return null;
-    bike.status = "Sold";
-    bike.paperwork = "Pending";
-    return bike;
-  }
-
+  await connectDB();
   // Sales are keyed by registration number; completing a sale also resets paperwork to pending.
   return Bike.findOneAndUpdate(
-    { number: new RegExp(`^${escapeRegex(target)}$`, "i") },
+    { number: uppercaseDbText(bikeId) },
     {
       status: "Sold",
       paperwork: "Pending",
@@ -126,23 +70,10 @@ export async function updateBikePaperwork(
   bikeNumber: string,
   paperwork: "Pending" | "Completed"
 ) {
-  const isConnected = await connectDB();
-  const target = uppercaseDbText(bikeNumber);
-
-  if (!isConnected) {
-    const store = getMemoryStore();
-    const bike = store.bikes.find(
-      (b) => uppercaseDbText(b.number) === target
-    );
-    if (!bike) {
-      return { matchedCount: 0 };
-    }
-    bike.paperwork = paperwork;
-    return { matchedCount: 1 };
-  }
+  await connectDB();
 
   return Bike.updateOne(
-    { number: new RegExp(`^${escapeRegex(target)}$`, "i") },
+    { number: uppercaseDbText(bikeNumber) },
     {
       $set: {
         paperwork,
@@ -152,14 +83,7 @@ export async function updateBikePaperwork(
 }
 
 export async function deleteBike(id: string) {
-  const isConnected = await connectDB();
-  if (!isConnected) {
-    const store = getMemoryStore();
-    const index = store.bikes.findIndex((b) => b.id === id);
-    if (index === -1) return null;
-    const [removed] = store.bikes.splice(index, 1);
-    return removed;
-  }
+  await connectDB();
 
   return await Bike.findOneAndDelete({ id });
 }
@@ -175,21 +99,7 @@ export async function getBikesPage({
   page: number;
   pageSize: number;
 }) {
-  const isConnected = await connectDB();
-  if (!isConnected) {
-    const filtered = getMemoryStore().bikes.filter((bike) => {
-      if (status && bike.status !== status) return false;
-      if (paperwork && bike.paperwork !== paperwork) return false;
-      return true;
-    });
-    const totalItems = filtered.length;
-    const start = (page - 1) * pageSize;
-    const items = filtered.slice(start, start + pageSize);
-    return {
-      items: normalizeBikes(items),
-      pagination: buildPagination(page, pageSize, totalItems),
-    };
-  }
+  await connectDB();
 
   // The _id tie-breaker keeps page order stable when bikes share a createdAt timestamp.
   const filter = {
@@ -214,16 +124,9 @@ export async function getBikesPage({
 export async function getBikesByNumbers(numbers: string[]) {
   if (numbers.length === 0) return [];
 
-  const isConnected = await connectDB();
-  const normalizedNumbers = numbers.map((number) => uppercaseDbText(number));
+  await connectDB();
 
-  if (!isConnected) {
-    const numSet = new Set(normalizedNumbers);
-    const matched = getMemoryStore().bikes.filter((bike) =>
-      numSet.has(uppercaseDbText(bike.number))
-    );
-    return normalizeBikes(matched);
-  }
+  const normalizedNumbers = numbers.map((number) => uppercaseDbText(number));
 
   const bikes = await Bike.find({
     number: {
@@ -240,16 +143,7 @@ function escapeRegex(value: string) {
 }
 
 export async function getBikeOverview() {
-  const isConnected = await connectDB();
-  if (!isConnected) {
-    const bikes = getMemoryStore().bikes;
-    return {
-      recentBikes: normalizeBikes(bikes.slice(0, 6)),
-      totalStock: bikes.filter((b) => b.status === "Available").length,
-      soldBikes: bikes.filter((b) => b.status === "Sold").length,
-      pendingBikes: bikes.filter((b) => b.paperwork === "Pending").length,
-    };
-  }
+  await connectDB();
 
   const [recentBikes, totalStock, soldBikes, pendingBikes] = await Promise.all([
     Bike.find().sort({ createdAt: -1, _id: -1 }).limit(6).lean<BikeType[]>(),

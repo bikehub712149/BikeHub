@@ -6,20 +6,11 @@ const ALLOWED_ADMINS = [
   "bikehub.712149@gmail.com",
 ];
 
-const isProduction = process.env.NODE_ENV === "production";
-const hasClerkKeys = Boolean(
-  process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY && process.env.CLERK_SECRET_KEY
-);
-
 export async function verifyAdmin() {
-  if (!hasClerkKeys) {
-    return null;
-  }
-
   const authObject = await auth();
 
   if (!authObject.userId) {
-    if (!isProduction) {
+    if (process.env.AISTUDIO_PREVIEW === "true") {
       return null;
     }
     return NextResponse.json(

@@ -81,19 +81,19 @@ export default function BikeDetailsClient({
 
       {/* ---------------- Page ---------------- */}
 
-      <div className="space-y-6 sm:space-y-8 p-1 sm:p-4 lg:p-8">
-        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-          <div className="min-w-0">
+      <div className="space-y-8 p-8 max-sm:space-y-6 max-sm:p-2">
+        <div className="flex items-start justify-between max-sm:flex-col max-sm:gap-4">
+          <div>
             <Link
               href="/inventory"
-              className="mb-3 sm:mb-4 inline-flex items-center gap-2 text-sm text-slate-500 hover:text-black"
+              className="mb-4 inline-flex items-center gap-2 text-sm text-slate-500 hover:text-black"
             >
               <ArrowLeft size={16} />
               Back to Inventory
             </Link>
 
-            <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold uppercase! break-words">
+            <div className="flex items-center gap-3 max-sm:flex-wrap">
+              <h1 className="text-4xl max-sm:text-2xl font-bold uppercase!">
                 {bike.model.toUpperCase()}
               </h1>
 
@@ -114,18 +114,16 @@ export default function BikeDetailsClient({
               )}
             </div>
 
-            <p className="mt-1.5 sm:mt-2 text-sm sm:text-base text-slate-500 uppercase!">
+            <p className="mt-2 text-slate-500 uppercase!">
               Registration No. {bike.number.toUpperCase()}
             </p>
           </div>
 
-          <div className="shrink-0">
-            <DeleteBikeDialog bikeId={bike.id} bikeNumber={bike.number} />
-          </div>
+          <DeleteBikeDialog bikeId={bike.id} bikeNumber={bike.number} />
         </div>
 
-        <div className="grid grid-cols-1 xl:grid-cols-[460px_1fr] gap-6 sm:gap-8 items-start">
-          <div className="xl:sticky xl:top-24">
+        <div className="grid grid-cols-1 lg:grid-cols-[460px_1fr] gap-8 items-start">
+          <div className="lg:sticky lg:top-24">
             <BikeGalleryClient images={images} />
           </div>
 
@@ -172,31 +170,31 @@ export default function BikeDetailsClient({
           </div>
         )}
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
-          <div className="rounded-2xl sm:rounded-3xl border bg-white p-4 sm:p-6 shadow-sm">
-            <p className="text-xs sm:text-sm text-slate-500">Purchase Price</p>
+        <div className="grid gap-5 md:grid-cols-4 max-md:grid-cols-2 max-sm:gap-3">
+          <div className="rounded-3xl border bg-white p-6 max-sm:p-4 shadow-sm">
+            <p className="text-sm text-slate-500">Purchase Price</p>
 
-            <h2 className="mt-2 sm:mt-3 text-xl sm:text-2xl lg:text-3xl font-bold break-words">
+            <h2 className="mt-3 text-3xl max-sm:text-xl font-bold">
               {transaction
                 ? `₹${transaction.purchasePrice.toLocaleString("en-IN")}`
                 : "--"}
             </h2>
           </div>
 
-          <div className="rounded-2xl sm:rounded-3xl border bg-white p-4 sm:p-6 shadow-sm">
-            <p className="text-xs sm:text-sm text-slate-500">Selling Price</p>
+          <div className="rounded-3xl border bg-white p-6 max-sm:p-4 shadow-sm">
+            <p className="text-sm text-slate-500">Selling Price</p>
 
-            <h2 className="mt-2 sm:mt-3 text-xl sm:text-2xl lg:text-3xl font-bold break-words">
+            <h2 className="mt-3 text-3xl max-sm:text-xl font-bold">
               {transaction?.sellingPrice
                 ? `₹${transaction.sellingPrice.toLocaleString("en-IN")}`
                 : "--"}
             </h2>
           </div>
 
-          <div className="rounded-2xl sm:rounded-3xl border bg-white p-4 sm:p-6 shadow-sm">
-            <p className="text-xs sm:text-sm text-slate-500">Profit</p>
+          <div className="rounded-3xl border bg-white p-6 max-sm:p-4 shadow-sm">
+            <p className="text-sm text-slate-500">Profit</p>
 
-            <h2 className="mt-2 sm:mt-3 text-xl sm:text-2xl lg:text-3xl font-bold text-emerald-600 break-words">
+            <h2 className="mt-3 text-3xl max-sm:text-xl font-bold text-emerald-600">
               {transaction?.sellingPrice
                 ? `₹${(
                     transaction.sellingPrice - transaction.purchasePrice
@@ -205,10 +203,10 @@ export default function BikeDetailsClient({
             </h2>
           </div>
 
-          <div className="rounded-2xl sm:rounded-3xl border bg-white p-4 sm:p-6 shadow-sm">
-            <p className="text-xs sm:text-sm text-slate-500">Current Status</p>
+          <div className="rounded-3xl border bg-white p-6 max-sm:p-4 shadow-sm">
+            <p className="text-sm text-slate-500">Current Status</p>
 
-            <div className="mt-2 sm:mt-3">
+            <div className="mt-3">
               {bike.status === "Sold" ? (
                 <Badge
                   variant="sold"

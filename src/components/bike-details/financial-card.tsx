@@ -25,16 +25,16 @@ export default function FinancialCard({
     : null;
 
   return (
-    <Card className="rounded-2xl sm:rounded-3xl shadow-sm">
-      <CardContent className="p-5 sm:p-8">
-        <div className="mb-6 sm:mb-8 flex items-center justify-between gap-3">
+    <Card className="rounded-3xl shadow-sm">
+      <CardContent className="p-8 max-sm:p-5">
+        <div className="mb-8 max-sm:mb-6 flex items-center justify-between">
           <div>
-            <h2 className="text-lg sm:text-xl font-bold flex items-center gap-2">
-              <IndianRupee className="h-5 w-5 text-blue-600 shrink-0" />
+            <h2 className="text-xl font-bold flex items-center gap-2">
+              <IndianRupee className="h-5 w-5 text-blue-600" />
               Financial Information
             </h2>
 
-            <p className="text-xs sm:text-sm text-slate-500">
+            <p className="text-sm text-slate-500">
               Purchase &amp; selling summary
             </p>
           </div>
@@ -49,7 +49,7 @@ export default function FinancialCard({
           </Button>
         </div>
 
-        <div className="space-y-5 sm:space-y-6">
+        <div className="space-y-6">
           <Row
             label="Purchase Price"
             value={`₹${purchasePrice.toLocaleString("en-IN")}`}
@@ -64,16 +64,16 @@ export default function FinancialCard({
             }
           />
 
-          <div className="rounded-2xl bg-emerald-50 border border-emerald-200 p-4 sm:p-5">
+          <div className="rounded-2xl bg-emerald-50 border border-emerald-200 p-5">
             <div className="flex items-center gap-2 text-emerald-700">
               <TrendingUp size={18} />
 
-              <span className="font-medium text-sm sm:text-base">
+              <span className="font-medium">
                 Estimated Profit
               </span>
             </div>
 
-            <p className="mt-2 text-2xl sm:text-3xl font-bold text-emerald-700">
+            <p className="mt-2 text-3xl font-bold text-emerald-700">
               {sold
                 ? `₹${profit?.toLocaleString("en-IN")}`
                 : "--"}
@@ -93,12 +93,12 @@ function Row({
   value: React.ReactNode;
 }) {
   return (
-    <div className="flex items-center justify-between border-b pb-3 gap-2">
-      <span className="text-sm sm:text-base text-slate-500">
+    <div className="flex items-center justify-between border-b pb-3">
+      <span className="text-slate-500">
         {label}
       </span>
 
-      <span className="font-semibold text-sm sm:text-base">
+      <span className="font-semibold">
         {value}
       </span>
     </div>
