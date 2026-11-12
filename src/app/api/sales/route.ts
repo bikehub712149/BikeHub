@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { getBikesPage } from "@/lib/server/bike";
 import { verifyAdmin } from "@/lib/server/admin-auth";
 import { getPaginationParams } from "@/lib/server/pagination";
+import { connectDB } from "@/lib/db";
 import CustomerTransaction from "@/models/CustomerTransaction";
 
 export async function GET(req: Request) {
@@ -13,29 +14,38 @@ export async function GET(req: Request) {
     const url = new URL(req.url);
     const { page, pageSize } = getPaginationParams(url.searchParams);
     const paperworkParam = url.searchParams.get("paperwork")?.toLowerCase();
-    const paperwork = paperworkParam === "pending" ? "Pending" : paperworkParam === "completed" ? "Completed" : undefined;
+    const paperwork =
+      paperworkParam === "pending"
+        ? "Pending"
+        : paperworkParam === "completed"
+        ? "Completed"
+        : undefined;
+
+    await connectDB();
+
     const result = await getBikesPage({
       status: "Sold",
       paperwork,
       page,
       pageSize,
     });
+
     // Page sold bikes first, then join their customer transaction data by registration number.
     const customers = await CustomerTransaction.find({
       bikeId: { $in: result.items.map((bike) => bike.number) },
     }).lean();
 
     const sales = result.items.map((bike) => {
-        const customer = customers.find((c: any) => c.bikeId === bike.number);
+      const customer = customers.find((c: any) => c.bikeId === bike.number);
 
-        return {
-          ...bike,
-          buyer: customer?.buyer,
-          sellingPrice: customer?.sellingPrice,
-          purchasePrice: customer?.purchasePrice,
-          receipt: customer?.receipt,
-          saleDate: customer?.saleDate,
-        };
+      return {
+        ...bike,
+        buyer: customer?.buyer,
+        sellingPrice: customer?.sellingPrice,
+        purchasePrice: customer?.purchasePrice,
+        receipt: customer?.receipt,
+        saleDate: customer?.saleDate,
+      };
     });
 
     // Summary totals cover all matching transactions, not only the current page.
@@ -69,8 +79,7 @@ export async function GET(req: Request) {
       },
       pagination: result.pagination,
     });
-  } catch (error) {
-
+  } catch {
     return NextResponse.json(
       { message: "Failed to fetch sales" },
       { status: 500 }

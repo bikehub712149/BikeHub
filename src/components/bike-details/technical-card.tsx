@@ -28,8 +28,8 @@ export default function TechnicalCard({
 }: TechnicalCardProps) {
   return (
     <Card className="rounded-3xl shadow-sm">
-      <CardContent className="p-8">
-        <div className="mb-8 flex items-center justify-between">
+      <CardContent className="p-8 max-sm:p-5">
+        <div className="mb-8 max-sm:mb-6 flex items-center justify-between">
           <div>
             <h2 className="text-xl font-bold">Technical Information</h2>
 
@@ -42,7 +42,7 @@ export default function TechnicalCard({
           </Button>
         </div>
 
-        <div className="grid grid-cols-3 gap-x-10 gap-y-8 uppercase!">
+        <div className="grid grid-cols-2 md:grid-cols-3 max-sm:grid-cols-1 gap-x-10 gap-y-8 max-sm:gap-y-5 uppercase!">
           <Info title="Registration" value={bikeData.number.toUpperCase()} />
 
           <Info title="Model" value={bikeData.model.toUpperCase()} />
@@ -72,7 +72,7 @@ export default function TechnicalCard({
 
           <Info
             title="Expected Selling Price"
-            value={`₹${bikeData.expectedSellingPrice}`}
+            value={`₹${bikeData.expectedSellingPrice.toLocaleString("en-IN")}`}
           />
 
           <div>
@@ -102,11 +102,11 @@ function Info({
   value: React.ReactNode;
 }) {
   return (
-    <div>
+    <div className="min-w-0">
       <p className="mb-1 text-sm text-slate-500">{title}</p>
 
       <div className="overflow-x-auto">
-        <h4 className="min-w-max text-lg font-semibold text-slate-900 whitespace-nowrap">
+        <h4 className="text-lg font-semibold text-slate-900">
           {value}
         </h4>
       </div>

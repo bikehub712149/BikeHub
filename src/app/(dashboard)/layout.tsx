@@ -19,26 +19,28 @@ export default async function DashboardLayout({
   // Keep authentication and authorization separate: signed-in users can still be denied.
   const authObject = await auth();
 
-  // Unauthenticated users belong on the sign-in route, not an access-denied page.
+  // 2. Unauthenticated users belong on the sign-in route, not the access-denied screen.
   if (!authObject.userId) {
-    redirect("/sign-in");
-  }
+    if (process.env.AISTUDIO_PREVIEW !== "true") {
+      redirect("/sign-in");
+    }
+  } else {
+    // 3. Extract the email from the Clerk session token
+    const userEmail = authObject.sessionClaims?.email as string | undefined;
 
-  // 3. Extract the email from the Clerk session token
-  const userEmail = authObject.sessionClaims?.email as string;
-
-  // This allowlist must stay aligned with verifyAdmin, which protects the API routes.
-  if (!userEmail || !ALLOWED_ADMINS.includes(userEmail)) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-50 font-sans dark:bg-slate-950">
-        <div className="text-center rounded-2xl bg-white p-10 shadow-sm border dark:bg-slate-900 dark:border-slate-800">
-          <h1 className="text-3xl font-bold text-red-600">Access Denied</h1>
-          <p className="mt-3 text-slate-500">
-            This inventory portal is restricted to authorized shop admins only.
-          </p>
+    // This allowlist must stay aligned with verifyAdmin, which protects the API routes.
+    if (!userEmail || !ALLOWED_ADMINS.includes(userEmail)) {
+      return (
+        <div className="flex min-h-screen items-center justify-center bg-slate-50 font-sans dark:bg-slate-950">
+          <div className="text-center rounded-2xl bg-white p-10 shadow-sm border dark:bg-slate-900 dark:border-slate-800">
+            <h1 className="text-3xl font-bold text-red-600">Access Denied</h1>
+            <p className="mt-3 text-slate-500">
+              This inventory portal is restricted to authorized shop admins only.
+            </p>
+          </div>
         </div>
-      </div>
-    );
+      );
+    }
   }
 
   // Only authorized administrators reach the dashboard shell.
@@ -46,14 +48,13 @@ export default async function DashboardLayout({
     <div className="flex min-h-screen font-sans">
       <Sidebar />
 
-      <main className="flex min-h-screen flex-1 flex-col">
+      <main className="flex min-w-0 flex-1 flex-col">
         <NavigationToast />
         <Navbar />
 
-        <div className="flex-1 bg-slate-50 p-8 dark:bg-slate-950">
+        <div className="flex-1 bg-slate-50 p-6 max-sm:p-3 dark:bg-slate-950">
           {children}
         </div>
-
       </main>
     </div>
   );

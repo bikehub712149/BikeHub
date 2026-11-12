@@ -39,3 +39,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local platform files
+metadata.json
+/public/assets/
+.playwright-cli/
+
+

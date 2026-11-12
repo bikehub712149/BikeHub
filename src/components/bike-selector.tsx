@@ -53,7 +53,7 @@ export default function BikeSelector({
         }
       />
 
-      <PopoverContent className="w-[420px] p-0">
+      <PopoverContent className="w-[min(420px,calc(100vw-2rem))] p-0">
         <Command>
           <CommandInput placeholder="Search registration..." />
 

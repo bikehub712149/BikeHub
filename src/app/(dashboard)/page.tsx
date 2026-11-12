@@ -13,15 +13,15 @@ import Link from "next/link";
 
 export default function DashboardOverview() {
   return (
-    <div className="flex-1 overflow-y-auto p-4 md:p-8 bg-muted/10 min-h-screen">
+    <div className="flex-1 overflow-y-auto p-4 md:p-8 max-sm:p-2 bg-muted/10 min-h-screen">
       {/* Header with subtle fade-in */}
-      <div className="mb-8 animate-in fade-in duration-700 slide-in-from-top-4">
-        <h1 className="text-3xl font-extrabold tracking-tight text-foreground">
+      <div className="mb-8 max-sm:mb-6 animate-in fade-in duration-700 slide-in-from-top-4">
+        <h1 className="text-3xl max-sm:text-2xl font-extrabold tracking-tight text-foreground">
           Overview
         </h1>
         <p className="mt-1.5 text-sm font-medium text-muted-foreground flex items-center gap-2">
-          <TrendingUp className="h-4 w-4 text-primary/70" />
-          Here's what's happening with your inventory today.
+          <TrendingUp className="h-4 w-4 shrink-0 text-primary/70" />
+          Here&apos;s what&apos;s happening with your inventory today.
         </p>
       </div>
 
@@ -41,15 +41,15 @@ async function DashboardContent() {
     await getBikeOverview();
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-10 max-sm:space-y-8">
       {/* 
         Stats Grid 
         Using delay utilities to create a staggered entrance effect 
       */}
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+      <div className="grid grid-cols-1 gap-6 max-sm:gap-4 md:grid-cols-3">
         {/* Card 1: Total Stock */}
         <Link href="/inventory?status=available">
-          <div className="group relative overflow-hidden cursor-pointer rounded-xl border border-border/50 bg-card p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md animate-in fade-in slide-in-from-bottom-6">
+          <div className="group relative overflow-hidden cursor-pointer rounded-xl border border-border/50 bg-card p-6 max-sm:p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md animate-in fade-in slide-in-from-bottom-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="mb-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">
@@ -69,7 +69,7 @@ async function DashboardContent() {
 
         {/* Card 2: Bikes Sold */}
         <Link href="/inventory?status=sold">
-          <div className="group relative overflow-hidden cursor-pointer rounded-xl border border-border/50 bg-card p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md animate-in fade-in slide-in-from-bottom-6 delay-100 fill-mode-both">
+          <div className="group relative overflow-hidden cursor-pointer rounded-xl border border-border/50 bg-card p-6 max-sm:p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md animate-in fade-in slide-in-from-bottom-6 delay-100 fill-mode-both">
             <div className="flex items-center justify-between">
               <div>
                 <p className="mb-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">
@@ -89,7 +89,7 @@ async function DashboardContent() {
 
         {/* Card 3: Pending Paperwork */}
         <Link href="/paperwork?status=pending">
-          <div className="group relative overflow-hidden rounded-xl cursor-pointer border border-border/50 bg-card p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md animate-in fade-in slide-in-from-bottom-6 delay-200 fill-mode-both">
+          <div className="group relative overflow-hidden rounded-xl cursor-pointer border border-border/50 bg-card p-6 max-sm:p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md animate-in fade-in slide-in-from-bottom-6 delay-200 fill-mode-both">
             <div className="flex items-center justify-between">
               <div>
                 <p className="mb-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">
@@ -110,9 +110,9 @@ async function DashboardContent() {
 
       {/* Recent Additions List */}
       <div className="overflow-hidden rounded-xl border-2 border-border/70 bg-card shadow-sm animate-in fade-in duration-700 delay-300 fill-mode-both">
-        <div className="flex items-center justify-between border-b-2 border-border/100 px-6 py-8 sm:px-8">
+        <div className="flex items-center justify-between border-b-2 border-border/100 px-8 py-8 max-sm:flex-col max-sm:items-start max-sm:gap-4 max-sm:px-4 max-sm:py-5">
           <div>
-            <h2 className="text-2xl font-bold tracking-tight text-foreground leading-4">
+            <h2 className="text-2xl max-sm:text-xl font-bold tracking-tight text-foreground">
               Recent Additions
             </h2>
             <p className="mt-1 text-xs text-muted-foreground">
@@ -132,7 +132,7 @@ async function DashboardContent() {
           </Link>
         </div>
 
-        <div className="grid gap-8 py-6 !px-16 sm:p-8 md:grid-cols-2 xl:grid-cols-3 bg-slate-200/50">
+        <div className="grid gap-8 py-6 p-8 !px-16 max-lg:!px-4 max-sm:gap-5 md:grid-cols-2 lg:grid-cols-3 bg-slate-200/50">
           {recentBikes.length > 0 ? (
             recentBikes.map((bike) => <BikeCard key={bike.id} {...bike} />)
           ) : (

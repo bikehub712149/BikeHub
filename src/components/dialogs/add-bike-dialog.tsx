@@ -38,6 +38,7 @@ function formatNumberInput(value: string) {
 function unformatNumberInput(value: string) {
   return value.replace(/,/g, "");
 }
+
 export default function AddBikeDialog() {
   const [open, setOpen] = useState(false);
   const [images, setImages] = useState<File[]>([]);
@@ -98,7 +99,7 @@ export default function AddBikeDialog() {
     const files = Array.from(e.target.files || []);
 
     if (files.length + images.length > 4) {
-      alert("Maximum 4 images allowed.");
+      toast.error("Maximum 4 images allowed.");
       return;
     }
 
@@ -255,25 +256,27 @@ export default function AddBikeDialog() {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger
         render={
-          <Button className="h-12 rounded-xl px-6">
-            <Plus className="mr-2 h-4 w-4" />
+          <Button className="h-9 sm:h-11 rounded-xl px-3 sm:px-5 text-xs sm:text-sm">
+            <Plus className="mr-1 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
             Add Bike
           </Button>
         }
       />
 
-      <DialogContent className="!max-w-[82vw] max-h-[90vh] flex flex-col gap-0 overflow-hidden rounded-3xl p-7">
-        <DialogHeader className="shrink-0 border-b bg-muted/20 px-6 py-5">
-          <DialogTitle className="text-2xl font-bold tracking-tight">Add New Bike</DialogTitle>
+      <DialogContent className="w-[95vw] !max-w-5xl max-h-[92vh] flex flex-col gap-0 overflow-hidden rounded-2xl sm:rounded-3xl p-0 sm:p-5">
+        <DialogHeader className="shrink-0 border-b bg-muted/20 px-5 py-4 sm:px-6 sm:py-5">
+          <DialogTitle className="text-xl sm:text-2xl font-bold tracking-tight">
+            Add New Bike
+          </DialogTitle>
 
-          <p className="text-sm text-slate-500">
+          <p className="text-xs sm:text-sm text-slate-500">
             Enter bike details and seller information.
           </p>
         </DialogHeader>
 
-        <div className="min-h-0 flex-1 grid grid-cols-1 md:grid-cols-12">
+        <div className="min-h-0 flex-1 overflow-y-auto md:overflow-hidden grid grid-cols-1 md:grid-cols-12">
           {/* LEFT */}
-          <div className="min-h-[240px] border-b md:col-span-5 md:min-h-0 md:border-b-0 md:border-r">
+          <div className="border-b md:col-span-5 md:min-h-0 md:overflow-y-auto md:border-b-0 md:border-r">
             <BikeGallery
               images={images}
               selectedImage={selectedImage}
@@ -285,10 +288,10 @@ export default function AddBikeDialog() {
           </div>
 
           {/* RIGHT */}
-          <div className="min-h-0 overflow-y-auto p-5 sm:p-8 md:col-span-7">
-            <h3 className="mb-5 text-lg font-semibold">Bike Details</h3>
+          <div className="min-h-0 md:overflow-y-auto p-4 sm:p-6 md:p-8 md:col-span-7">
+            <h3 className="mb-4 sm:mb-5 text-lg font-semibold">Bike Details</h3>
 
-            <div className="grid grid-cols-2 gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
               <Input
                 name="number"
                 value={form.number}
@@ -355,11 +358,11 @@ export default function AddBikeDialog() {
               </div>
             </div>
 
-            <h3 className="mt-10 mb-5 text-lg font-semibold">
+            <h3 className="mt-8 sm:mt-10 mb-4 sm:mb-5 text-lg font-semibold">
               Seller Information
             </h3>
 
-            <div className="grid grid-cols-2 gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
               <Input
                 name="sellerName"
                 value={form.sellerName}
@@ -403,9 +406,9 @@ export default function AddBikeDialog() {
                 onChange={handleChange}
               />
 
-              <div className="col-span-2">
+              <div className="sm:col-span-2">
                 <Textarea
-                  rows={4}
+                  rows={3}
                   name="sellerAddress"
                   value={form.sellerAddress}
                   placeholder="Seller Address"
@@ -413,7 +416,7 @@ export default function AddBikeDialog() {
                 />
               </div>
 
-              <div className="col-span-2">
+              <div className="sm:col-span-2">
                 <p className="mb-3 text-sm font-medium">
                   Broker Information{" "}
                   <span className="text-xs font-normal text-slate-400">
@@ -421,7 +424,7 @@ export default function AddBikeDialog() {
                   </span>
                 </p>
 
-                <div className="grid grid-cols-2 gap-5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
                   <Input
                     name="brokerName"
                     value={form.brokerName}
@@ -454,7 +457,7 @@ export default function AddBikeDialog() {
             </div>
 
             <div className="mt-8">
-              <p className="mb-3 text-sm font-medium">Seller Documents</p>
+              <p className="mb-2 text-sm font-medium">Seller Documents</p>
               <p className="mb-3 text-xs text-slate-500">
                 Upload document images only. They will be converted into a
                 single PDF automatically.
@@ -489,7 +492,7 @@ export default function AddBikeDialog() {
               />
 
               {sellerDocs.length > 0 && (
-                <div className="mt-4 space-y-2 rounded-xl border bg-slate-50 p-4">
+                <div className="mt-4 space-y-2 rounded-xl border bg-slate-50 p-3 sm:p-4">
                   {sellerDocs.map((file) => (
                     <div
                       key={`${file.name}-${file.size}-${file.lastModified}`}
@@ -505,7 +508,7 @@ export default function AddBikeDialog() {
                           setSellerDocs((docs) =>
                             docs.filter((candidate) => candidate !== file)
                           );
-                          setFileKey(Date.now()); // reset file input
+                          setFileKey(Date.now());
                         }}
                       >
                         <X size={16} />
@@ -516,9 +519,9 @@ export default function AddBikeDialog() {
               )}
             </div>
 
-            <div className="mt-8 flex justify-end gap-4">
+            <div className="mt-8 flex justify-end gap-4 pb-2">
               <Button
-                className="min-w-[150px]"
+                className="w-full sm:w-auto sm:min-w-[150px]"
                 disabled={isSubmitting}
                 onClick={handleSubmit}
               >

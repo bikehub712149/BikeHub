@@ -63,14 +63,13 @@ export default function BikeGallery({
   };
 
   return (
-    <div className="rounded-l-3xl border-r bg-slate-50 p-8">
+    <div className="rounded-l-3xl border-r bg-slate-50 p-8 max-md:rounded-2xl max-md:border-r-0 max-md:border-b max-sm:p-4">
       <h3 className="mb-5 text-lg font-semibold">
         Bike Photos
       </h3>
 
       {/* Main Image */}
-
-      <div className="h-80 overflow-hidden rounded-2xl border bg-white relative flex items-center justify-center">
+      <div className="h-80 max-sm:h-60 overflow-hidden rounded-2xl border bg-white relative flex items-center justify-center">
         {images.length ? (
           <>
             {loadingImages.has(images[selectedImage]) && (
@@ -97,15 +96,12 @@ export default function BikeGallery({
       </div>
 
       {/* Thumbnails */}
-
-      <div className="mt-5 grid grid-cols-5 gap-3">
+      <div className="mt-5 grid grid-cols-5 max-sm:grid-cols-4 gap-3 max-sm:gap-2">
         {images.map((image, index) => (
           <div
             key={index}
             onClick={() => setSelectedImage(index)}
-            className={`relative cursor-pointer overflow-hidden rounded-xl border-2 transition
-
-            ${
+            className={`relative cursor-pointer overflow-hidden rounded-xl border-2 transition ${
               selectedImage === index
                 ? "border-blue-600"
                 : "border-slate-200"
@@ -122,7 +118,7 @@ export default function BikeGallery({
             <img
               src={getImageSrc(image)}
               alt=""
-              className="h-20 w-full object-cover"
+              className="h-20 max-sm:h-16 w-full object-cover"
               onLoad={() => handleImageLoad(image)}
               onError={() => handleImageLoad(image)}
             />
@@ -132,7 +128,6 @@ export default function BikeGallery({
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
-
                   onRemoveImage?.(index);
                 }}
                 className="absolute right-1 top-1 rounded-full bg-black/60 p-1 text-white transition hover:bg-black"
@@ -144,7 +139,7 @@ export default function BikeGallery({
         ))}
 
         {editable && images.length < 4 && (
-          <label className="flex h-20 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-300 transition hover:border-blue-500 hover:bg-blue-50">
+          <label className="flex h-20 max-sm:h-16 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-300 transition hover:border-blue-500 hover:bg-blue-50">
             <Plus className="mb-1 h-5 w-5" />
 
             <span className="text-xs font-medium">

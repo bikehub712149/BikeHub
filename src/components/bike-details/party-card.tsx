@@ -43,8 +43,8 @@ export default function PartyCard({
 }: PartyCardProps) {
   return (
     <Card className="rounded-3xl shadow-sm">
-      <CardContent className="p-8">
-        <div className="mb-8 flex items-start justify-between">
+      <CardContent className="p-8 max-sm:p-5">
+        <div className="mb-8 max-sm:mb-6 flex items-center justify-between max-sm:flex-wrap max-sm:gap-3">
           <div>
             <h2 className="text-xl font-bold">{title}</h2>
             <p className="text-sm text-slate-500">
@@ -86,7 +86,7 @@ export default function PartyCard({
             <div className="space-y-5">
               {/* Seller + Broker */}
               {title === "Seller Information" && broker ? (
-                <div className="grid grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Seller - LEFT */}
                   <div className="space-y-3">
                     <Info
@@ -145,7 +145,7 @@ export default function PartyCard({
               <h3 className="mb-4 font-semibold">Uploaded Documents</h3>
 
               {documents[0] ? (
-                <div className="flex items-center justify-between rounded-xl border p-3">
+                <div className="flex items-center justify-between rounded-xl border p-3 max-sm:flex-wrap max-sm:gap-2">
                   <div className="flex items-center gap-3">
                     <FileText size={18} className="text-blue-600" />
 
@@ -178,7 +178,7 @@ export default function PartyCard({
                   </div>
                 </div>
               ) : (
-                <div className="flex items-center justify-between rounded-xl border border-dashed p-4">
+                <div className="flex items-center justify-between rounded-xl border border-dashed p-4 max-sm:flex-wrap max-sm:gap-3">
                   <div>
                     <p className="font-medium">No document uploaded</p>
                     <p className="text-sm text-slate-500">
@@ -212,9 +212,9 @@ function Info({
   return (
     <div className="flex items-start gap-4 uppercase!">
       <div className="rounded-xl bg-slate-100 p-3 text-slate-600">{icon}</div>
-      <div>
+      <div className="min-w-0">
         <p className="text-sm text-slate-500">{label}</p>
-        <p className="font-semibold">{value}</p>
+        <p className="font-semibold break-words">{value}</p>
       </div>
     </div>
   );

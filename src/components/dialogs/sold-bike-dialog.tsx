@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Loader2, BadgeCheck, X } from "lucide-react";
 import {
   Dialog,
@@ -33,11 +33,11 @@ export default function SoldBikeDialog() {
   // Control the open state of the dialog
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isLoadingBikes, setIsLoadingBikes] = useState(false); // Added loading state
-  const [isLoadingImage, setIsLoadingImage] = useState(true); // Added image loading state
+  const [isLoadingBikes, setIsLoadingBikes] = useState(false);
+  const [isLoadingImage, setIsLoadingImage] = useState(true);
 
   // Use a key to force file inputs to reset on success
-  const [fileKey, setFileKey] = useState(Date.now());
+  const [fileKey, setFileKey] = useState(() => Date.now());
 
   const initialForm = {
     buyerName: "",
@@ -54,24 +54,24 @@ export default function SoldBikeDialog() {
     setSelectedBike(null);
     setReceipt(null);
     setBuyerDocs([]);
-    setFileKey(Date.now()); // Resets the file inputs
+    setFileKey(Date.now());
   };
 
   // Triggered every time the modal is opened
   async function fetchBikes() {
     try {
       // Refresh on every open so bikes sold elsewhere are not left in a stale selector.
-      setIsLoadingBikes(true); // Start loading
+      setIsLoadingBikes(true);
       const res = await fetch("/api/bike");
       if (!res.ok) {
         throw new Error("Failed to fetch bikes");
       }
       const data: Bike[] = await res.json();
       setBikes(data.filter((bike) => bike.status === "Available"));
-    } catch (err) {
+    } catch {
       toast.error("Failed to load bikes");
     } finally {
-      setIsLoadingBikes(false); // Stop loading regardless of success/fail
+      setIsLoadingBikes(false);
     }
   }
 
@@ -79,10 +79,10 @@ export default function SoldBikeDialog() {
   const handleOpenChange = (isOpen: boolean) => {
     setOpen(isOpen);
     if (isOpen) {
-      fetchBikes(); // Fetch fresh data when opening
+      fetchBikes();
     } else {
       // Closing resets files and fields so the next sale starts from a clean form.
-      resetForm(); // Clean up when closing
+      resetForm();
     }
   };
 
@@ -208,16 +208,16 @@ export default function SoldBikeDialog() {
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger
         render={
-          <Button variant="secondary" className="h-12 rounded-xl px-6">
-            <BadgeCheck className="mr-2 h-4 w-4" />
+          <Button variant="secondary" className="h-9 sm:h-11 rounded-xl px-3 sm:px-5 text-xs sm:text-sm">
+            <BadgeCheck className="mr-1 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
             Sold Bike
           </Button>
         }
       />
 
-      <DialogContent className="!max-w-[80vw] max-h-[90vh] overflow-hidden rounded-3xl p-7 gap-0">
-        <DialogHeader className="border-b px-5 py-4">
-          <DialogTitle className="text-3xl font-bold leading-5">
+      <DialogContent className="w-[95vw] !max-w-5xl max-h-[92vh] flex flex-col overflow-hidden rounded-2xl sm:rounded-3xl p-0 sm:p-5 gap-0">
+        <DialogHeader className="shrink-0 border-b px-5 py-4">
+          <DialogTitle className="text-xl sm:text-3xl font-bold">
             Complete Bike Sale
           </DialogTitle>
           <p className="text-slate-500 text-xs mt-1">
@@ -225,9 +225,9 @@ export default function SoldBikeDialog() {
           </p>
         </DialogHeader>
 
-        <div className="grid h-[75vh] grid-cols-12 py-5">
-          {/* LEFT: Added overflow-y-auto and pb-10 so the 3 rows don't get cut off */}
-          <div className="col-span-5 border-r px-8 overflow-y-auto pb-10">
+        <div className="min-h-0 flex-1 overflow-y-auto md:overflow-hidden grid grid-cols-1 md:grid-cols-12 py-4 sm:py-5">
+          {/* LEFT */}
+          <div className="md:col-span-5 border-b md:border-b-0 md:border-r px-4 sm:px-6 md:px-8 md:overflow-y-auto pb-6 md:pb-10">
             <div className="mb-4 flex items-center justify-between">
               <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 Bike Information
@@ -242,7 +242,6 @@ export default function SoldBikeDialog() {
               )}
             </div>
 
-            {/* If BikeSelector supports a 'disabled' prop, you can add disabled={isLoadingBikes} here */}
             <BikeSelector
               bikes={bikes}
               value={selectedBike ?? undefined}
@@ -254,7 +253,7 @@ export default function SoldBikeDialog() {
 
             {selectedBike && (
               <>
-                <div className="mt-8 relative h-60 w-full overflow-hidden rounded-2xl border bg-muted/20 flex items-center justify-center">
+                <div className="mt-6 sm:mt-8 relative h-48 sm:h-60 w-full overflow-hidden rounded-2xl border bg-muted/20 flex items-center justify-center">
                   {isLoadingImage && (
                     <div
                       className="absolute inset-0 z-10 rounded-2xl bg-gradient-to-r from-slate-200 via-slate-100 to-slate-200 bg-[length:200%_100%]"
@@ -274,7 +273,7 @@ export default function SoldBikeDialog() {
                   />
                 </div>
 
-                <div className="mt-8 grid grid-cols-2 gap-5">
+                <div className="mt-6 sm:mt-8 grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-5">
                   <Input
                     value={uppercaseDbText(selectedBike.number)}
                     readOnly
@@ -311,12 +310,12 @@ export default function SoldBikeDialog() {
           </div>
 
           {/* RIGHT */}
-          <div className="col-span-7 overflow-y-auto px-10 py-2 pb-10 pr-6">
-            <h3 className="mb-5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          <div className="md:col-span-7 md:overflow-y-auto px-4 sm:px-6 md:px-10 pt-6 md:pt-2 pb-8 md:pr-6">
+            <h3 className="mb-4 sm:mb-5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Buyer Information
             </h3>
 
-            <div className="grid grid-cols-2 gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
               <Input
                 name="buyerName"
                 value={form.buyerName}
@@ -342,7 +341,7 @@ export default function SoldBikeDialog() {
                 value={form.saleDate}
                 onChange={handleChange}
               />
-              <div className="col-span-2">
+              <div className="sm:col-span-2">
                 <Textarea
                   name="buyerAddress"
                   value={form.buyerAddress}
@@ -353,7 +352,7 @@ export default function SoldBikeDialog() {
               </div>
             </div>
 
-            <div className="mt-8 space-y-6">
+            <div className="mt-6 sm:mt-8 space-y-6">
               <div>
                 <p className="mb-2 text-sm font-medium">Upload Receipt</p>
                 <FilePicker
@@ -401,7 +400,7 @@ export default function SoldBikeDialog() {
                 />
 
                 {buyerDocs.length > 0 && (
-                  <div className="mt-4 space-y-2 rounded-xl border bg-slate-50 p-4">
+                  <div className="mt-4 space-y-2 rounded-xl border bg-slate-50 p-3 sm:p-4">
                     {buyerDocs.map((file) => (
                       <div
                         key={`${file.name}-${file.size}-${file.lastModified}`}
@@ -417,7 +416,7 @@ export default function SoldBikeDialog() {
                             setBuyerDocs((docs) =>
                               docs.filter((candidate) => candidate !== file)
                             );
-                            setFileKey(Date.now()); // reset file input
+                            setFileKey(Date.now());
                           }}
                         >
                           <X size={16} />
@@ -429,9 +428,9 @@ export default function SoldBikeDialog() {
               </div>
             </div>
 
-            <div className="mt-10 flex justify-end">
+            <div className="mt-8 sm:mt-10 flex justify-end">
               <Button
-                className="min-w-[150px] h-11"
+                className="w-full sm:w-auto sm:min-w-[150px] h-11"
                 disabled={isSubmitting}
                 onClick={handleSubmit}
               >

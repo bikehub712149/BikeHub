@@ -3,6 +3,7 @@ import { Inter, Poppins } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { ClerkProvider } from "@clerk/nextjs";
+
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
@@ -14,9 +15,16 @@ const poppins = Poppins({
   weight: ["400", "500", "600", "700", "800"],
 });
 
+const APP_DESCRIPTION =
+  "Bike Hub is a comprehensive platform for managing and tracking bike inventory, sales, paperwork, and customer transactions.";
+
 export const metadata: Metadata = {
   title: "Bike Hub",
-  description: "Bike Hub is a comprehensive platform for managing and tracking bike inventory, sales, and customer transactions. It provides an intuitive interface for users to view detailed information about bikes, including technical specifications, financial details, and ownership history. The platform also offers features for editing bike details, managing customer interactions, and ensuring a seamless experience for both buyers and sellers.",
+  description: APP_DESCRIPTION,
+  openGraph: {
+    title: "Bike Hub",
+    description: APP_DESCRIPTION,
+  },
 };
 
 export default function RootLayout({
@@ -26,16 +34,15 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-<html
-      lang="en"
-  className={`${inter.variable} ${poppins.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col">{children}
-        <Toaster richColors position="top-right" />
-      </body>
-      
-    </html>
+      <html
+        lang="en"
+        className={`${inter.variable} ${poppins.variable} h-full antialiased`}
+      >
+        <body className="min-h-full flex flex-col">
+          {children}
+          <Toaster richColors position="top-right" />
+        </body>
+      </html>
     </ClerkProvider>
-    
   );
 }

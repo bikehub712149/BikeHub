@@ -14,7 +14,7 @@ export default function CustomersPage() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [page, setPage] = useState(0);
   const [hasNextPage, setHasNextPage] = useState(true);
-  
+
   // Tracks which specific receipt is currently downloading
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
@@ -27,7 +27,7 @@ export default function CustomersPage() {
         setCustomers(data.items);
         setPage(1);
         setHasNextPage(data.pagination.hasNextPage);
-      } catch (err) {
+      } catch {
       } finally {
         setLoading(false);
       }
@@ -58,13 +58,13 @@ export default function CustomersPage() {
   // Download through a blob for a filename, with a direct URL fallback for remote-file failures.
   const handleDownload = async (url: string, desiredFileName: string, recordId: string) => {
     if (!url) return;
-    
+
     // Start the spinner for this specific button
     setDownloadingId(recordId);
 
     try {
       const response = await fetch(url);
-      
+
       if (!response.ok) {
         throw new Error("Failed to fetch file");
       }
@@ -74,14 +74,14 @@ export default function CustomersPage() {
 
       const link = document.createElement("a");
       link.href = localUrl;
-      link.download = desiredFileName; 
+      link.download = desiredFileName;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
 
       window.URL.revokeObjectURL(localUrl);
-    } catch (error) {
-      window.open(url, "_blank");
+    } catch {
+      window.open(url, "_blank", "noopener,noreferrer");
     } finally {
       // Stop the spinner
       setDownloadingId(null);
@@ -97,15 +97,15 @@ export default function CustomersPage() {
   }
 
   return (
-    <div className="flex-1 p-4 pb-24">
-      <div className="mb-8">
+    <div className="flex-1 p-4 max-sm:p-1 pb-24">
+      <div className="mb-8 max-sm:mb-6">
         <h1 className="text-2xl font-bold">Customer CRM</h1>
         <p className="mt-1 text-sm text-slate-500">
           Track every bike from seller to buyer.
         </p>
       </div>
 
-      <div className="space-y-6">
+      <div className="space-y-6 max-sm:space-y-4">
         {customers.map((record) => {
           const bike = record.bike;
 
@@ -116,20 +116,41 @@ export default function CustomersPage() {
               key={record.id}
               className="rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition"
             >
-              <CardContent className="px-10">
-                <div className="flex items-center gap-5">
+              <CardContent className="px-10 max-md:px-4">
+                <div className="flex items-center gap-5 max-md:flex-col max-md:items-stretch">
                   {/* Bike Image */}
-                  <Image
-                    src={bike.image}
-                    alt={bike.model}
-                    width={150}
-                    height={100}
-                    className="h-28 w-40 rounded-xl object-cover border"
-                  />
+                  <div className="flex items-center gap-4">
+                    <Image
+                      src={bike.image}
+                      alt={bike.model}
+                      width={150}
+                      height={100}
+                      className="h-35 w-46 max-sm:h-24 max-sm:w-32 shrink-0 rounded-xl object-cover border"
+                    />
+                    <div className="md:hidden min-w-0">
+                      <div className="flex flex-wrap items-center gap-2 mb-1">
+                        <h3 className="text-base font-semibold">
+                          {bike.number.toUpperCase()}
+                        </h3>
+                        {bike.status === "Sold" ? (
+                          <Badge variant="sold" className="text-xs font-bold tracking-wider">
+                            Sold
+                          </Badge>
+                        ) : (
+                          <Badge variant="available" className="text-xs font-bold tracking-wider">
+                            Available
+                          </Badge>
+                        )}
+                      </div>
+                      <p className="text-xs text-slate-500">
+                        {bike.model.toUpperCase()}
+                      </p>
+                    </div>
+                  </div>
 
                   {/* Information */}
                   <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-1">
+                    <div className="flex max-md:hidden items-center gap-3 mb-1">
                       <h3 className="text-lg font-semibold">{bike.number.toUpperCase()}</h3>
 
                       {bike.status === "Sold" ? (
@@ -143,9 +164,11 @@ export default function CustomersPage() {
                       )}
                     </div>
 
-                    <p className="text-sm text-slate-500 mb-5">{bike.model.toUpperCase()}</p>
+                    <p className="max-md:hidden text-sm text-slate-500 mb-5">
+                      {bike.model.toUpperCase()}
+                    </p>
 
-                    <div className="flex items-start">
+                    <div className="flex items-start max-sm:flex-col max-sm:gap-4">
                       {/* Seller */}
                       <div className="flex-1">
                         <p className="text-xs uppercase tracking-wider text-slate-400 mb-2">
@@ -163,7 +186,7 @@ export default function CustomersPage() {
                       </div>
 
                       {/* Divider */}
-                      <div className="mx-8 h-20 w-px bg-slate-500" />
+                      <div className="mx-8 h-20 w-px bg-slate-400 max-sm:mx-0 max-sm:h-px max-sm:w-full max-sm:bg-slate-200" />
 
                       {/* Buyer */}
                       <div className="flex-1">
@@ -198,8 +221,8 @@ export default function CustomersPage() {
                   </div>
 
                   {/* Right Buttons */}
-                  <div className="flex w-36 flex-col gap-3">
-                    <Link href={`/inventory/${bike.id}`}>
+                  <div className="flex w-36 flex-col gap-3 max-md:w-full max-md:flex-row">
+                    <Link href={`/inventory/${bike.id}`} className="max-md:flex-1">
                       <Button
                         variant="outline"
                         className="w-full border-2 rounded-xl p-4 py-6 transition duration-300 cursor-pointer"
@@ -219,7 +242,7 @@ export default function CustomersPage() {
                             record.id
                           )
                         }
-                        className="w-full rounded-xl p-4 py-6 transition duration-300 cursor-pointer"
+                        className="w-full max-md:flex-1 rounded-xl p-4 py-6 transition duration-300 cursor-pointer"
                       >
                         {downloadingId === record.id ? (
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -231,7 +254,7 @@ export default function CustomersPage() {
                     ) : (
                       <Button
                         disabled
-                        className="w-full rounded-xl p-4 py-6 transition duration-300 cursor-pointer"
+                        className="w-full max-md:flex-1 rounded-xl p-4 py-6 transition duration-300 cursor-pointer"
                       >
                         <FileText className="mr-2 h-4 w-4" />
                         Receipt

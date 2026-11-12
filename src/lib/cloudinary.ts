@@ -10,7 +10,6 @@ cloudinary.config({
  * Delete a Cloudinary asset from its URL.
  */
 export async function deleteCloudinaryByUrl(url?: string) {
-  // Ignore empty/local URLs; only Cloudinary upload URLs contain a removable public ID.
   if (!url || !url.includes("/upload/")) {
     return null;
   }

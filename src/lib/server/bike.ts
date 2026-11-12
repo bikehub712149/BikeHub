@@ -55,10 +55,9 @@ export async function updateBike(
 
 export async function markBikeAsSold(bikeId: string) {
   await connectDB();
-
   // Sales are keyed by registration number; completing a sale also resets paperwork to pending.
   return Bike.findOneAndUpdate(
-    { number: new RegExp(`^${escapeRegex(uppercaseDbText(bikeId))}$`, "i") },
+    { number: uppercaseDbText(bikeId) },
     {
       status: "Sold",
       paperwork: "Pending",
@@ -74,7 +73,7 @@ export async function updateBikePaperwork(
   await connectDB();
 
   return Bike.updateOne(
-    { number: new RegExp(`^${escapeRegex(uppercaseDbText(bikeNumber))}$`, "i") },
+    { number: uppercaseDbText(bikeNumber) },
     {
       $set: {
         paperwork,
@@ -123,11 +122,12 @@ export async function getBikesPage({
 }
 
 export async function getBikesByNumbers(numbers: string[]) {
-  await connectDB();
-
   if (numbers.length === 0) return [];
 
+  await connectDB();
+
   const normalizedNumbers = numbers.map((number) => uppercaseDbText(number));
+
   const bikes = await Bike.find({
     number: {
       $in: normalizedNumbers.map(

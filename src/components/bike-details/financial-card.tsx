@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import { Pencil, IndianRupee, TrendingUp } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
@@ -26,9 +26,8 @@ export default function FinancialCard({
 
   return (
     <Card className="rounded-3xl shadow-sm">
-      <CardContent className="p-8">
-
-        <div className="mb-8 flex items-center justify-between">
+      <CardContent className="p-8 max-sm:p-5">
+        <div className="mb-8 max-sm:mb-6 flex items-center justify-between">
           <div>
             <h2 className="text-xl font-bold flex items-center gap-2">
               <IndianRupee className="h-5 w-5 text-blue-600" />
@@ -36,7 +35,7 @@ export default function FinancialCard({
             </h2>
 
             <p className="text-sm text-slate-500">
-              Purchase & selling summary
+              Purchase &amp; selling summary
             </p>
           </div>
 
@@ -51,45 +50,36 @@ export default function FinancialCard({
         </div>
 
         <div className="space-y-6">
-
           <Row
             label="Purchase Price"
-            value={`₹${purchasePrice.toLocaleString()}`}
+            value={`₹${purchasePrice.toLocaleString("en-IN")}`}
           />
 
           <Row
             label="Selling Price"
             value={
               sold
-                ? `₹${sellingPrice.toLocaleString()}`
+                ? `₹${sellingPrice.toLocaleString("en-IN")}`
                 : "Not Sold"
             }
           />
 
           <div className="rounded-2xl bg-emerald-50 border border-emerald-200 p-5">
-
             <div className="flex items-center gap-2 text-emerald-700">
-
               <TrendingUp size={18} />
 
               <span className="font-medium">
                 Estimated Profit
               </span>
-
             </div>
 
             <p className="mt-2 text-3xl font-bold text-emerald-700">
-
               {sold
-                ? `₹${profit?.toLocaleString()}`
+                ? `₹${profit?.toLocaleString("en-IN")}`
                 : "--"}
-
             </p>
-
           </div>
-
         </div>
-
       </CardContent>
     </Card>
   );
@@ -104,7 +94,6 @@ function Row({
 }) {
   return (
     <div className="flex items-center justify-between border-b pb-3">
-
       <span className="text-slate-500">
         {label}
       </span>
@@ -112,7 +101,6 @@ function Row({
       <span className="font-semibold">
         {value}
       </span>
-
     </div>
   );
 }

@@ -50,15 +50,15 @@ const StatCard = ({
 }) => (
   <Card className={cn("relative overflow-hidden", className)}>
     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-      <CardTitle className="text-sm font-medium text-muted-foreground">
+      <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">
         {title}
       </CardTitle>
-      <div className="rounded-lg bg-primary/10 p-2 text-primary">
-        <Icon className="h-6 w-6" />
+      <div className="rounded-lg bg-primary/10 p-1.5 sm:p-2 text-primary shrink-0">
+        <Icon className="h-5 w-5 sm:h-6 sm:w-6" />
       </div>
     </CardHeader>
     <CardContent>
-      <div className="text-2xl font-bold">{value}</div>
+      <div className="text-lg sm:text-2xl font-bold break-words">{value}</div>
       {trend !== undefined && (
         <p className="text-xs text-muted-foreground">
           <span
@@ -100,7 +100,7 @@ export default function SalesPage() {
         setSummary(data.summary);
         setPage(1);
         setHasNextPage(data.pagination.hasNextPage);
-      } catch (err) {
+      } catch {
       } finally {
         setLoading(false);
       }
@@ -170,10 +170,10 @@ export default function SalesPage() {
 
   if (!soldBikes || soldBikes.length === 0) {
     return (
-      <div className="flex flex-col gap-8 p-4">
+      <div className="flex flex-col gap-8 p-1 sm:p-4">
         <div className="flex items-end justify-between">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">Sales & Revenue</h1>
+            <h1 className="text-2xl font-bold tracking-tight">Sales &amp; Revenue</h1>
             <p className="text-sm text-muted-foreground mt-1">
               Track your store&apos;s financial performance and sold vehicles.
             </p>
@@ -188,10 +188,10 @@ export default function SalesPage() {
   }
 
   return (
-    <div className="flex flex-col gap-8 p-4">
+    <div className="flex flex-col gap-6 sm:gap-8 p-1 sm:p-4">
       <div className="flex items-end justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Sales & Revenue</h1>
+          <h1 className="text-2xl font-bold tracking-tight">Sales &amp; Revenue</h1>
           <p className="text-sm text-muted-foreground mt-1">
             Track your store&apos;s financial performance and sold vehicles.
           </p>
@@ -199,7 +199,7 @@ export default function SalesPage() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         {stats.map((stat) => (
           <StatCard
             key={stat.title}
@@ -210,7 +210,7 @@ export default function SalesPage() {
         ))}
       </div>
 
-      {/* Sales Table */}
+      {/* Sales List / Table */}
       <Card>
         <CardHeader>
           <CardTitle>Sold Vehicles</CardTitle>
@@ -219,7 +219,85 @@ export default function SalesPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
+          {/* Mobile Cards (< md) */}
+          <div className="space-y-3 md:hidden">
+            {soldBikes.map((bike) => {
+              const salePrice = bike.sellingPrice || 0;
+              const profit = (bike.sellingPrice || 0) - (bike.purchasePrice || 0);
+
+              return (
+                <div
+                  key={bike.id}
+                  className="rounded-2xl border border-slate-200 p-3.5 space-y-3"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="h-14 w-20 relative shrink-0 overflow-hidden rounded-lg border border-border bg-muted">
+                      <Image
+                        fill
+                        sizes="80px"
+                        src={bike.image}
+                        alt={bike.model}
+                        className="h-full w-full object-cover"
+                      />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="font-bold text-foreground truncate">
+                        {bike.number.toUpperCase()}
+                      </div>
+                      <div className="text-xs text-slate-600 truncate">
+                        {bike.model.toUpperCase()}
+                      </div>
+                      <div className="text-[11px] text-muted-foreground mt-0.5">
+                        {bike.year} • {bike.kms} km
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-2 rounded-xl bg-slate-50 p-2.5 text-xs">
+                    <div>
+                      <p className="text-[10px] uppercase text-slate-400">Sold</p>
+                      <p className="font-bold text-primary">{formatCurrency(salePrice)}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] uppercase text-slate-400">Profit</p>
+                      <p className="font-bold text-emerald-600">
+                        +{formatCurrency(Math.round(profit))}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] uppercase text-slate-400">Date</p>
+                      <p className="font-medium text-slate-700">
+                        {bike.saleDate
+                          ? new Date(bike.saleDate).toLocaleDateString("en-IN", {
+                              day: "2-digit",
+                              month: "short",
+                              year: "2-digit",
+                            })
+                          : "-"}
+                      </p>
+                    </div>
+                  </div>
+
+                  {bike.receipt && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full text-xs font-medium"
+                      onClick={() =>
+                        window.open(bike.receipt, "_blank", "noopener,noreferrer")
+                      }
+                    >
+                      <ExternalLink className="mr-2 h-3.5 w-3.5" />
+                      Preview Receipt
+                    </Button>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Desktop Table (md+) */}
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-left">
               <thead>
                 <tr className="border-b bg-muted/50">
@@ -239,8 +317,8 @@ export default function SalesPage() {
                     Est. Profit
                   </th>
                   <th className="px-4 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
-  Sale Date
-</th>
+                    Sale Date
+                  </th>
                   <th className="px-4 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider text-right">
                     Action
                   </th>
@@ -268,7 +346,7 @@ export default function SalesPage() {
                             />
                           </div>
                           <div>
-                            <div className="font-semibold text-foreground">
+                            <div className="font-semibold text-foreground whitespace-nowrap">
                               {bike.number.toUpperCase()}
                             </div>
                           </div>
@@ -277,34 +355,34 @@ export default function SalesPage() {
                       <td className="px-4 py-4">
                         <div className="text-sm">{bike.model.toUpperCase()}</div>
                       </td>
-                      <td className="px-4 py-4">
+                      <td className="px-4 py-4 whitespace-nowrap">
                         <div className="text-sm">{bike.year}</div>
                         <div className="text-xs text-muted-foreground">
                           {bike.kms}
                         </div>
                       </td>
-                      <td className="px-4 py-4">
+                      <td className="px-4 py-4 whitespace-nowrap">
                         <div className="font-bold text-primary">
                           {formatCurrency(salePrice)}
                         </div>
                       </td>
-                      <td className="px-4 py-4">
+                      <td className="px-4 py-4 whitespace-nowrap">
                         <span className="font-bold text-emerald-600">
                           +{formatCurrency(Math.round(profit))}
                         </span>
                       </td>
-                      <td className="px-4 py-4">
-  <div className="text-sm">
-    {bike.saleDate
-      ? new Date(bike.saleDate).toLocaleDateString("en-IN", {
-          day: "2-digit",
-          month: "short",
-          year: "numeric",
-        })
-      : "-"}
-  </div>
-</td>
-                      <td className="px-4 py-4 text-right">
+                      <td className="px-4 py-4 whitespace-nowrap">
+                        <div className="text-sm">
+                          {bike.saleDate
+                            ? new Date(bike.saleDate).toLocaleDateString("en-IN", {
+                                day: "2-digit",
+                                month: "short",
+                                year: "numeric",
+                              })
+                            : "-"}
+                        </div>
+                      </td>
+                      <td className="px-4 py-4 text-right whitespace-nowrap">
                         <Button
                           variant="ghost"
                           size="sm"
