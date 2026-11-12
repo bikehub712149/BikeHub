@@ -174,13 +174,13 @@ export default function Navbar() {
   };
 
   return (
-    <header className="sticky top-0 z-40 flex h-22 items-center justify-between gap-10 border-b bg-white px-6 max-md:h-auto max-md:flex-wrap max-md:gap-2.5 max-md:px-3 max-md:py-2.5">
+    <header className="sticky top-0 z-40 flex h-22 items-center justify-between gap-10 border-b bg-white px-6 max-md:h-auto max-md:flex-wrap max-md:gap-2.5 max-md:px-3.5 max-md:py-2.5">
       {/* Mobile Menu Trigger + Brand */}
       <div className="flex items-center gap-2 lg:hidden">
         <Sheet open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
           <SheetTrigger
             render={
-              <Button variant="outline" size="icon-sm" aria-label="Open navigation menu" className="rounded-xl !p-2.5">
+              <Button variant="outline" size="icon-sm" aria-label="Open navigation menu" className="size-8 rounded-lg !p-0">
                 <Menu className="h-4 w-4" />
               </Button>
             }
@@ -190,7 +190,7 @@ export default function Navbar() {
             <SidebarNavContent onNavigate={() => setMobileNavOpen(false)} />
           </SheetContent>
         </Sheet>
-        <span className="text-base font-bold tracking-tight md:hidden">BikeHub</span>
+        <span className="text-sm font-bold tracking-tight md:hidden">BikeHub</span>
       </div>
 
       {/* Search Bar */}
@@ -198,13 +198,13 @@ export default function Navbar() {
         <div className="relative group">
           {loading ? (
             <Loader2
-              size={17}
-              className="absolute left-4 top-1/2 -translate-y-1/2 animate-spin text-primary"
+              size={16}
+              className="absolute left-4 max-sm:left-3 top-1/2 -translate-y-1/2 animate-spin text-primary"
             />
           ) : (
             <Search
-              size={17}
-              className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-primary"
+              size={16}
+              className="absolute left-4 max-sm:left-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-primary"
             />
           )}
           <Input
@@ -213,7 +213,7 @@ export default function Navbar() {
             onFocus={() => query.trim() && setIsOpen(true)}
             placeholder="Search bikes by model, number, seller, or buyer"
             aria-label="Search bikes"
-            className="h-11 w-full rounded-xl border-border/60 bg-muted/20 pl-10 pr-10 text-sm shadow-sm transition-all focus-visible:border-primary focus-visible:ring-primary/20"
+            className="h-11 max-sm:h-9 w-full rounded-xl max-sm:rounded-lg border-border/60 bg-muted/20 pl-10 max-sm:pl-9 pr-10 max-sm:pr-8 text-sm max-sm:text-xs shadow-sm transition-all focus-visible:border-primary focus-visible:ring-primary/20"
           />
 
           {query && (
@@ -223,23 +223,23 @@ export default function Navbar() {
               aria-label="Clear search"
               className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
             >
-              <X size={16} />
+              <X size={15} />
             </button>
           )}
         </div>
 
         {/* Dropdown Results */}
         {isOpen && (
-          <div className="absolute top-[calc(100%+8px)] left-0 w-full overflow-hidden rounded-2xl border border-border/50 bg-card shadow-2xl animate-in fade-in slide-in-from-top-2 duration-200 z-50">
+          <div className="absolute top-[calc(100%+8px)] left-0 w-full overflow-hidden rounded-2xl max-sm:rounded-xl border border-border/50 bg-card shadow-2xl animate-in fade-in slide-in-from-top-2 duration-200 z-50">
             {/* 
               shouldFilter={false} is REQUIRED when fetching from an API. 
               Otherwise, cmdk tries to filter your already-filtered API results.
             */}
-            <Command shouldFilter={false} className="max-h-[400px] max-sm:max-h-[70vh] bg-transparent">
-              <CommandList className="max-h-[400px] max-sm:max-h-[70vh] overflow-y-auto p-2">
+            <Command shouldFilter={false} className="max-h-[400px] max-sm:max-h-[65vh] bg-transparent">
+              <CommandList className="max-h-[400px] max-sm:max-h-[65vh] overflow-y-auto p-2 max-sm:p-1.5">
                 {/* Loading State */}
                 {loading && (
-                  <div className="flex items-center justify-center py-8 text-sm text-muted-foreground">
+                  <div className="flex items-center justify-center py-8 text-sm max-sm:text-xs text-muted-foreground">
                     <Loader2 className="mr-2 h-4 w-4 animate-spin text-primary" />
                     Searching inventory...
                   </div>
@@ -247,12 +247,12 @@ export default function Navbar() {
 
                 {/* Not Found State */}
                 {!loading && results.length === 0 && (
-                  <div className="flex flex-col items-center justify-center py-10 text-center">
-                    <div className="mb-3 rounded-full bg-muted/30 p-3">
-                      <Bike className="h-6 w-6 text-muted-foreground/60" />
+                  <div className="flex flex-col items-center justify-center py-10 max-sm:py-6 text-center">
+                    <div className="mb-3 rounded-full bg-muted/30 p-3 max-sm:p-2.5">
+                      <Bike className="h-6 w-6 max-sm:h-5 max-sm:w-5 text-muted-foreground/60" />
                     </div>
-                    <p className="text-sm font-semibold text-foreground">No results found</p>
-                    <p className="text-xs text-muted-foreground mt-1">
+                    <p className="text-sm max-sm:text-xs font-semibold text-foreground">No results found</p>
+                    <p className="text-xs max-sm:text-[11px] text-muted-foreground mt-1">
                       We couldn&apos;t find anything matching &quot;{query}&quot;
                     </p>
                   </div>
@@ -266,11 +266,11 @@ export default function Navbar() {
                         key={item.bikeId}
                         value={item.bikeId}
                         onSelect={() => handleBikeSelect(item.bikeId)}
-                        className="mb-1 flex cursor-pointer items-center gap-4 max-sm:gap-3 rounded-xl px-3 py-3 transition-colors hover:bg-muted/50 aria-selected:bg-muted/50"
+                        className="mb-1 flex cursor-pointer items-center gap-4 max-sm:gap-2.5 rounded-xl px-3 py-3 max-sm:px-2.5 max-sm:py-2 transition-colors hover:bg-muted/50 aria-selected:bg-muted/50"
                         aria-disabled={navigating}
                       >
                         {/* Thumbnail */}
-                        <div className="relative h-14 w-20 max-sm:h-12 max-sm:w-16 shrink-0 overflow-hidden rounded-lg bg-muted/30 border border-border/50">
+                        <div className="relative h-14 w-20 max-sm:size-12 shrink-0 overflow-hidden rounded-lg bg-muted/30 border border-border/50">
                           <Image
                             fill
                             sizes="80px"
@@ -281,28 +281,28 @@ export default function Navbar() {
                         </div>
 
                         {/* Details */}
-                        <div className="flex flex-col flex-1 min-w-0 gap-1">
+                        <div className="flex flex-col flex-1 min-w-0 gap-1 max-sm:gap-0.5">
                           <div className="flex items-center justify-between">
-                            <span className="font-extrabold uppercase tracking-tight text-foreground truncate">
+                            <span className="font-extrabold max-sm:text-xs uppercase tracking-tight text-foreground truncate">
                               {item.number}
                             </span>
                           </div>
 
-                          <span className="text-sm font-medium text-muted-foreground line-clamp-1">
+                          <span className="text-sm max-sm:text-[11px] font-medium text-muted-foreground line-clamp-1">
                             {item.model}
                           </span>
 
                           {/* Seller / Buyer Tags */}
-                          <div className="flex items-center gap-3 mt-0.5 max-sm:flex-wrap">
+                          <div className="flex items-center gap-3 mt-0.5 max-sm:flex-wrap max-sm:gap-2">
                             {item.seller?.name && (
                               <span className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                                <User size={12} className="text-blue-500 shrink-0" />
+                                <User size={11} className="text-blue-500 shrink-0" />
                                 <span className="truncate">{item.seller.name}</span>
                               </span>
                             )}
                             {item.buyer?.name && (
                               <span className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                                <ShoppingBag size={12} className="text-green-500 shrink-0" />
+                                <ShoppingBag size={11} className="text-green-500 shrink-0" />
                                 <span className="truncate">{item.buyer.name}</span>
                               </span>
                             )}

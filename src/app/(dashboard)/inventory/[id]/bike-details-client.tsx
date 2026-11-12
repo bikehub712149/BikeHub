@@ -81,40 +81,40 @@ export default function BikeDetailsClient({
 
       {/* ---------------- Page ---------------- */}
 
-      <div className="space-y-8 p-8 max-sm:space-y-6 max-sm:p-2">
-        <div className="flex items-start justify-between max-sm:flex-col max-sm:gap-4">
+      <div className="space-y-8 p-8 max-sm:space-y-4 max-sm:p-1.5">
+        <div className="flex items-start justify-between max-sm:flex-col max-sm:gap-3">
           <div>
             <Link
               href="/inventory"
-              className="mb-4 inline-flex items-center gap-2 text-sm text-slate-500 hover:text-black"
+              className="mb-4 max-sm:mb-2 inline-flex items-center gap-2 text-sm max-sm:text-xs text-slate-500 hover:text-black"
             >
-              <ArrowLeft size={16} />
+              <ArrowLeft size={16} className="max-sm:h-3.5 max-sm:w-3.5" />
               Back to Inventory
             </Link>
 
-            <div className="flex items-center gap-3 max-sm:flex-wrap">
-              <h1 className="text-4xl max-sm:text-2xl font-bold uppercase!">
+            <div className="flex items-center gap-3 max-sm:gap-2 max-sm:flex-wrap">
+              <h1 className="text-4xl max-sm:text-xl font-bold uppercase!">
                 {bike.model.toUpperCase()}
               </h1>
 
               {bike.status === "Sold" ? (
                 <Badge
                   variant="sold"
-                  className="text-xs font-bold tracking-wider"
+                  className="text-xs max-sm:text-[10px] font-bold tracking-wider"
                 >
                   Sold
                 </Badge>
               ) : (
                 <Badge
                   variant="available"
-                  className="text-xs font-bold tracking-wider"
+                  className="text-xs max-sm:text-[10px] font-bold tracking-wider"
                 >
                   Available
                 </Badge>
               )}
             </div>
 
-            <p className="mt-2 text-slate-500 uppercase!">
+            <p className="mt-2 max-sm:mt-1 max-sm:text-xs text-slate-500 uppercase!">
               Registration No. {bike.number.toUpperCase()}
             </p>
           </div>
@@ -122,12 +122,12 @@ export default function BikeDetailsClient({
           <DeleteBikeDialog bikeId={bike.id} bikeNumber={bike.number} />
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[460px_1fr] gap-8 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-[460px_1fr] gap-8 max-sm:gap-4 items-start">
           <div className="lg:sticky lg:top-24">
             <BikeGalleryClient images={images} />
           </div>
 
-          <div className="flex flex-col gap-6 min-w-0">
+          <div className="flex flex-col gap-6 max-sm:gap-4 min-w-0">
             <TechnicalCard
               bikeData={bike}
               onEdit={() => setTechnicalOpen(true)}
@@ -144,7 +144,7 @@ export default function BikeDetailsClient({
         </div>
 
         {transaction && (
-          <div className="grid gap-6 lg:grid-cols-2">
+          <div className="grid gap-6 max-sm:gap-4 lg:grid-cols-2">
             <PartyCard
               title="Seller Information"
               person={transaction.seller}
@@ -170,31 +170,31 @@ export default function BikeDetailsClient({
           </div>
         )}
 
-        <div className="grid gap-5 md:grid-cols-4 max-md:grid-cols-2 max-sm:gap-3">
-          <div className="rounded-3xl border bg-white p-6 max-sm:p-4 shadow-sm">
-            <p className="text-sm text-slate-500">Purchase Price</p>
+        <div className="grid gap-5 md:grid-cols-4 max-md:grid-cols-2 max-sm:gap-2.5">
+          <div className="rounded-3xl max-sm:rounded-2xl border bg-white p-6 max-sm:p-3.5 shadow-sm">
+            <p className="text-sm max-sm:text-[11px] text-slate-500">Purchase Price</p>
 
-            <h2 className="mt-3 text-3xl max-sm:text-xl font-bold">
+            <h2 className="mt-3 max-sm:mt-1.5 text-3xl max-sm:text-base font-bold">
               {transaction
                 ? `₹${transaction.purchasePrice.toLocaleString("en-IN")}`
                 : "--"}
             </h2>
           </div>
 
-          <div className="rounded-3xl border bg-white p-6 max-sm:p-4 shadow-sm">
-            <p className="text-sm text-slate-500">Selling Price</p>
+          <div className="rounded-3xl max-sm:rounded-2xl border bg-white p-6 max-sm:p-3.5 shadow-sm">
+            <p className="text-sm max-sm:text-[11px] text-slate-500">Selling Price</p>
 
-            <h2 className="mt-3 text-3xl max-sm:text-xl font-bold">
+            <h2 className="mt-3 max-sm:mt-1.5 text-3xl max-sm:text-base font-bold">
               {transaction?.sellingPrice
                 ? `₹${transaction.sellingPrice.toLocaleString("en-IN")}`
                 : "--"}
             </h2>
           </div>
 
-          <div className="rounded-3xl border bg-white p-6 max-sm:p-4 shadow-sm">
-            <p className="text-sm text-slate-500">Profit</p>
+          <div className="rounded-3xl max-sm:rounded-2xl border bg-white p-6 max-sm:p-3.5 shadow-sm">
+            <p className="text-sm max-sm:text-[11px] text-slate-500">Profit</p>
 
-            <h2 className="mt-3 text-3xl max-sm:text-xl font-bold text-emerald-600">
+            <h2 className="mt-3 max-sm:mt-1.5 text-3xl max-sm:text-base font-bold text-emerald-600">
               {transaction?.sellingPrice
                 ? `₹${(
                     transaction.sellingPrice - transaction.purchasePrice
@@ -203,21 +203,21 @@ export default function BikeDetailsClient({
             </h2>
           </div>
 
-          <div className="rounded-3xl border bg-white p-6 max-sm:p-4 shadow-sm">
-            <p className="text-sm text-slate-500">Current Status</p>
+          <div className="rounded-3xl max-sm:rounded-2xl border bg-white p-6 max-sm:p-3.5 shadow-sm">
+            <p className="text-sm max-sm:text-[11px] text-slate-500">Current Status</p>
 
-            <div className="mt-3">
+            <div className="mt-3 max-sm:mt-1.5">
               {bike.status === "Sold" ? (
                 <Badge
                   variant="sold"
-                  className="text-xs font-bold tracking-wider"
+                  className="text-xs max-sm:text-[10px] font-bold tracking-wider"
                 >
                   Sold
                 </Badge>
               ) : (
                 <Badge
                   variant="available"
-                  className="text-xs font-bold tracking-wider"
+                  className="text-xs max-sm:text-[10px] font-bold tracking-wider"
                 >
                   Available
                 </Badge>

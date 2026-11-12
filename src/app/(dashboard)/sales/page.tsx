@@ -49,16 +49,16 @@ const StatCard = ({
   className?: string;
 }) => (
   <Card className={cn("relative overflow-hidden", className)}>
-    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-      <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">
+    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 max-sm:px-3.5 max-sm:pt-3.5 max-sm:pb-1.5">
+      <CardTitle className="text-xs max-sm:text-[11px] sm:text-sm font-medium text-muted-foreground">
         {title}
       </CardTitle>
-      <div className="rounded-lg bg-primary/10 p-1.5 sm:p-2 text-primary shrink-0">
-        <Icon className="h-5 w-5 sm:h-6 sm:w-6" />
+      <div className="rounded-lg bg-primary/10 p-1.5 sm:p-2 max-sm:size-8 max-sm:p-0 max-sm:flex max-sm:items-center max-sm:justify-center text-primary shrink-0">
+        <Icon className="h-5 w-5 max-sm:h-4 max-sm:w-4 sm:h-6 sm:w-6" />
       </div>
     </CardHeader>
-    <CardContent>
-      <div className="text-lg sm:text-2xl font-bold break-words">{value}</div>
+    <CardContent className="max-sm:px-3.5 max-sm:pb-3.5">
+      <div className="text-lg max-sm:text-base sm:text-2xl font-bold break-words">{value}</div>
       {trend !== undefined && (
         <p className="text-xs text-muted-foreground">
           <span
@@ -170,36 +170,36 @@ export default function SalesPage() {
 
   if (!soldBikes || soldBikes.length === 0) {
     return (
-      <div className="flex flex-col gap-8 p-1 sm:p-4">
+      <div className="flex flex-col gap-8 max-sm:gap-5 p-1 sm:p-4">
         <div className="flex items-end justify-between">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">Sales &amp; Revenue</h1>
-            <p className="text-sm text-muted-foreground mt-1">
+            <h1 className="text-2xl max-sm:text-xl font-bold tracking-tight">Sales &amp; Revenue</h1>
+            <p className="text-sm max-sm:text-xs text-muted-foreground mt-1 max-sm:mt-0.5">
               Track your store&apos;s financial performance and sold vehicles.
             </p>
           </div>
         </div>
         <div className="flex h-56 flex-col items-center justify-center gap-3 text-muted-foreground">
           <ShoppingBag className="h-10 w-10 opacity-30" />
-          <p>No bikes have been sold yet.</p>
+          <p className="max-sm:text-xs">No bikes have been sold yet.</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col gap-6 sm:gap-8 p-1 sm:p-4">
+    <div className="flex flex-col gap-6 max-sm:gap-4 sm:gap-8 p-1 sm:p-4">
       <div className="flex items-end justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Sales &amp; Revenue</h1>
-          <p className="text-sm text-muted-foreground mt-1">
+          <h1 className="text-2xl max-sm:text-xl font-bold tracking-tight">Sales &amp; Revenue</h1>
+          <p className="text-sm max-sm:text-xs text-muted-foreground mt-1 max-sm:mt-0.5">
             Track your store&apos;s financial performance and sold vehicles.
           </p>
         </div>
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 max-sm:gap-2.5 sm:gap-4 lg:grid-cols-4">
         {stats.map((stat) => (
           <StatCard
             key={stat.title}
@@ -212,15 +212,15 @@ export default function SalesPage() {
 
       {/* Sales List / Table */}
       <Card>
-        <CardHeader>
-          <CardTitle>Sold Vehicles</CardTitle>
-          <CardDescription>
+        <CardHeader className="max-sm:px-3.5 max-sm:py-3">
+          <CardTitle className="max-sm:text-base">Sold Vehicles</CardTitle>
+          <CardDescription className="max-sm:text-xs">
             Complete record of all sold bikes with financial breakdown.
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="max-sm:px-3.5 max-sm:pb-3.5">
           {/* Mobile Cards (< md) */}
-          <div className="space-y-3 md:hidden">
+          <div className="space-y-3 max-sm:space-y-2.5 md:hidden">
             {soldBikes.map((bike) => {
               const salePrice = bike.sellingPrice || 0;
               const profit = (bike.sellingPrice || 0) - (bike.purchasePrice || 0);
@@ -228,20 +228,20 @@ export default function SalesPage() {
               return (
                 <div
                   key={bike.id}
-                  className="rounded-2xl border border-slate-200 p-3.5 space-y-3"
+                  className="rounded-2xl border border-slate-200 p-3 space-y-2.5"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="h-14 w-20 relative shrink-0 overflow-hidden rounded-lg border border-border bg-muted">
+                    <div className="size-14 relative shrink-0 overflow-hidden rounded-xl border border-border bg-muted">
                       <Image
                         fill
-                        sizes="80px"
+                        sizes="64px"
                         src={bike.image}
                         alt={bike.model}
                         className="h-full w-full object-cover"
                       />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <div className="font-bold text-foreground truncate">
+                      <div className="text-sm font-bold text-foreground truncate">
                         {bike.number.toUpperCase()}
                       </div>
                       <div className="text-xs text-slate-600 truncate">
@@ -253,7 +253,7 @@ export default function SalesPage() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-3 gap-2 rounded-xl bg-slate-50 p-2.5 text-xs">
+                  <div className="grid grid-cols-3 gap-2 rounded-xl bg-slate-50 p-2 text-xs">
                     <div>
                       <p className="text-[10px] uppercase text-slate-400">Sold</p>
                       <p className="font-bold text-primary">{formatCurrency(salePrice)}</p>
@@ -282,12 +282,12 @@ export default function SalesPage() {
                     <Button
                       variant="outline"
                       size="sm"
-                      className="w-full text-xs font-medium"
+                      className="w-full h-8 text-xs font-medium"
                       onClick={() =>
                         window.open(bike.receipt, "_blank", "noopener,noreferrer")
                       }
                     >
-                      <ExternalLink className="mr-2 h-3.5 w-3.5" />
+                      <ExternalLink className="mr-1.5 h-3.5 w-3.5" />
                       Preview Receipt
                     </Button>
                   )}

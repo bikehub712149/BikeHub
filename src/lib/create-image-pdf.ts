@@ -11,6 +11,17 @@ function readFileAsDataUrl(file: File) {
 }
 
 export async function createImagePdf(files: File[], name: string) {
+  for (const file of files) {
+    // Reject non-images before creating a document that the server cannot interpret consistently.
+    if (!file.type.startsWith("image/")) {
+      throw new Error(`${file.name} is not a supported image file.`);
+    }
+  }
+
+  // Prepare all images in parallel (instant if already warmed in background).
+  const preparedFiles = await Promise.all(files.map(prepareUploadImage));
+  const dataUrls = await Promise.all(preparedFiles.map(readFileAsDataUrl));
+
   // Store selected images as one centered, aspect-ratio-preserving A4 PDF for document uploads.
   const pdf = new jsPDF({
     orientation: "p",
@@ -24,16 +35,10 @@ export async function createImagePdf(files: File[], name: string) {
   const maxWidth = pageWidth - margin * 2;
   const maxHeight = pageHeight - margin * 2;
 
-  for (const [index, file] of files.entries()) {
-    // Reject non-images before creating a document that the server cannot interpret consistently.
-    if (!file.type.startsWith("image/")) {
-      throw new Error(`${file.name} is not a supported image file.`);
-    }
-
+  for (const [index, preparedFile] of preparedFiles.entries()) {
     if (index > 0) pdf.addPage();
 
-    const preparedFile = await prepareUploadImage(file);
-    const dataUrl = await readFileAsDataUrl(preparedFile);
+    const dataUrl = dataUrls[index];
     const properties = pdf.getImageProperties(dataUrl);
     const scale = Math.min(
       maxWidth / properties.width,
@@ -45,7 +50,8 @@ export async function createImagePdf(files: File[], name: string) {
     const y = (pageHeight - height) / 2;
     const format = preparedFile.type.includes("png") ? "PNG" : "JPEG";
 
-    pdf.addImage(dataUrl, format, x, y, width, height, undefined, "SLOW");
+    // Use FAST encoding since images are already compressed JPEGs; avoids freezing mobile main thread.
+    pdf.addImage(dataUrl, format, x, y, width, height, undefined, "FAST");
   }
 
   return new File([pdf.output("blob")], name, { type: "application/pdf" });

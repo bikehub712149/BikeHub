@@ -41,7 +41,7 @@ yarn-error.log*
 next-env.d.ts
 
 # local platform files
-metadata.json
+/.aistudio/
 /public/assets/
 .playwright-cli/
 

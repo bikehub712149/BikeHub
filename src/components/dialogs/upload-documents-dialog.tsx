@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Loader2, Plus, X } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -16,18 +16,66 @@ import {
 import { Button } from "@/components/ui/button";
 import FilePicker from "@/components/ui/file-picker";
 import { createImagePdf } from "@/lib/create-image-pdf";
+import { warmUploadImages } from "@/lib/prepare-upload-image";
+import {
+  clearDialogDraft,
+  loadDialogDraft,
+  saveDialogDraft,
+} from "@/lib/draft-store";
 
 type Props = {
   bikeNumber: string;
   type: "seller" | "buyer";
 };
 
+type UploadDocsDraft = {
+  open: boolean;
+  docs: File[];
+};
+
 export default function UploadDocumentsDialog({ bikeNumber, type }: Props) {
+  const draftKey = `upload-docs-${bikeNumber}-${type}`;
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [docs, setDocs] = useState<File[]>([]);
   const [fileKey, setFileKey] = useState(0);
+  const draftRestoredRef = useRef(false);
   const router = useRouter();
+
+  useEffect(() => {
+    let active = true;
+    loadDialogDraft<UploadDocsDraft>(draftKey).then((draft) => {
+      if (!active) return;
+      draftRestoredRef.current = true;
+      if (draft?.open) {
+        const restoredDocs = Array.isArray(draft.docs) ? draft.docs : [];
+        setDocs(restoredDocs);
+        setOpen(true);
+        warmUploadImages(restoredDocs);
+      }
+    });
+    return () => {
+      active = false;
+    };
+  }, [draftKey]);
+
+  useEffect(() => {
+    if (!draftRestoredRef.current) return;
+    if (open) {
+      saveDialogDraft<UploadDocsDraft>(draftKey, {
+        open: true,
+        docs,
+      });
+    }
+  }, [draftKey, open, docs]);
+
+  const handleOpenChange = (nextOpen: boolean) => {
+    setOpen(nextOpen);
+    if (!nextOpen) {
+      clearDialogDraft(draftKey);
+    }
+  };
+
   async function uploadDocuments() {
     try {
       setLoading(true);
@@ -83,12 +131,12 @@ export default function UploadDocumentsDialog({ bikeNumber, type }: Props) {
 
       setDocs([]);
       setFileKey((key) => key + 1);
+      await clearDialogDraft(draftKey);
       setOpen(false);
 
       // Refresh the page to reflect the updated documents
       router.refresh();
-    } catch (err) {
-
+    } catch {
       toast.error("Failed to upload documents.");
     } finally {
       setLoading(false);
@@ -96,31 +144,31 @@ export default function UploadDocumentsDialog({ bikeNumber, type }: Props) {
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger
         render={
-          <Button size="sm" variant="outline">
-            <Plus className="mr-2 h-4 w-4" />
+          <Button size="sm" variant="outline" className="max-sm:h-8 max-sm:!px-2.5 max-sm:text-xs">
+            <Plus className="mr-2 max-sm:mr-1 h-4 w-4 max-sm:h-3.5 max-sm:w-3.5" />
             Add Documents
           </Button>
         }
       />
 
-      <DialogContent className="max-h-[90vh] overflow-y-auto p-7 sm:max-w-lg">
+      <DialogContent className="max-h-[90vh] max-sm:w-[95vw] overflow-y-auto p-7 max-sm:p-4 sm:max-w-lg max-sm:rounded-2xl">
         <DialogHeader>
-          <DialogTitle>
+          <DialogTitle className="max-sm:text-base">
             Upload More {type === "seller" ? "Seller" : "Buyer"} Documents
           </DialogTitle>
 
-          <DialogDescription>
-  Upload document images only. They will automatically be combined into a PDF and merged with the existing document.
-</DialogDescription>
+          <DialogDescription className="max-sm:text-xs">
+            Upload document images only. They will automatically be combined into a PDF and merged with the existing document.
+          </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-6">
-          <div className="space-y-2">
-            <label htmlFor={`documents-${type}`} className="text-sm font-medium">
-              Choose Files {docs.length > 0 ? `${docs.length} FILES` : ""}
+        <div className="space-y-6 max-sm:space-y-4">
+          <div className="space-y-2 max-sm:space-y-1.5">
+            <label htmlFor={`documents-${type}`} className="text-sm max-sm:text-xs font-medium">
+              Choose Files {docs.length > 0 ? `(${docs.length} selected)` : ""}
             </label>
             <FilePicker
               id={`documents-${type}`}
@@ -151,20 +199,21 @@ export default function UploadDocumentsDialog({ bikeNumber, type }: Props) {
           </div>
 
           {docs.length > 0 && (
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Selected Files</label>
-              <div className="rounded-xl border bg-slate-50 p-4 space-y-2 max-h-44 overflow-y-auto">
+            <div className="space-y-2 max-sm:space-y-1.5">
+              <label className="text-sm max-sm:text-xs font-medium">Selected Files</label>
+              <div className="rounded-xl border bg-slate-50 p-4 max-sm:p-2.5 space-y-2 max-h-44 overflow-y-auto">
                 {docs.map((file) => (
                   <div
                     key={`${file.name}-${file.size}-${file.lastModified}`}
-                    className="flex items-center justify-between rounded-lg border bg-white px-3 py-2"
+                    className="flex items-center justify-between rounded-lg border bg-white px-3 py-2 max-sm:px-2.5 max-sm:py-1.5"
                   >
-                    <span className="truncate text-sm">{file.name}</span>
+                    <span className="truncate text-sm max-sm:text-xs">{file.name}</span>
 
                     <Button
                       size="icon"
                       variant="ghost"
                       type="button"
+                      className="max-sm:size-7 max-sm:!p-0"
                       onClick={() =>
                         setDocs((docs) => docs.filter((candidate) => candidate !== file))
                       }
@@ -178,7 +227,7 @@ export default function UploadDocumentsDialog({ bikeNumber, type }: Props) {
           )}
 
           <Button
-            className="w-full"
+            className="w-full max-sm:h-10 max-sm:text-xs"
             disabled={loading || docs.length === 0}
             onClick={uploadDocuments}
           >

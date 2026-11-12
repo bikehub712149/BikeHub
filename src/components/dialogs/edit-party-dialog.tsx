@@ -139,23 +139,23 @@ export default function EditPartyDialog({
       <DialogContent className="max-h-[90vh] gap-0 overflow-hidden rounded-2xl border-border/50 bg-background p-0 shadow-xl sm:max-w-lg">
         
         {/* Header Section */}
-        <DialogHeader className="shrink-0 border-b bg-muted/20 px-6 py-5 gap-0">
-          <DialogTitle className="text-xl font-bold tracking-tight">
+        <DialogHeader className="shrink-0 border-b bg-muted/20 px-6 py-5 max-sm:px-4 max-sm:py-4 gap-0">
+          <DialogTitle className="text-xl max-sm:text-base font-bold tracking-tight">
             Edit {type === "seller" ? "Seller" : "Buyer"}
           </DialogTitle>
-          <DialogDescription className="text-sm">
+          <DialogDescription className="text-sm max-sm:text-xs">
             Update the contact details and address below.
           </DialogDescription>
         </DialogHeader>
 
         {/* Content Section */}
-        <div className="min-h-0 space-y-6 overflow-y-auto px-6 py-6">
+        <div className="min-h-0 space-y-6 max-sm:space-y-4 overflow-y-auto px-6 py-6 max-sm:px-4 max-sm:py-4">
           <div className="space-y-1.5">
-            <label className="text-sm font-medium text-foreground/80">
+            <label className="text-sm max-sm:text-xs font-medium text-foreground/80">
               Full Name
             </label>
             <Input
-              className="h-11 bg-background"
+              className="h-11 max-sm:h-9 max-sm:text-xs bg-background"
               placeholder="e.g. John Doe"
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -163,11 +163,11 @@ export default function EditPartyDialog({
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-sm font-medium text-foreground/80">
+            <label className="text-sm max-sm:text-xs font-medium text-foreground/80">
               Phone Number
             </label>
             <Input
-              className="h-11 bg-background"
+              className="h-11 max-sm:h-9 max-sm:text-xs bg-background"
               placeholder="e.g. +91 98765 43210"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
@@ -175,11 +175,11 @@ export default function EditPartyDialog({
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-sm font-medium text-foreground/80">
+            <label className="text-sm max-sm:text-xs font-medium text-foreground/80">
               Address
             </label>
             <Input
-              className="h-11 bg-background"
+              className="h-11 max-sm:h-9 max-sm:text-xs bg-background"
               placeholder="Enter full address"
               value={address}
               onChange={(e) => setAddress(e.target.value)}
@@ -187,29 +187,29 @@ export default function EditPartyDialog({
           </div>
 
           {type === "seller" && (
-            <div className="space-y-3 border-t pt-5">
-              <p className="text-sm font-medium text-foreground/80">
+            <div className="space-y-3 border-t pt-5 max-sm:pt-4">
+              <p className="text-sm max-sm:text-xs font-medium text-foreground/80">
                 Broker Information
               </p>
 
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="grid grid-cols-1 gap-4 max-sm:gap-3 sm:grid-cols-2">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  <label className="text-xs max-sm:text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
                     Broker Name
                   </label>
                   <Input
-                    className="h-11"
+                    className="h-11 max-sm:h-9 max-sm:text-xs"
                     placeholder="Enter broker name"
                     value={brokerName}
                     onChange={(e) => setBrokerName(e.target.value)}
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  <label className="text-xs max-sm:text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
                     Broker Number
                   </label>
                   <Input
-                    className="h-11"
+                    className="h-11 max-sm:h-9 max-sm:text-xs"
                     placeholder="Enter broker number"
                     value={brokerPhone}
                     onChange={(e) => setBrokerPhone(e.target.value)}
@@ -221,17 +221,17 @@ export default function EditPartyDialog({
         </div>
 
         {/* Footer Section */}
-        <div className="flex shrink-0 justify-end gap-3 border-t bg-muted/20 px-6 py-4">
+        <div className="flex shrink-0 justify-end gap-3 max-sm:gap-2 border-t bg-muted/20 px-6 py-4 max-sm:px-4 max-sm:py-3">
           <Button
             variant="outline"
-            className="h-10 px-6"
+            className="h-10 max-sm:h-9 px-6 max-sm:px-4 max-sm:text-xs"
             onClick={() => onOpenChange(false)}
           >
             Cancel
           </Button>
 
           <Button
-            className="h-10 min-w-[140px]"
+            className="h-10 max-sm:h-9 min-w-[140px] max-sm:min-w-[120px] max-sm:text-xs"
             onClick={save}
             disabled={loading || waitingForRefresh || isPending}
           >

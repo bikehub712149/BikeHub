@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Loader2, Plus, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -26,9 +26,15 @@ import { validateBike } from "@/types/zod";
 import { capitalizeInputText, uppercaseDbText } from "@/lib/utils";
 import FilePicker from "@/components/ui/file-picker";
 import { createImagePdf } from "@/lib/create-image-pdf";
-import { prepareUploadImage } from "@/lib/prepare-upload-image";
+import { prepareUploadImage, warmUploadImages } from "@/lib/prepare-upload-image";
+import {
+  clearDialogDraft,
+  loadDialogDraft,
+  saveDialogDraft,
+} from "@/lib/draft-store";
 
 const NUMERIC_FIELDS = ["kms", "expectedSellingPrice", "purchasePrice"];
+const ADD_BIKE_DRAFT_KEY = "add-bike-dialog";
 
 function formatNumberInput(value: string) {
   const digits = value.replace(/[^\d]/g, "");
@@ -39,12 +45,36 @@ function unformatNumberInput(value: string) {
   return value.replace(/,/g, "");
 }
 
+type AddBikeDraft = {
+  open: boolean;
+  form: {
+    number: string;
+    model: string;
+    year: string;
+    kms: string;
+    expectedSellingPrice: string;
+    engineNumber: string;
+    brokerName: string;
+    brokerPhone: string;
+    sellerName: string;
+    sellerPhone: string;
+    purchasePrice: string;
+    chassisNumber: string;
+    sellerAddress: string;
+    ownerSerial: string;
+  };
+  images: File[];
+  selectedImage: number;
+  sellerDocs: File[];
+};
+
 export default function AddBikeDialog() {
   const [open, setOpen] = useState(false);
   const [images, setImages] = useState<File[]>([]);
   const [selectedImage, setSelectedImage] = useState(0);
   const [sellerDocs, setSellerDocs] = useState<File[]>([]);
   const [fileKey, setFileKey] = useState(() => Date.now());
+  const draftRestoredRef = useRef(false);
   const router = useRouter();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -67,6 +97,53 @@ export default function AddBikeDialog() {
     sellerAddress: "",
     ownerSerial: "1",
   });
+
+  // Restore any active draft if the mobile browser tab was reloaded during a camera/file action
+  useEffect(() => {
+    let active = true;
+    loadDialogDraft<AddBikeDraft>(ADD_BIKE_DRAFT_KEY).then((draft) => {
+      if (!active) return;
+      draftRestoredRef.current = true;
+      if (draft?.open) {
+        setForm(draft.form);
+        const restoredImages = Array.isArray(draft.images) ? draft.images : [];
+        const restoredDocs = Array.isArray(draft.sellerDocs) ? draft.sellerDocs : [];
+        setImages(restoredImages);
+        setSelectedImage(
+          restoredImages.length > 0
+            ? Math.min(draft.selectedImage || 0, restoredImages.length - 1)
+            : 0
+        );
+        setSellerDocs(restoredDocs);
+        setOpen(true);
+        warmUploadImages([...restoredImages, ...restoredDocs]);
+      }
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  // Save draft while open so mobile OS memory eviction never loses user input or photos
+  useEffect(() => {
+    if (!draftRestoredRef.current) return;
+    if (open) {
+      saveDialogDraft<AddBikeDraft>(ADD_BIKE_DRAFT_KEY, {
+        open: true,
+        form,
+        images,
+        selectedImage,
+        sellerDocs,
+      });
+    }
+  }, [open, form, images, selectedImage, sellerDocs]);
+
+  const handleOpenChange = (nextOpen: boolean) => {
+    setOpen(nextOpen);
+    if (!nextOpen) {
+      clearDialogDraft(ADD_BIKE_DRAFT_KEY);
+    }
+  };
 
   function handleChange(
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -97,18 +174,27 @@ export default function AddBikeDialog() {
 
   function handleImages(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
 
-    if (files.length + images.length > 4) {
-      toast.error("Maximum 4 images allowed.");
-      return;
-    }
-
-    setImages([...images, ...files]);
+    setImages((prev) => {
+      if (files.length + prev.length > 4) {
+        toast.error("Maximum 4 images allowed.");
+        return prev;
+      }
+      const next = [...prev, ...files];
+      setSelectedImage(next.length - 1);
+      return next;
+    });
   }
 
   function removeImage(index: number) {
-    setImages(images.filter((_, i) => i !== index));
-    setSelectedImage(0);
+    setImages((prev) => {
+      const next = prev.filter((_, i) => i !== index);
+      setSelectedImage((curr) =>
+        next.length === 0 ? 0 : Math.min(curr, next.length - 1)
+      );
+      return next;
+    });
   }
 
   async function handleSubmit() {
@@ -243,8 +329,10 @@ export default function AddBikeDialog() {
       setSelectedImage(0);
       setFileKey(Date.now());
 
-      setOpen(false);
+      await clearDialogDraft(ADD_BIKE_DRAFT_KEY);
       router.refresh();
+      setOpen(false);
+      window.dispatchEvent(new Event("inventory-updated"));
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : "Something went wrong.");
     } finally {
@@ -253,23 +341,23 @@ export default function AddBikeDialog() {
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger
         render={
-          <Button className="h-9 sm:h-11 rounded-xl px-3 sm:px-5 text-xs sm:text-sm">
-            <Plus className="mr-1 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
+          <Button size="lg" className="h-11 rounded-xl px-5 max-sm:h-8 max-sm:!px-2.5 max-sm:!py-0 max-sm:text-xs max-sm:rounded-lg">
+            <Plus className="mr-2 max-sm:mr-1 h-4 w-4 max-sm:h-3.5 max-sm:w-3.5" />
             Add Bike
           </Button>
         }
       />
 
-      <DialogContent className="w-[95vw] !max-w-5xl max-h-[92vh] flex flex-col gap-0 overflow-hidden rounded-2xl sm:rounded-3xl p-0 sm:p-5">
-        <DialogHeader className="shrink-0 border-b bg-muted/20 px-5 py-4 sm:px-6 sm:py-5">
-          <DialogTitle className="text-xl sm:text-2xl font-bold tracking-tight">
+      <DialogContent className="!max-w-5xl max-sm:w-[95vw] max-h-[92vh] flex flex-col gap-0 overflow-hidden rounded-3xl max-sm:rounded-2xl p-5 max-sm:p-0">
+        <DialogHeader className="shrink-0 border-b bg-muted/20 px-6 py-5 max-sm:px-4 max-sm:py-3.5">
+          <DialogTitle className="text-2xl max-sm:text-base font-bold tracking-tight">
             Add New Bike
           </DialogTitle>
 
-          <p className="text-xs sm:text-sm text-slate-500">
+          <p className="text-sm max-sm:text-[11px] text-slate-500">
             Enter bike details and seller information.
           </p>
         </DialogHeader>
@@ -288,34 +376,40 @@ export default function AddBikeDialog() {
           </div>
 
           {/* RIGHT */}
-          <div className="min-h-0 md:overflow-y-auto p-4 sm:p-6 md:p-8 md:col-span-7">
-            <h3 className="mb-4 sm:mb-5 text-lg font-semibold">Bike Details</h3>
+          <div className="min-h-0 md:overflow-y-auto p-8 max-sm:p-4 md:col-span-7">
+            <h3 className="mb-5 max-sm:mb-3 text-lg max-sm:text-sm font-semibold">
+              Bike Details
+            </h3>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
+            <div className="grid grid-cols-2 max-sm:grid-cols-1 gap-5 max-sm:gap-3">
               <Input
                 name="number"
                 value={form.number}
                 placeholder="Registration Number"
                 required
                 onChange={handleChange}
+                className="max-sm:h-9 max-sm:text-xs"
               />
               <Input
                 name="model"
                 value={form.model}
                 placeholder="Bike Model"
                 onChange={handleChange}
+                className="max-sm:h-9 max-sm:text-xs"
               />
               <Input
                 type="month"
                 name="year"
                 value={form.year}
                 onChange={handleChange}
+                className="max-sm:h-9 max-sm:text-xs"
               />
               <Input
                 name="kms"
                 value={form.kms}
                 placeholder="Kilometers"
                 onChange={handleChange}
+                className="max-sm:h-9 max-sm:text-xs"
               />
               <Input
                 name="expectedSellingPrice"
@@ -324,16 +418,20 @@ export default function AddBikeDialog() {
                 type="text"
                 inputMode="numeric"
                 onChange={handleChange}
+                className="max-sm:h-9 max-sm:text-xs"
               />
               <Input
                 name="engineNumber"
                 value={form.engineNumber}
                 placeholder="Engine Number"
                 onChange={handleChange}
+                className="max-sm:h-9 max-sm:text-xs"
               />
 
               <div>
-                <p className="mb-2 text-sm font-medium">Owner Series</p>
+                <p className="mb-2 max-sm:mb-1.5 text-sm max-sm:text-xs font-medium">
+                  Owner Series
+                </p>
 
                 <Select
                   value={form.ownerSerial}
@@ -344,7 +442,7 @@ export default function AddBikeDialog() {
                     })
                   }
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="max-sm:h-9 max-sm:text-xs">
                     <SelectValue placeholder="Select Owner" />
                   </SelectTrigger>
 
@@ -358,21 +456,23 @@ export default function AddBikeDialog() {
               </div>
             </div>
 
-            <h3 className="mt-8 sm:mt-10 mb-4 sm:mb-5 text-lg font-semibold">
+            <h3 className="mt-10 max-sm:mt-6 mb-5 max-sm:mb-3 text-lg max-sm:text-sm font-semibold">
               Seller Information
             </h3>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
+            <div className="grid grid-cols-2 max-sm:grid-cols-1 gap-5 max-sm:gap-3">
               <Input
                 name="sellerName"
                 value={form.sellerName}
                 placeholder="Seller Name"
                 onChange={handleChange}
+                className="max-sm:h-9 max-sm:text-xs"
               />
               <Input
                 name="sellerPhone"
                 value={form.sellerPhone}
                 placeholder="Phone Number (Alt: 9876543210 / 9123456789)"
+                className="max-sm:h-9 max-sm:text-xs"
                 onChange={(e) => {
                   let value = e.target.value;
 
@@ -398,44 +498,49 @@ export default function AddBikeDialog() {
                 type="text"
                 inputMode="numeric"
                 onChange={handleChange}
+                className="max-sm:h-9 max-sm:text-xs"
               />
               <Input
                 name="chassisNumber"
                 value={form.chassisNumber}
                 placeholder="Chassis Number"
                 onChange={handleChange}
+                className="max-sm:h-9 max-sm:text-xs"
               />
 
-              <div className="sm:col-span-2">
+              <div className="col-span-2 max-sm:col-span-1">
                 <Textarea
                   rows={3}
                   name="sellerAddress"
                   value={form.sellerAddress}
                   placeholder="Seller Address"
                   onChange={handleChange}
+                  className="max-sm:text-xs"
                 />
               </div>
 
-              <div className="sm:col-span-2">
-                <p className="mb-3 text-sm font-medium">
+              <div className="col-span-2 max-sm:col-span-1">
+                <p className="mb-3 max-sm:mb-2 text-sm max-sm:text-xs font-medium">
                   Broker Information{" "}
-                  <span className="text-xs font-normal text-slate-400">
+                  <span className="text-xs max-sm:text-[11px] font-normal text-slate-400">
                     (Optional)
                   </span>
                 </p>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
+                <div className="grid grid-cols-2 max-sm:grid-cols-1 gap-5 max-sm:gap-3">
                   <Input
                     name="brokerName"
                     value={form.brokerName}
                     placeholder="Broker Name"
                     onChange={handleChange}
+                    className="max-sm:h-9 max-sm:text-xs"
                   />
 
                   <Input
                     name="brokerPhone"
                     value={form.brokerPhone}
                     placeholder="Broker Phone"
+                    className="max-sm:h-9 max-sm:text-xs"
                     onChange={(e) => {
                       let value = e.target.value;
 
@@ -456,9 +561,11 @@ export default function AddBikeDialog() {
               </div>
             </div>
 
-            <div className="mt-8">
-              <p className="mb-2 text-sm font-medium">Seller Documents</p>
-              <p className="mb-3 text-xs text-slate-500">
+            <div className="mt-8 max-sm:mt-6">
+              <p className="mb-2 max-sm:mb-1 text-sm max-sm:text-xs font-medium">
+                Seller Documents
+              </p>
+              <p className="mb-3 max-sm:mb-2.5 text-xs max-sm:text-[11px] text-slate-500">
                 Upload document images only. They will be converted into a
                 single PDF automatically.
               </p>
@@ -492,18 +599,19 @@ export default function AddBikeDialog() {
               />
 
               {sellerDocs.length > 0 && (
-                <div className="mt-4 space-y-2 rounded-xl border bg-slate-50 p-3 sm:p-4">
+                <div className="mt-4 max-sm:mt-3 space-y-2 rounded-xl border bg-slate-50 p-4 max-sm:p-2.5">
                   {sellerDocs.map((file) => (
                     <div
                       key={`${file.name}-${file.size}-${file.lastModified}`}
-                      className="flex items-center justify-between rounded-lg bg-white px-3 py-2 border"
+                      className="flex items-center justify-between rounded-lg bg-white px-3 py-2 max-sm:px-2.5 max-sm:py-1.5 border"
                     >
-                      <span className="truncate text-sm">{file.name}</span>
+                      <span className="truncate text-sm max-sm:text-xs">{file.name}</span>
 
                       <Button
                         size="icon"
                         variant="ghost"
                         type="button"
+                        className="max-sm:size-7 max-sm:!p-0"
                         onClick={() => {
                           setSellerDocs((docs) =>
                             docs.filter((candidate) => candidate !== file)
@@ -519,9 +627,9 @@ export default function AddBikeDialog() {
               )}
             </div>
 
-            <div className="mt-8 flex justify-end gap-4 pb-2">
+            <div className="mt-8 max-sm:mt-6 flex justify-end gap-4 pb-2">
               <Button
-                className="w-full sm:w-auto sm:min-w-[150px]"
+                className="min-w-[150px] max-sm:w-full max-sm:h-10 max-sm:text-xs"
                 disabled={isSubmitting}
                 onClick={handleSubmit}
               >
