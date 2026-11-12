@@ -137,32 +137,32 @@ export default function EditFinancialDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-h-[90vh] max-w-xl overflow-hidden rounded-3xl p-0">
+      <DialogContent className="max-h-[90vh] max-w-xl overflow-hidden rounded-3xl max-sm:rounded-2xl p-0">
 
-        <DialogHeader className="shrink-0 border-b bg-muted/20 px-7 py-6 gap-0">
+        <DialogHeader className="shrink-0 border-b bg-muted/20 px-7 py-6 max-sm:px-4 max-sm:py-4 gap-0">
 
-          <DialogTitle className="flex items-center text-xl font-bold!">
+          <DialogTitle className="flex items-center text-xl max-sm:text-base font-bold!">
 
             Edit Financial Information
 
           </DialogTitle>
 
-          <DialogDescription>
+          <DialogDescription className="max-sm:text-xs">
             Update purchase and selling prices.
           </DialogDescription>
 
         </DialogHeader>
 
-        <div className="min-h-0 space-y-6 overflow-y-auto px-7 py-6">
+        <div className="min-h-0 space-y-6 max-sm:space-y-4 overflow-y-auto px-7 py-6 max-sm:px-4 max-sm:py-4">
 
-          <div className="space-y-2">
+          <div className="space-y-2 max-sm:space-y-1.5">
 
-            <label className="mb-2 block text-sm font-medium">
+            <label className="mb-2 max-sm:mb-1 block text-sm max-sm:text-xs font-medium">
               Purchase Price
             </label>
 
             <Input
-              className="h-11"
+              className="h-11 max-sm:h-9 max-sm:text-xs"
               name="purchasePrice"
               type="text"
               inputMode="numeric"
@@ -172,14 +172,14 @@ export default function EditFinancialDialog({
 
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-2 max-sm:space-y-1.5">
 
-            <label className="mb-2 block text-sm font-medium">
+            <label className="mb-2 max-sm:mb-1 block text-sm max-sm:text-xs font-medium">
               Selling Price
             </label>
 
             <Input
-              className="h-11"
+              className="h-11 max-sm:h-9 max-sm:text-xs"
               name="sellingPrice"
               type="text"
               inputMode="numeric"
@@ -190,13 +190,13 @@ export default function EditFinancialDialog({
 
           </div>
 
-          <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
+          <div className="rounded-2xl max-sm:rounded-xl border border-emerald-200 bg-emerald-50 p-5 max-sm:p-3.5">
 
-            <p className="text-sm text-slate-500">
+            <p className="text-sm max-sm:text-xs text-slate-500">
               Estimated Profit
             </p>
 
-            <h2 className="mt-2 text-3xl font-bold text-emerald-700">
+            <h2 className="mt-2 max-sm:mt-1 text-3xl max-sm:text-xl font-bold text-emerald-700">
 
               {profit == null
                 ? "--"
@@ -208,10 +208,11 @@ export default function EditFinancialDialog({
 
         </div>
 
-        <div className="flex shrink-0 justify-end gap-3 border-t bg-muted/20 px-7 py-4">
+        <div className="flex shrink-0 justify-end gap-3 max-sm:gap-2 border-t bg-muted/20 px-7 py-4 max-sm:px-4 max-sm:py-3">
 
           <Button
             variant="outline"
+            className="max-sm:h-9 max-sm:text-xs"
             onClick={() => onOpenChange(false)}
           >
             Cancel
@@ -220,7 +221,7 @@ export default function EditFinancialDialog({
           <Button
             onClick={saveChanges}
             disabled={loading || waitingForRefresh || isPending}
-            className="min-w-[150px]"
+            className="min-w-[150px] max-sm:min-w-[120px] max-sm:h-9 max-sm:text-xs"
           >
             {loading ? (
               <>

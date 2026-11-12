@@ -66,26 +66,26 @@ export default function InventoryList({ status }: { status?: string }) {
   return (
     <>
       {/* Mobile Card List (< md) */}
-      <div className="space-y-3 md:hidden">
+      <div className="space-y-2.5 md:hidden">
         {bikes.map((bike) => (
           <Link
             key={bike.id}
             href={`/inventory/${bike.id}`}
-            className="flex items-center gap-3.5 rounded-2xl border border-slate-200 bg-white p-3.5 shadow-sm transition active:scale-[0.99]"
+            className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-3 shadow-sm transition active:scale-[0.99]"
           >
-            <div className="h-20 w-24 shrink-0 overflow-hidden rounded-xl border border-slate-200">
+            <div className="size-16 shrink-0 overflow-hidden rounded-xl border border-slate-200">
               <Image
                 src={bike.image}
                 alt={bike.model}
-                width={96}
-                height={80}
+                width={64}
+                height={64}
                 className="h-full w-full object-cover"
               />
             </div>
 
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between gap-2">
-                <span className="font-bold text-slate-900 truncate">
+                <span className="text-xs font-bold text-slate-900 truncate">
                   {bike.number.toUpperCase()}
                 </span>
                 <span
@@ -99,21 +99,23 @@ export default function InventoryList({ status }: { status?: string }) {
                 </span>
               </div>
 
-              <p className="mt-0.5 text-xs font-medium text-slate-600 truncate">
+              <p className="mt-0.5 text-[11px] font-medium text-slate-600 truncate">
                 {bike.model.toUpperCase()}
               </p>
 
-              <div className="mt-2 flex items-center justify-between text-xs text-slate-500">
+              <div className="mt-1.5 flex items-center justify-between text-[11px] text-slate-500">
                 <span>
                   {bike.year} • {bike.kms} km
                 </span>
-                <span className="text-sm font-bold text-slate-900">
+                <span className="text-xs font-bold text-slate-900">
                   ₹{bike.expectedSellingPrice.toLocaleString("en-IN")}
                 </span>
               </div>
             </div>
 
-            <ChevronRight size={18} className="shrink-0 text-slate-400" />
+            <div className="size-8 shrink-0 flex items-center justify-center rounded-lg bg-slate-50 text-slate-400">
+              <ChevronRight size={16} />
+            </div>
           </Link>
         ))}
       </div>

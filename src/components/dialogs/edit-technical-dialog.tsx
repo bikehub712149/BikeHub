@@ -152,27 +152,27 @@ export default function EditTechnicalDialog({
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="!max-w-2xl max-h-[90vh] overflow-hidden rounded-2xl bg-background p-0 shadow-xl">
-        <DialogHeader className="shrink-0 border-b bg-muted/20 px-7 pb-5 pt-7 !gap-0">
-          <DialogTitle className="text-xl font-bold tracking-tight">
+        <DialogHeader className="shrink-0 border-b bg-muted/20 px-7 pb-5 pt-7 max-sm:px-4 max-sm:py-4 !gap-0">
+          <DialogTitle className="text-xl max-sm:text-base font-bold tracking-tight">
             Edit Bike Information
           </DialogTitle>
-          <DialogDescription className="text-sm">
+          <DialogDescription className="text-sm max-sm:text-xs">
             Update registration, technical details, and pricing.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="min-h-0 space-y-7 overflow-y-auto px-6 py-6">
+        <div className="min-h-0 space-y-7 max-sm:space-y-5 overflow-y-auto px-6 py-6 max-sm:px-4 max-sm:py-4">
           {/* Section 1: Registration (3 Columns) */}
-          <div className="space-y-4">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-primary/80 underline pb-1">
+          <div className="space-y-4 max-sm:space-y-3">
+            <h3 className="text-xs max-sm:text-[11px] font-bold uppercase tracking-wider text-primary/80 underline pb-1">
               Registration Details
             </h3>
-            <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
+            <div className="grid grid-cols-1 gap-5 max-sm:gap-3.5 md:grid-cols-3">
               {/* Model spans 2 columns because names can be long */}
               <div className="space-y-1.5 md:col-span-2">
-                <label className="text-sm font-medium">Bike Model</label>
+                <label className="text-sm max-sm:text-xs font-medium">Bike Model</label>
                 <Input
-                  className="h-10"
+                  className="h-10 max-sm:h-9 max-sm:text-xs"
                   name="model"
                   placeholder="Royal Enfield Classic 350"
                   value={form.model}
@@ -181,9 +181,9 @@ export default function EditTechnicalDialog({
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-sm font-medium">Mfg. Year</label>
+                <label className="text-sm max-sm:text-xs font-medium">Mfg. Year</label>
                 <Input
-                  className="h-10"
+                  className="h-10 max-sm:h-9 max-sm:text-xs"
                   name="year"
                   type="month"
                   value={form.year}
@@ -192,9 +192,9 @@ export default function EditTechnicalDialog({
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-sm font-medium">Kilometers</label>
+                <label className="text-sm max-sm:text-xs font-medium">Kilometers</label>
                 <Input
-                  className="h-10"
+                  className="h-10 max-sm:h-9 max-sm:text-xs"
                   name="kms"
                   placeholder="18,450 km"
                   value={form.kms}
@@ -203,7 +203,7 @@ export default function EditTechnicalDialog({
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-sm font-medium">Owner Serial</label>
+                <label className="text-sm max-sm:text-xs font-medium">Owner Serial</label>
 
                 <select
                   name="ownerSerial"
@@ -214,7 +214,7 @@ export default function EditTechnicalDialog({
                       ownerSerial: e.target.value,
                     }))
                   }
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                  className="flex h-10 max-sm:h-9 w-full rounded-md border border-input bg-background px-3 py-2 text-sm max-sm:text-xs shadow-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
                 >
                   <option value="">Select Owner</option>
                   <option value="1">1st Owner</option>
@@ -227,15 +227,15 @@ export default function EditTechnicalDialog({
           </div>
 
           {/* Section 2: Technical & Pricing (3 Columns) */}
-          <div className="space-y-4">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-primary/80 underline pb-1">
+          <div className="space-y-4 max-sm:space-y-3">
+            <h3 className="text-xs max-sm:text-[11px] font-bold uppercase tracking-wider text-primary/80 underline pb-1">
               Technical & Pricing
             </h3>
-            <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
+            <div className="grid grid-cols-1 gap-5 max-sm:gap-3.5 md:grid-cols-3">
               <div className="space-y-1.5">
-                <label className="text-sm font-medium">Engine Number</label>
+                <label className="text-sm max-sm:text-xs font-medium">Engine Number</label>
                 <Input
-                  className="h-10"
+                  className="h-10 max-sm:h-9 max-sm:text-xs"
                   name="engineNumber"
                   placeholder="Enter engine no."
                   value={form.engineNumber}
@@ -244,9 +244,9 @@ export default function EditTechnicalDialog({
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-sm font-medium">Chassis Number</label>
+                <label className="text-sm max-sm:text-xs font-medium">Chassis Number</label>
                 <Input
-                  className="h-10"
+                  className="h-10 max-sm:h-9 max-sm:text-xs"
                   name="chassisNumber"
                   placeholder="Enter chassis no."
                   value={form.chassisNumber}
@@ -255,15 +255,15 @@ export default function EditTechnicalDialog({
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-sm font-medium">
+                <label className="text-sm max-sm:text-xs font-medium">
                   Expected Price (₹)
                 </label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm font-medium">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm max-sm:text-xs font-medium">
                     ₹
                   </span>
                   <Input
-                    className="h-10 pl-7"
+                    className="h-10 max-sm:h-9 pl-7 max-sm:text-xs"
                     name="expectedSellingPrice"
                     type="text"
                     inputMode="numeric"
@@ -278,17 +278,17 @@ export default function EditTechnicalDialog({
         </div>
 
         {/* Footer */}
-        <div className="flex shrink-0 justify-end gap-3 border-t bg-muted/20 px-6 py-4">
+        <div className="flex shrink-0 justify-end gap-3 max-sm:gap-2 border-t bg-muted/20 px-6 py-4 max-sm:px-4 max-sm:py-3">
           <Button
             variant="outline"
-            className="h-9 px-6"
+            className="h-9 px-6 max-sm:px-4 max-sm:text-xs"
             onClick={() => onOpenChange(false)}
           >
             Cancel
           </Button>
 
           <Button
-            className="h-9 min-w-[140px]"
+            className="h-9 min-w-[140px] max-sm:min-w-[120px] max-sm:text-xs"
             disabled={loading || waitingForRefresh || isPending}
             onClick={saveChanges}
           >

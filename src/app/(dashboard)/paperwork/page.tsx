@@ -104,21 +104,21 @@ function PaperworkContent() {
   return (
     <div className="flex-1 overflow-y-auto p-1 sm:p-4 pb-32">
       {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+      <div className="mb-6 max-sm:mb-4">
+        <h1 className="text-2xl max-sm:text-xl font-bold tracking-tight text-slate-900">
           Paperwork Management
         </h1>
 
-        <p className="mt-1 text-sm text-slate-500">
+        <p className="mt-1 max-sm:mt-0.5 text-sm max-sm:text-xs text-slate-500">
           Manage ownership transfer and paperwork completion.
         </p>
       </div>
 
       {/* Tabs */}
-      <div className="mb-6 flex w-max max-w-full overflow-x-auto gap-2 rounded-xl border border-slate-200 bg-slate-100 p-1">
+      <div className="mb-6 max-sm:mb-4 flex w-max max-w-full overflow-x-auto gap-2 max-sm:gap-1.5 rounded-xl border border-slate-200 bg-slate-100 p-1">
         <button
           onClick={() => setTab("Pending")}
-          className={`rounded-lg px-4 sm:px-5 py-2 text-xs sm:text-sm font-medium transition ${
+          className={`rounded-lg px-4 max-sm:px-3.5 sm:px-5 py-2 max-sm:py-1.5 text-xs sm:text-sm font-medium transition ${
             tab === "Pending"
               ? "border bg-white shadow-sm"
               : "text-slate-600 hover:bg-white"
@@ -129,7 +129,7 @@ function PaperworkContent() {
 
         <button
           onClick={() => setTab("Completed")}
-          className={`rounded-lg px-4 sm:px-5 py-2 text-xs sm:text-sm font-medium transition ${
+          className={`rounded-lg px-4 max-sm:px-3.5 sm:px-5 py-2 max-sm:py-1.5 text-xs sm:text-sm font-medium transition ${
             tab === "Completed"
               ? "border bg-white shadow-sm"
               : "text-slate-600 hover:bg-white"
@@ -147,30 +147,30 @@ function PaperworkContent() {
       ) : (
         <>
           {/* Mobile Cards (< md) */}
-          <div className="space-y-3 md:hidden">
+          <div className="space-y-3 max-sm:space-y-2.5 md:hidden">
             {bikes.length === 0 ? (
-              <div className="rounded-2xl border border-slate-200 bg-white py-12 text-center text-sm text-slate-500">
+              <div className="rounded-2xl border border-slate-200 bg-white py-12 max-sm:py-8 text-center text-sm max-sm:text-xs text-slate-500">
                 No {tab.toLowerCase()} paperwork found.
               </div>
             ) : (
               bikes.map((bike) => (
                 <div
                   key={bike.id}
-                  className="flex items-center gap-3.5 rounded-2xl border border-slate-200 bg-white p-3.5 shadow-sm"
+                  className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm"
                 >
-                  <div className="h-16 w-20 shrink-0 overflow-hidden rounded-xl border">
+                  <div className="size-15 shrink-0 overflow-hidden rounded-xl border">
                     <Image
                       src={bike.image}
                       alt={bike.model}
-                      width={80}
-                      height={64}
+                      width={60}
+                      height={60}
                       className="h-full w-full object-cover"
                     />
                   </div>
 
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2">
-                      <span className="font-bold text-slate-900 truncate">
+                      <span className="text-sm font-bold text-slate-900 truncate">
                         {bike.number.toUpperCase()}
                       </span>
                       <span
@@ -186,7 +186,7 @@ function PaperworkContent() {
                     <p className="mt-0.5 text-xs font-medium text-slate-600 truncate">
                       {bike.model.toUpperCase()}
                     </p>
-                    <p className="mt-1 text-xs text-slate-500 truncate">
+                    <p className="mt-0.5 text-[11px] text-slate-500 truncate">
                       Buyer: <span className="font-medium text-slate-700">{bike.buyer?.name || "-"}</span>
                     </p>
                   </div>
@@ -195,10 +195,10 @@ function PaperworkContent() {
                     <Button
                       size="icon"
                       variant="outline"
-                      className="shrink-0"
+                      className="shrink-0 size-9 rounded-xl !p-0"
                       onClick={() => setSelectedBike(bike)}
                     >
-                      <CheckCircle2 className="h-5 w-5 text-emerald-600" />
+                      <CheckCircle2 className="h-4 w-4 text-emerald-600" />
                     </Button>
                   )}
                 </div>

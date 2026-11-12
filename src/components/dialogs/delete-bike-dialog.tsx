@@ -55,8 +55,8 @@ export default function DeleteBikeDialog({
     <AlertDialog>
       <AlertDialogTrigger
         render={
-          <Button variant="destructive">
-            <Trash2 className="mr-2 h-4 w-4" />
+          <Button variant="destructive" className="max-sm:h-8 max-sm:text-xs">
+            <Trash2 className="mr-2 max-sm:mr-1.5 h-4 w-4 max-sm:h-3.5 max-sm:w-3.5" />
             Delete Bike
           </Button>
         }
