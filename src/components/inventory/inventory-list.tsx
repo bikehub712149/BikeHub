@@ -28,7 +28,7 @@ export default function InventoryList({ status }: { status?: string }) {
     try {
       const query = new URLSearchParams({ page: String(nextPage), pageSize: "25" });
       if (status) query.set("status", status);
-      const response = await fetch(`/api/bike?${query}`);
+      const response = await fetch(`/api/bike?${query}`, { cache: "no-store" });
       if (!response.ok) throw new Error("Failed to fetch inventory");
       const data = await response.json();
       // Replace on refresh, append on scroll, and deduplicate in case pages overlap.
@@ -53,6 +53,15 @@ export default function InventoryList({ status }: { status?: string }) {
     setPage(0);
     setHasNextPage(true);
     loadPage(1);
+  }, [loadPage]);
+
+  useEffect(() => {
+    const refreshInventory = () => {
+      void loadPage(1);
+    };
+
+    window.addEventListener("inventory-updated", refreshInventory);
+    return () => window.removeEventListener("inventory-updated", refreshInventory);
   }, [loadPage]);
 
   if (loading && bikes.length === 0) {

@@ -330,8 +330,9 @@ export default function AddBikeDialog() {
       setFileKey(Date.now());
 
       await clearDialogDraft(ADD_BIKE_DRAFT_KEY);
-      setOpen(false);
       router.refresh();
+      setOpen(false);
+      window.dispatchEvent(new Event("inventory-updated"));
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : "Something went wrong.");
     } finally {

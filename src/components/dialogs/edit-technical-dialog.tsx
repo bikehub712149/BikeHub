@@ -151,7 +151,7 @@ export default function EditTechnicalDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="!max-w-2xl max-h-[90vh] overflow-hidden rounded-2xl bg-background p-0 shadow-xl">
+      <DialogContent className="!max-w-2xl max-h-[90vh] overflow-y-auto overflow-x-hidden scrollbar-none rounded-2xl bg-background p-0 shadow-xl">
         <DialogHeader className="shrink-0 border-b bg-muted/20 px-7 pb-5 pt-7 max-sm:px-4 max-sm:py-4 !gap-0">
           <DialogTitle className="text-xl max-sm:text-base font-bold tracking-tight">
             Edit Bike Information
