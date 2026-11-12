@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Loader2, BadgeCheck, X } from "lucide-react";
 import {
   Dialog,
@@ -21,13 +21,35 @@ import { validateSoldBike } from "@/types/zod";
 import { capitalizeInputText, uppercaseDbText } from "@/lib/utils";
 import FilePicker from "@/components/ui/file-picker";
 import { createImagePdf } from "@/lib/create-image-pdf";
-import { prepareUploadImage } from "@/lib/prepare-upload-image";
+import { prepareUploadImage, warmUploadImages } from "@/lib/prepare-upload-image";
+import {
+  clearDialogDraft,
+  loadDialogDraft,
+  saveDialogDraft,
+} from "@/lib/draft-store";
+
+const SOLD_BIKE_DRAFT_KEY = "sold-bike-dialog";
+
+type SoldBikeDraft = {
+  open: boolean;
+  form: {
+    buyerName: string;
+    buyerPhone: string;
+    buyerAddress: string;
+    sellingPrice: string;
+    saleDate: string;
+  };
+  selectedBike: Bike | null;
+  receipt: File | null;
+  buyerDocs: File[];
+};
 
 export default function SoldBikeDialog() {
   const [receipt, setReceipt] = useState<File | null>(null);
   const [buyerDocs, setBuyerDocs] = useState<File[]>([]);
   const [bikes, setBikes] = useState<Bike[]>([]);
   const [selectedBike, setSelectedBike] = useState<Bike | null>(null);
+  const draftRestoredRef = useRef(false);
   const router = useRouter();
 
   // Control the open state of the dialog
@@ -75,6 +97,45 @@ export default function SoldBikeDialog() {
     }
   }
 
+  // Restore draft if the mobile browser tab was reloaded during a camera/file action
+  useEffect(() => {
+    let active = true;
+    loadDialogDraft<SoldBikeDraft>(SOLD_BIKE_DRAFT_KEY).then((draft) => {
+      if (!active) return;
+      draftRestoredRef.current = true;
+      if (draft?.open) {
+        setForm(draft.form);
+        setSelectedBike(draft.selectedBike ?? null);
+        setReceipt(draft.receipt ?? null);
+        const restoredDocs = Array.isArray(draft.buyerDocs) ? draft.buyerDocs : [];
+        setBuyerDocs(restoredDocs);
+        setOpen(true);
+        fetchBikes();
+        warmUploadImages([
+          ...(draft.receipt ? [draft.receipt] : []),
+          ...restoredDocs,
+        ]);
+      }
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  // Save draft while open so mobile OS memory eviction never loses user input or documents
+  useEffect(() => {
+    if (!draftRestoredRef.current) return;
+    if (open) {
+      saveDialogDraft<SoldBikeDraft>(SOLD_BIKE_DRAFT_KEY, {
+        open: true,
+        form,
+        selectedBike,
+        receipt,
+        buyerDocs,
+      });
+    }
+  }, [open, form, selectedBike, receipt, buyerDocs]);
+
   // Handle dialog open/close properly to fix the dropdown issue
   const handleOpenChange = (isOpen: boolean) => {
     setOpen(isOpen);
@@ -83,6 +144,7 @@ export default function SoldBikeDialog() {
     } else {
       // Closing resets files and fields so the next sale starts from a clean form.
       resetForm();
+      clearDialogDraft(SOLD_BIKE_DRAFT_KEY);
     }
   };
 
@@ -195,6 +257,7 @@ export default function SoldBikeDialog() {
 
       toast.success("Bike sold successfully.");
 
+      await clearDialogDraft(SOLD_BIKE_DRAFT_KEY);
       setOpen(false);
       router.refresh();
     } catch (err: any) {

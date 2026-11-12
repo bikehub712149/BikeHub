@@ -3,6 +3,7 @@
 import { Camera, ImagePlus, Plus, X } from "lucide-react";
 import { useState, useEffect, useMemo, useRef } from "react";
 import { warmUploadImages } from "@/lib/prepare-upload-image";
+import CameraCaptureDialog from "@/components/ui/camera-capture-dialog";
 
 type BikeGalleryProps = {
   images: (File | string)[];
@@ -23,6 +24,7 @@ export default function BikeGallery({
   onAddImages,
   onRemoveImage,
 }: BikeGalleryProps) {
+  const [cameraOpen, setCameraOpen] = useState(false);
   const [loadingImages, setLoadingImages] = useState<Set<File | string>>(
     new Set()
   );
@@ -63,47 +65,34 @@ export default function BikeGallery({
     });
   };
 
-  const handleGalleryFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files ?? []);
-    if (files.length > 0) {
-      warmUploadImages(files);
-    }
-    onAddImages?.(e);
-    e.target.value = "";
+  const emitFiles = (files: File[]) => {
+    if (files.length === 0) return;
+    warmUploadImages(files);
+    const syntheticEvent = {
+      target: { files },
+    } as unknown as React.ChangeEvent<HTMLInputElement>;
+    onAddImages?.(syntheticEvent);
   };
 
-  const handleCameraFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const rawFiles = Array.from(e.target.files ?? []);
-    if (rawFiles.length === 0) return;
-
-    // Give each mobile camera photo a unique filename so consecutive captures never collide.
-    const stampedFiles = rawFiles.map((file, idx) => {
-      const ext = file.name.includes(".")
-        ? file.name.slice(file.name.lastIndexOf("."))
-        : ".jpg";
-      const stamp = `${Date.now().toString().slice(-5)}${idx ? `-${idx}` : ""}`;
-      return new File([file], `bike-photo-${stamp}${ext}`, {
-        type: file.type || "image/jpeg",
-        lastModified: Date.now(),
-      });
-    });
-
-    warmUploadImages(stampedFiles);
-
-    try {
-      const dt = new DataTransfer();
-      for (const f of stampedFiles) dt.items.add(f);
-      e.target.files = dt.files;
-    } catch {
-      // Fallback if DataTransfer assignment is restricted
-    }
-
-    onAddImages?.(e);
+  const handleGalleryFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? []);
     e.target.value = "";
+    emitFiles(files);
   };
 
   return (
     <div className="rounded-l-3xl border-r bg-slate-50 p-8 max-md:rounded-2xl max-md:border-r-0 max-md:border-b max-sm:p-4">
+      {editable && (
+        <CameraCaptureDialog
+          open={cameraOpen}
+          onOpenChange={setCameraOpen}
+          maxPhotos={Math.max(1, 4 - images.length)}
+          filePrefix="bike-photo"
+          title="Capture Bike Photo"
+          onCapture={emitFiles}
+        />
+      )}
+
       <div className="mb-5 max-sm:mb-3 flex items-center justify-between">
         <h3 className="text-lg max-sm:text-sm font-semibold">
           Bike Photos
@@ -209,19 +198,20 @@ export default function BikeGallery({
         {/* Mobile Only (< sm): Square "Camera" and "Gallery" Buttons (No 3rd Add button) */}
         {editable && images.length < 4 && (
           <>
-            <label className="sm:hidden flex aspect-square cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border-2 border-primary bg-primary/5 text-primary transition active:scale-95">
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setCameraOpen(true);
+              }}
+              className="sm:hidden flex aspect-square cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border-2 border-primary bg-primary/5 text-primary transition active:scale-95"
+            >
               <Camera className="h-4 w-4" />
               <span className="text-[10px] font-semibold leading-none">
                 Camera
               </span>
-              <input
-                hidden
-                type="file"
-                accept="image/*"
-                capture="environment"
-                onChange={handleCameraFiles}
-              />
-            </label>
+            </button>
 
             <label className="sm:hidden flex aspect-square cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-slate-300 bg-white text-slate-700 transition active:scale-95">
               <ImagePlus className="h-4 w-4" />

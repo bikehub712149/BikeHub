@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Loader2, Plus, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -26,9 +26,15 @@ import { validateBike } from "@/types/zod";
 import { capitalizeInputText, uppercaseDbText } from "@/lib/utils";
 import FilePicker from "@/components/ui/file-picker";
 import { createImagePdf } from "@/lib/create-image-pdf";
-import { prepareUploadImage } from "@/lib/prepare-upload-image";
+import { prepareUploadImage, warmUploadImages } from "@/lib/prepare-upload-image";
+import {
+  clearDialogDraft,
+  loadDialogDraft,
+  saveDialogDraft,
+} from "@/lib/draft-store";
 
 const NUMERIC_FIELDS = ["kms", "expectedSellingPrice", "purchasePrice"];
+const ADD_BIKE_DRAFT_KEY = "add-bike-dialog";
 
 function formatNumberInput(value: string) {
   const digits = value.replace(/[^\d]/g, "");
@@ -39,12 +45,36 @@ function unformatNumberInput(value: string) {
   return value.replace(/,/g, "");
 }
 
+type AddBikeDraft = {
+  open: boolean;
+  form: {
+    number: string;
+    model: string;
+    year: string;
+    kms: string;
+    expectedSellingPrice: string;
+    engineNumber: string;
+    brokerName: string;
+    brokerPhone: string;
+    sellerName: string;
+    sellerPhone: string;
+    purchasePrice: string;
+    chassisNumber: string;
+    sellerAddress: string;
+    ownerSerial: string;
+  };
+  images: File[];
+  selectedImage: number;
+  sellerDocs: File[];
+};
+
 export default function AddBikeDialog() {
   const [open, setOpen] = useState(false);
   const [images, setImages] = useState<File[]>([]);
   const [selectedImage, setSelectedImage] = useState(0);
   const [sellerDocs, setSellerDocs] = useState<File[]>([]);
   const [fileKey, setFileKey] = useState(() => Date.now());
+  const draftRestoredRef = useRef(false);
   const router = useRouter();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -67,6 +97,53 @@ export default function AddBikeDialog() {
     sellerAddress: "",
     ownerSerial: "1",
   });
+
+  // Restore any active draft if the mobile browser tab was reloaded during a camera/file action
+  useEffect(() => {
+    let active = true;
+    loadDialogDraft<AddBikeDraft>(ADD_BIKE_DRAFT_KEY).then((draft) => {
+      if (!active) return;
+      draftRestoredRef.current = true;
+      if (draft?.open) {
+        setForm(draft.form);
+        const restoredImages = Array.isArray(draft.images) ? draft.images : [];
+        const restoredDocs = Array.isArray(draft.sellerDocs) ? draft.sellerDocs : [];
+        setImages(restoredImages);
+        setSelectedImage(
+          restoredImages.length > 0
+            ? Math.min(draft.selectedImage || 0, restoredImages.length - 1)
+            : 0
+        );
+        setSellerDocs(restoredDocs);
+        setOpen(true);
+        warmUploadImages([...restoredImages, ...restoredDocs]);
+      }
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  // Save draft while open so mobile OS memory eviction never loses user input or photos
+  useEffect(() => {
+    if (!draftRestoredRef.current) return;
+    if (open) {
+      saveDialogDraft<AddBikeDraft>(ADD_BIKE_DRAFT_KEY, {
+        open: true,
+        form,
+        images,
+        selectedImage,
+        sellerDocs,
+      });
+    }
+  }, [open, form, images, selectedImage, sellerDocs]);
+
+  const handleOpenChange = (nextOpen: boolean) => {
+    setOpen(nextOpen);
+    if (!nextOpen) {
+      clearDialogDraft(ADD_BIKE_DRAFT_KEY);
+    }
+  };
 
   function handleChange(
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -252,6 +329,7 @@ export default function AddBikeDialog() {
       setSelectedImage(0);
       setFileKey(Date.now());
 
+      await clearDialogDraft(ADD_BIKE_DRAFT_KEY);
       setOpen(false);
       router.refresh();
     } catch (err: unknown) {
@@ -262,7 +340,7 @@ export default function AddBikeDialog() {
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger
         render={
           <Button size="lg" className="h-11 rounded-xl px-5 max-sm:h-8 max-sm:!px-2.5 max-sm:!py-0 max-sm:text-xs max-sm:rounded-lg">

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Loader2, Plus, X } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -16,18 +16,66 @@ import {
 import { Button } from "@/components/ui/button";
 import FilePicker from "@/components/ui/file-picker";
 import { createImagePdf } from "@/lib/create-image-pdf";
+import { warmUploadImages } from "@/lib/prepare-upload-image";
+import {
+  clearDialogDraft,
+  loadDialogDraft,
+  saveDialogDraft,
+} from "@/lib/draft-store";
 
 type Props = {
   bikeNumber: string;
   type: "seller" | "buyer";
 };
 
+type UploadDocsDraft = {
+  open: boolean;
+  docs: File[];
+};
+
 export default function UploadDocumentsDialog({ bikeNumber, type }: Props) {
+  const draftKey = `upload-docs-${bikeNumber}-${type}`;
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [docs, setDocs] = useState<File[]>([]);
   const [fileKey, setFileKey] = useState(0);
+  const draftRestoredRef = useRef(false);
   const router = useRouter();
+
+  useEffect(() => {
+    let active = true;
+    loadDialogDraft<UploadDocsDraft>(draftKey).then((draft) => {
+      if (!active) return;
+      draftRestoredRef.current = true;
+      if (draft?.open) {
+        const restoredDocs = Array.isArray(draft.docs) ? draft.docs : [];
+        setDocs(restoredDocs);
+        setOpen(true);
+        warmUploadImages(restoredDocs);
+      }
+    });
+    return () => {
+      active = false;
+    };
+  }, [draftKey]);
+
+  useEffect(() => {
+    if (!draftRestoredRef.current) return;
+    if (open) {
+      saveDialogDraft<UploadDocsDraft>(draftKey, {
+        open: true,
+        docs,
+      });
+    }
+  }, [draftKey, open, docs]);
+
+  const handleOpenChange = (nextOpen: boolean) => {
+    setOpen(nextOpen);
+    if (!nextOpen) {
+      clearDialogDraft(draftKey);
+    }
+  };
+
   async function uploadDocuments() {
     try {
       setLoading(true);
@@ -83,6 +131,7 @@ export default function UploadDocumentsDialog({ bikeNumber, type }: Props) {
 
       setDocs([]);
       setFileKey((key) => key + 1);
+      await clearDialogDraft(draftKey);
       setOpen(false);
 
       // Refresh the page to reflect the updated documents
@@ -95,7 +144,7 @@ export default function UploadDocumentsDialog({ bikeNumber, type }: Props) {
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger
         render={
           <Button size="sm" variant="outline" className="max-sm:h-8 max-sm:!px-2.5 max-sm:text-xs">

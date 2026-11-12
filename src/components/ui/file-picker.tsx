@@ -1,9 +1,10 @@
 "use client";
 
 import { Camera, ImagePlus, Upload } from "lucide-react";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { warmUploadImages } from "@/lib/prepare-upload-image";
+import CameraCaptureDialog from "@/components/ui/camera-capture-dialog";
 
 export default function FilePicker({
   id,
@@ -25,48 +26,34 @@ export default function FilePicker({
   selectedFileName?: string;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
-  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const [cameraOpen, setCameraOpen] = useState(false);
+
+  const emitFiles = (files: File[]) => {
+    if (files.length === 0) return;
+    warmUploadImages(files);
+    const syntheticEvent = {
+      target: { files },
+    } as unknown as React.ChangeEvent<HTMLInputElement>;
+    onChange(syntheticEvent);
+  };
 
   const handleGalleryChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files ?? []);
-    if (files.length > 0) {
-      warmUploadImages(files);
-    }
-    onChange(event);
-  };
-
-  const handleCameraChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const rawFiles = Array.from(event.target.files ?? []);
-    if (rawFiles.length === 0) return;
-
-    // Give each camera capture a distinct filename so multiple clicked document pages never collide.
-    const stampedFiles = rawFiles.map((file, idx) => {
-      const ext = file.name.includes(".")
-        ? file.name.slice(file.name.lastIndexOf("."))
-        : ".jpg";
-      const stamp = `${Date.now().toString().slice(-5)}${idx ? `-${idx}` : ""}`;
-      return new File([file], `doc-photo-${stamp}${ext}`, {
-        type: file.type || "image/jpeg",
-        lastModified: Date.now(),
-      });
-    });
-
-    warmUploadImages(stampedFiles);
-
-    try {
-      const dt = new DataTransfer();
-      for (const f of stampedFiles) dt.items.add(f);
-      event.target.files = dt.files;
-    } catch {
-      // Fallback if DataTransfer assignment is restricted
-    }
-
-    onChange(event);
     event.target.value = "";
+    emitFiles(files);
   };
 
   return (
     <div className="flex items-center gap-3 max-sm:flex-col max-sm:items-stretch max-sm:gap-2 rounded-xl border border-dashed border-slate-300 bg-slate-50 p-3 max-sm:p-2.5">
+      <CameraCaptureDialog
+        open={cameraOpen}
+        onOpenChange={setCameraOpen}
+        maxPhotos={multiple ? 10 : 1}
+        filePrefix="doc-photo"
+        title={multiple ? "Capture Document Pages" : "Capture Receipt"}
+        onCapture={emitFiles}
+      />
+
       <input
         key={resetKey}
         ref={inputRef}
@@ -77,17 +64,6 @@ export default function FilePicker({
         multiple={multiple}
         disabled={disabled}
         onChange={handleGalleryChange}
-      />
-      <input
-        key={`camera-${resetKey ?? 0}`}
-        ref={cameraInputRef}
-        id={`${id}-camera`}
-        className="sr-only"
-        type="file"
-        accept="image/*"
-        capture="environment"
-        disabled={disabled}
-        onChange={handleCameraChange}
       />
 
       {/* PC Only: Original Single Upload Button */}
@@ -108,7 +84,11 @@ export default function FilePicker({
           type="button"
           variant="default"
           disabled={disabled}
-          onClick={() => cameraInputRef.current?.click()}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setCameraOpen(true);
+          }}
           className="h-9 rounded-lg !px-3 !py-1.5 text-xs font-semibold"
         >
           <Camera className="mr-1.5 h-3.5 w-3.5" />
@@ -119,7 +99,11 @@ export default function FilePicker({
           type="button"
           variant="outline"
           disabled={disabled}
-          onClick={() => inputRef.current?.click()}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            inputRef.current?.click();
+          }}
           className="h-9 rounded-lg bg-white !px-3 !py-1.5 text-xs font-semibold"
         >
           <ImagePlus className="mr-1.5 h-3.5 w-3.5" />
